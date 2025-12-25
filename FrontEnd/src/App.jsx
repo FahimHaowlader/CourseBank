@@ -9,6 +9,7 @@ import CheckPage from './Pages/CheckPage.jsx'
 import CoursePage from './Pages/CoursePage.jsx'
 import CourseDetailsPage from './Pages/CourseDetailsPage.jsx'
 import LoginPage from './Pages/LoginPage.jsx'
+import CrCoursePage from './Pages/CrCoursePage.jsx'
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     { path:'/courses', element: <CoursePage /> },
     { path:'/courseid', element: <CourseDetailsPage /> },
     { path:'/login', element: <LoginPage /> },
+    { path:'/my-courses', element: <CrCoursePage /> },
   ])
 
   return (
