@@ -1,11 +1,14 @@
 import React from 'react'
+import NoCourse from '../Components/NoCourse'
+import NoElement from '../Components/NoElement'
 // import SelectBox from '../Components/SelectBox'
 // import InputBox from '../Components/InputBox'
 
 const CheckPage = () => {
   return (
-    <div className='min-h-screen min-w-screen flex justify-center items-center' >
-      <h1 className='text-primary border p-6 rounded-xl'>Hello world </h1>
+    // <div className='min-h-screen' >
+     <div className='min-h-screen' > 
+      {/* <h1 className='text-primary border p-6 rounded-xl'>Hello world </h1> */}
       {/* <SelectBox
   label="Year"
   options={["All Years", "2025", "2024", "2023"]}
@@ -21,6 +24,8 @@ const CheckPage = () => {
     setFilters({ ...filters, title: e.target.value })
   }
 /> */}
+{/* <NoCourse/> */}
+<NoElement/>
     </div>
   )
 }
