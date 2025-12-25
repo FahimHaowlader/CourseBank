@@ -8,15 +8,17 @@ import { createBrowserRouter,RouterProvider,Navigate } from 'react-router'
 import CheckPage from './Pages/CheckPage.jsx'
 import CoursePage from './Pages/CoursePage.jsx'
 import CourseDetailsPage from './Pages/CourseDetailsPage.jsx'
+import LoginPage from './Pages/LoginPage.jsx'
 
 
 function App() {
 
   const router = createBrowserRouter([
     { path: '/', element: <Navigate to="/courses" replace /> },
-    {path:'/check-page', element: <CheckPage />},
-    {path:'/courses', element: <CoursePage />},
-    {path:'/courseid', element: <CourseDetailsPage />},
+    { path:'/check-page', element: <CheckPage /> },
+    { path:'/courses', element: <CoursePage /> },
+    { path:'/courseid', element: <CourseDetailsPage /> },
+    { path:'/login', element: <LoginPage /> },
   ])
 
   return (
