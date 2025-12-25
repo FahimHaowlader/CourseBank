@@ -9,6 +9,7 @@ import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlinePersonOutline } from "react-icons/md";
 import { LuCalendarDays } from "react-icons/lu";
 import { IoArrowForwardSharp } from "react-icons/io5";
+import CourseCard from "../Components/CourseCard";
 
 
 
@@ -781,8 +782,11 @@ const CoursePage = () => {
               </button>
             </div>
           </article>
+          {
+            <CourseCard/>
+          }
         </div>
-        <div class="flex items-center justify-between  px-4 py-2 sm:px-6 mt-8 ">
+        <div class=" flex items-center justify-between  px-4 py-2 sm:px-6 mt-8 ">
           {/* <div class="flex flex-1 justify-between sm:hidden">
             <a
               class="relative inline-flex items-center rounded-md border border-border-light dark:border-border-dark bg-white dark:bg-background-dark px-4 py-2 text-sm font-medium text-text-secondary hover:bg-gray-50"
@@ -797,8 +801,7 @@ const CoursePage = () => {
               Next
             </a>
           </div> */}
-          <div class="flex flex-1 items-center justify-between ">
-            <div></div>
+          <div class="flex flex-1 items-center justify-center md:justify-end ">
             <div>
               <nav
                 aria-label="Pagination"
@@ -861,17 +864,17 @@ const CoursePage = () => {
           </div>
         </div>
         <div class="hidden mt-12 flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
-          <div class="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
+          {/* <div class="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
             <span class="material-symbols-outlined text-4xl">search_off</span>
-          </div>
+          </div> */}
           <h3 class="text-xl font-bold text-text-main dark:text-white mb-2">
             No courses found
           </h3>
-          <p class="text-text-secondary dark:text-gray-400 max-w-sm">
+          <p class="text-text-secondary dark:text-gray-400 px-5 ">
             We couldn't find any courses matching your filters. Try adjusting
             your search criteria.
           </p>
-          <button class="mt-6 text-primary font-medium hover:underline">
+          <button class="mt-5 text-primary font-semibold hover:underline hover:cursor-pointer">
             Clear all filters
           </button>
         </div>
