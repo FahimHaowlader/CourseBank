@@ -10,18 +10,10 @@ import { MdOutlineAssignment } from "react-icons/md";
 import NoCourse from "../Components/NoCourse";
 import NoElement from "../Components/NoElement";
 
-
-
-
-
-
-
-
 const CourseDetailsPage = () => {
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
-      
-     <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         {/* <nav
           aria-label="Breadcrumb"
           className="flex text-sm text-slate-500 dark:text-slate-400 mb-6"
@@ -54,7 +46,7 @@ const CourseDetailsPage = () => {
                 </span>
               </div> */}
               <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
-                 Introduction to Computer Science
+                Introduction to Computer Science
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-5">
                 Department of Engineering • School of Computing
@@ -62,30 +54,29 @@ const CourseDetailsPage = () => {
               <div className="flex flex-wrap gap-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption/>
+                    <GrShareOption />
                   </span>
                   3 Credits
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
-                   <GrShareOption/>
+                    <GrShareOption />
                   </span>
                   Undergraduate
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption/>
+                    <GrShareOption />
                   </span>
                   In-Person
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption/>
+                    <GrShareOption />
                   </span>
                   Mon/Wed 10:00 AM
                 </div>
               </div>
-            
             </div>
             <div className="flex items-center gap-3 shrink-0">
               {/* <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
@@ -99,10 +90,10 @@ const CourseDetailsPage = () => {
                 Share
               </button> */}
               <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
-                Share Now
                 <span className="material-symbols-outlined text-lg">
-                  <GrShareOption/>
+                  <GrShareOption />
                 </span>
+                Share Now
               </button>
             </div>
           </div>
@@ -142,7 +133,7 @@ const CourseDetailsPage = () => {
           <div className="lg:col-span-3 flex flex-col gap-8">
             <section>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-                Instructor &amp; Course Info
+                Instructor Info
               </h2>
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
@@ -191,8 +182,33 @@ const CourseDetailsPage = () => {
               </h2>
               <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
                 <p className="mb-4">
-               Algebra of matrices: Various types of matrices: operations of matrices: determinant of matrices: transpose and complex conjugate of matrices: special types of matrices: block matrices: adjoint und inverse of matrices: elementary row operations und echelon forms of matrices: rank of a matrix: System of lincar equations: Basic definitions, Linear equations. degenerated linear equations, leading unknowns of a non-degenerated linear equation, systems of linear equations and their solutions, equivalent systems. and related theorems: use of inverse matrix. rank. und echelon forms in solving systems of homogeneous and non-homogencous linear equations; LU decomposition and their application to solving the system of linear equations: Vector space: Basie definitions and examples: lincar combinations: spanning sets: subspaces: linear span: row and column spaces of matrices: linear dependence and independence of vectors: direct sum: basis and dimension of vector space: quotient space: solution space of a system of homogeneous linear equations: Linear transformations: kernel. image, rank. and nullity: matris representation: change of basis: similarity: bigenvalues and cigenvectors: Polynomials of matrices; characteristics of polynomials; characteristic equations: Cayloy-Hamilton theorem: cigenvalues and cigenvectors: diagonalization of matrices: Inner product space: Cauchy-Schwarz inequality: orthogonal vectors and orthonormal basis:
-Gram-Schmidt orthogonalization process and its application to QR decomposition: bilinear and quadratic forms.
+                  Algebra of matrices: Various types of matrices: operations of
+                  matrices: determinant of matrices: transpose and complex
+                  conjugate of matrices: special types of matrices: block
+                  matrices: adjoint und inverse of matrices: elementary row
+                  operations und echelon forms of matrices: rank of a matrix:
+                  System of lincar equations: Basic definitions, Linear
+                  equations. degenerated linear equations, leading unknowns of a
+                  non-degenerated linear equation, systems of linear equations
+                  and their solutions, equivalent systems. and related theorems:
+                  use of inverse matrix. rank. und echelon forms in solving
+                  systems of homogeneous and non-homogencous linear equations;
+                  LU decomposition and their application to solving the system
+                  of linear equations: Vector space: Basie definitions and
+                  examples: lincar combinations: spanning sets: subspaces:
+                  linear span: row and column spaces of matrices: linear
+                  dependence and independence of vectors: direct sum: basis and
+                  dimension of vector space: quotient space: solution space of a
+                  system of homogeneous linear equations: Linear
+                  transformations: kernel. image, rank. and nullity: matris
+                  representation: change of basis: similarity: bigenvalues and
+                  cigenvectors: Polynomials of matrices; characteristics of
+                  polynomials; characteristic equations: Cayloy-Hamilton
+                  theorem: cigenvalues and cigenvectors: diagonalization of
+                  matrices: Inner product space: Cauchy-Schwarz inequality:
+                  orthogonal vectors and orthonormal basis: Gram-Schmidt
+                  orthogonalization process and its application to QR
+                  decomposition: bilinear and quadratic forms.
                 </p>
               </div>
             </section>
@@ -200,7 +216,7 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-800 flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-primary dark:text-teal-300 text-2xl">
-                    <LuNotebook/>
+                    <LuNotebook />
                   </span>
                 </div>
                 <div>
@@ -213,10 +229,18 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                   </p>
                 </div>
               </div>
-              <button className="cursor-pointer shrink-0 flex items-center gap-2 px-4 py-2 bg-primary hover:bg-teal-700 text-white font-medium rounded-lg shadow-sm transition-colors">
-                <span className="material-symbols-outlined"><MdOutlineFileDownload size={26}/></span>
+              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+                <span className="material-symbols-outlined text-lg">
+                  <MdOutlineFileDownload size={26} />
+                </span>
                 Download PDF
               </button>
+              {/* <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+                <span className="material-symbols-outlined text-lg">
+                  <MdOutlineFileDownload/>
+                </span>
+                Download PDF
+              </button> */}
             </div>
             <section>
               <div className="flex items-center justify-between mb-4">
@@ -235,7 +259,7 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                       <span className="material-symbols-outlined">
-                       <FaRegFilePdf size={24}/>
+                        <FaRegFilePdf size={24} />
                       </span>
                     </div>
                     <div>
@@ -247,15 +271,15 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                    <MdOutlineFileDownload size={26}/>
+                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
                 <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                       <span className="material-symbols-outlined">
-                       <FaRegFilePdf size={24}/>
+                        <FaRegFilePdf size={24} />
                       </span>
                     </div>
                     <div>
@@ -267,15 +291,15 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                    <MdOutlineFileDownload size={26}/>
+                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
                 <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                       <span className="material-symbols-outlined">
-                       <FaRegFilePdf size={24}/>
+                        <FaRegFilePdf size={24} />
                       </span>
                     </div>
                     <div>
@@ -287,8 +311,8 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                    <MdOutlineFileDownload size={26}/>
+                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
                 {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
@@ -360,7 +384,7 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
                       <span className="material-symbols-outlined text-primary text-2xl ">
-                        <MdOutlineMenuBook size={24}/>
+                        <MdOutlineMenuBook size={24} />
                       </span>
                     </div>
                     <div>
@@ -376,14 +400,14 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
+                    <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
                 <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
                       <span className="material-symbols-outlined text-primary text-2xl ">
-                        <MdOutlineMenuBook size={24}/>
+                        <MdOutlineMenuBook size={24} />
                       </span>
                     </div>
                     <div>
@@ -399,7 +423,7 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
+                    <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
                 {/* <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
@@ -433,70 +457,69 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                     Active Tasks &amp; Assignments
                   </h2>
-                 
                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                       <IoDocumentsOutline size={24}/>
-                      </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
+                        <span className="material-symbols-outlined">
+                          <IoDocumentsOutline size={24} />
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
+                          Lecture Notes: Weeks 1-4
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          PDF • 2.4 MB • Updated yesterday
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
-                 <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                       <IoDocumentsOutline size={24}/>
-                      </span>
+                  <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
+                        <span className="material-symbols-outlined">
+                          <IoDocumentsOutline size={24} />
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
+                          Lecture Notes: Weeks 1-4
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          PDF • 2.4 MB • Updated yesterday
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
-                 <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                       <IoDocumentsOutline size={24}/>
-                      </span>
+                  <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
+                        <span className="material-symbols-outlined">
+                          <IoDocumentsOutline size={24} />
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
+                          Lecture Notes: Weeks 1-4
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          PDF • 2.4 MB • Updated yesterday
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
-                </div>
-                {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                  {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <span className="material-symbols-outlined">code</span>
@@ -554,10 +577,10 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                     download
                   </span>
                 </div> */}
-              </div>
+                </div>
               </section>
             </div>
-                   {/* <NoElement/> */}
+            {/* <NoElement/> */}
 
             <section>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
@@ -567,14 +590,14 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
                     <span className="material-symbols-outlined text-primary text-base">
-                     <MdOutlineAssignment size={20}/>
+                      <MdOutlineAssignment size={20} />
                     </span>
                     Term Test Questions
                   </h3>
                   <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                         <IoDocumentTextOutline size={24}/>
+                        <IoDocumentTextOutline size={24} />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -585,14 +608,14 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                         </p>
                       </div>
                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
                   <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                         <IoDocumentTextOutline size={24}/>
+                        <IoDocumentTextOutline size={24} />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -603,14 +626,14 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                         </p>
                       </div>
                     </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
                   <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                         <IoDocumentTextOutline size={24}/>
+                        <IoDocumentTextOutline size={24} />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -621,22 +644,22 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                         </p>
                       </div>
                     </div>
-                   <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
                     <span className="material-symbols-outlined text-primary text-base">
-                       <MdOutlineAssignment size={20}/>
+                      <MdOutlineAssignment size={20} />
                     </span>
                     Final Exam Questions
                   </h3>
                   <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                        <IoDocumentTextOutline size={24}/>
+                        <IoDocumentTextOutline size={24} />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -647,14 +670,14 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                         </p>
                       </div>
                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
                   <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                         <IoDocumentTextOutline size={24}/>
+                        <IoDocumentTextOutline size={24} />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -665,9 +688,9 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
                         </p>
                       </div>
                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <MdOutlineFileDownload size={26}/>
-                  </span>
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <MdOutlineFileDownload size={26} />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -701,7 +724,7 @@ Gram-Schmidt orthogonalization process and its application to QR decomposition: 
           </div>
         </div>
       </footer> */}
-        </div>
+    </div>
   );
 };
 

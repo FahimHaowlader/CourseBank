@@ -74,7 +74,7 @@ const CustomCourseCard = () => {
             </button>
           </div> */}
            <div className="p-5 pt-0 flex items-center justify-between">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-xs transition-colors flex items-center gap-1.5 hover:cursor-pointer">
+              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
               View Details
               <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
                 <IoArrowForwardSharp size={18} />
