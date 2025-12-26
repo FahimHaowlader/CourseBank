@@ -45,7 +45,7 @@ const CourseDetailsPage = () => {
                   Open
                 </span>
               </div> */}
-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl mb-2 text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
                 Introduction to Computer Science
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-5">

@@ -60,7 +60,7 @@ const AddCoursePage = () => {
 <span class="text-text-main-light dark:text-text-main-dark font-medium">Add New</span>
 </div> */}
         <div class="mb-5">
-          <h1 class="text-3xl md:text-4xl font-bold bg-primary-dark dark:bg-primary bg-clip-text text-text-main-light dark:text-text-main-dark mb-1 tracking-tight text-transparent">
+          <h1 class="text-3xl md:text-4xl font-extrabold bg-primary-dark dark:bg-primary bg-clip-text text-text-main-light dark:text-text-main-dark mb-1 tracking-tight text-transparent">
             Add New Course
           </h1>
           <p class="pt-2 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-1">

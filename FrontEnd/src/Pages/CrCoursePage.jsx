@@ -35,7 +35,7 @@ const CrCoursePage = () => {
 
        
          <div className=" mb-5">
-              <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-gradient-to-r from-primary-dark to-blue-600 dark:from-primary dark:to-blue-200    tracking-tight pb-1 font-extrabold">
+              <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight pb-1 font-extrabold">
            My Courses
           </h1>
           <p className="mt-2 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-0.5">
