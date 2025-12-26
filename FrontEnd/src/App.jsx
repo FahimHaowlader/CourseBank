@@ -11,6 +11,8 @@ import CourseDetailsPage from './Pages/CourseDetailsPage.jsx'
 import LoginPage from './Pages/LoginPage.jsx'
 import CrCoursePage from './Pages/CrCoursePage.jsx'
 import CourseDetailsEditPage from './Pages/CourseDetailsEditPage.jsx'
+import AddCoursePage from './Pages/AddCoursePage.jsx'
+
 
 
 function App() {
@@ -23,6 +25,7 @@ function App() {
     { path:'/login', element: <LoginPage /> },
     { path:'/my-courses', element: <CrCoursePage /> },
     { path:'/edit', element: <CourseDetailsEditPage /> },
+    { path:'/add-course', element: <AddCoursePage /> },
   ])
 
   return (
