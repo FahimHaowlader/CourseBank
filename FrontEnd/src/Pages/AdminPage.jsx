@@ -19,7 +19,7 @@ const AdminPage = () => {
             <h1 class="text-3xl sm:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight pb-1 font-extrabold">
               Admin Dashboard
             </h1>
-            <p class="text-text-secondary dark:text-gray-400 mt-2 text-lg max-w-3xl pl-1">
+            <p class="text-secondary-text dark:text-gray-400 mt-2 text-lg max-w-3xl pl-1">
               Manage university resources, users, and system settings.
             </p>
           </div>

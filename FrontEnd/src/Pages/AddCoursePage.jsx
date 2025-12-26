@@ -281,7 +281,7 @@ const AddCoursePage = () => {
                 <label class="block text-text-main-light dark:text-text-main-dark text-md font-semibold mb-2">
                   Instructor Photo
                 </label>
-                <div class="bg-background-light dark:bg-background-dark/30 border-2 border-border-light dark:border-border-dark hover:border-primary transition-all rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer group relative shadow-sm h-[240px]">
+                <div class="bg-background-light dark:bg-background-dark/30 border-2 border-border-light dark:border-border-dark hover:border-primary transition-all rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer group relative shadow-sm h-60">
                   <input
                     class="absolute inset-0 opacity-0 cursor-pointer z-10"
                     title="Upload Instructor Photo"
@@ -304,7 +304,7 @@ const AddCoursePage = () => {
                 <label class="block text-text-main-light dark:text-text-main-dark text-md font-semibold mb-2">
                   Personal Information
                 </label>
-                <div class="bg-background-light dark:bg-background-dark/30 rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm h-[240px] flex flex-col justify-center gap-6">
+                <div class="bg-background-light dark:bg-background-dark/30 rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm h-60 flex flex-col justify-center gap-6">
                   <div>
                     <label className="flex flex-col gap-1.5 w-full ">
                       <span className="text-sm font-semibold text-text-secondary dark:text-gray-400 ">

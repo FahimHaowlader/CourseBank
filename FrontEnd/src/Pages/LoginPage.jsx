@@ -35,7 +35,7 @@ const LoginPage = () => {
           </div>
         </div>
       </nav> */}
-      <main className="flex-grow flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white dark:bg-surface-dark rounded-2xl shadow-xl border border-border-light dark:border-border-dark overflow-hidden">
           <div className="p-8 sm:p-10">
             <div className="mb-8 text-center">

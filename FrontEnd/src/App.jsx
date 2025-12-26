@@ -13,6 +13,7 @@ import CrCoursePage from './Pages/CrCoursePage.jsx'
 import CourseDetailsEditPage from './Pages/CourseDetailsEditPage.jsx'
 import AddCoursePage from './Pages/AddCoursePage.jsx'
 import AdminPage from './Pages/AdminPage.jsx'
+import AllCoursePage from './Pages/AllCoursePage.jsx'
 
 
 
@@ -28,6 +29,7 @@ function App() {
     { path:'/edit', element: <CourseDetailsEditPage /> },
     { path:'/add-course', element: <AddCoursePage /> },
     { path:'/admin', element: <AdminPage /> },
+    { path:'/all', element: <AllCoursePage /> },
   ])
 
   return (
