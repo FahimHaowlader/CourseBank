@@ -7,6 +7,14 @@ import AddElement from "../Components/AddElement";
 import { IoDocumentsOutline } from "react-icons/io5";
 import { MdOutlineFileDownload } from "react-icons/md";
 import AddFirstElement from "../Components/AddFirstElement";
+import CourseDeleteConformation from "../Components/CourseDeleteConformation";
+import ElementDeleteConfirmation from "../Components/ElementDeleteConformation";
+import AddMaterial from "../Components/AddMaterial";
+import AddTask from "../Components/AddTask";
+import AddBook from "../Components/AddBook";
+import AddAssessment from "../Components/AddAssessment";
+import UpdateDescription from "../Components/UpdateDescription";
+import UpdateHandbook from "../Components/UpdateHandbook";
 
 const CheckPage = () => {
   return (
@@ -29,9 +37,18 @@ const CheckPage = () => {
   }
 /> */}
       {/* <NoCourse/> */}
-      <NoElement/>
+      {/* <NoElement/> */}
+      {/* <CourseDeleteConformation/> */}
+      {/* <ElementDeleteConfirmation/> */}
+      {/* <AddMaterial/> */}
+      {/* <AddTask/> */}
+      {/* <AddBook/> */}
+      {/* <AddAssessment/> */}
+      {/* <UpdateDescription /> */}
+      {/* <UpdateDescription /> */}
+      <UpdateHandbook/>
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
-      <AddFirstElement title="Document" onAdd={() => alert("Add Document clicked")} />
+      {/* <AddFirstElement title="Document" onAdd={() => alert("Add Document clicked")} /> */}
 
       {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
         <div className="flex items-center gap-4">

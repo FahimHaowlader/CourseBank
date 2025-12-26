@@ -1,7 +1,7 @@
 import React from "react";
 import CustomCourseCard from "../Components/CustomCourseCard";
 import AddCourseCard from "../Components/AddCourseCard";
-import DeleteConformation from "../Components/DeleteConformation";
+import CourseDeleteConformation from "../Components/CourseDeleteConformation";
 
 const CrCoursePage = () => {
   return (
