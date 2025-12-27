@@ -193,14 +193,14 @@ const CoursePage = () => {
               </label>
             </div>
             <div className="flex items-center gap-3 w-full xl:w-auto mt-2 xl:mt-0 xl:ml-auto">
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold ">
+              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold active:scale-95 ">
                 <span className="material-symbols-outlined  text-[20px] font-semibold">
                   <MdRefresh />
                 </span>
                 Reset
-                <span classNameName="hidden md:block"> Filters</span>
+                <span className="hidden md:block"> Filters</span>
               </button>
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark ">
+              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark active:scale-95 ">
                 <span className="material-symbols-outlined text-[20px] font-semibold">
                   <AiOutlineSearch />
                 </span>
@@ -797,7 +797,7 @@ const CoursePage = () => {
               Next
             </a>
           </div> */}
-          <div className="flex flex-1 items-center justify-center md:justify-end ">
+          <div className="flex flex-1 items-center justify-center  ">
             <div>
               <nav
                 aria-label="Pagination"

@@ -3,7 +3,7 @@ import CustomCourseCard from "../Components/CustomCourseCard";
 import AddCourseCard from "../Components/AddCourseCard";
 import CourseDeleteConformation from "../Components/CourseDeleteConformation";
 
-const CrCoursePage = () => {
+const ModeratorCoursePage = () => {
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-5">
@@ -799,4 +799,4 @@ const CrCoursePage = () => {
   );
 };
 
-export default CrCoursePage;
+export default ModeratorCoursePage;

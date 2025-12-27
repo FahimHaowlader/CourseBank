@@ -15,6 +15,7 @@ import AddBook from "../Components/AddBook";
 import AddAssessment from "../Components/AddAssessment";
 import UpdateDescription from "../Components/UpdateDescription";
 import UpdateHandbook from "../Components/UpdateHandbook";
+import SelectAbleTable from "../Components/SelectAbleTable";
 
 const CheckPage = () => {
   return (
@@ -46,7 +47,8 @@ const CheckPage = () => {
       {/* <AddAssessment/> */}
       {/* <UpdateDescription /> */}
       {/* <UpdateDescription /> */}
-      <UpdateHandbook/>
+      {/* <UpdateHandbook/> */}
+      <SelectAbleTable />
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
       {/* <AddFirstElement title="Document" onAdd={() => alert("Add Document clicked")} /> */}
 

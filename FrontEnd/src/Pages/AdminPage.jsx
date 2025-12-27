@@ -57,7 +57,7 @@ const AdminPage = () => {
               <span class="material-symbols-outlined text-[28px]"><MdOutlinePeopleAlt/></span>
             </div>
             <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
-              Manage Users
+              Manage Moderators
             </h3>
             <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
               Oversee student enrollments, faculty profiles, and administrative

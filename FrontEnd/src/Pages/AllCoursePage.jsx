@@ -12,6 +12,8 @@ import { IoArrowForwardSharp } from "react-icons/io5";
 import { GrShareOption } from "react-icons/gr";
 import { LiaIdCardSolid } from "react-icons/lia";
 import CustomCourseCard from '../Components/CustomCourseCard';
+import { AiOutlinePlus } from "react-icons/ai";
+
 
 
 
@@ -20,9 +22,17 @@ const AllCoursePage = () => {
    <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
          <header className="mb-5">
-          <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight pb-1 font-extrabold">
+            <div className='sm:flex justify-between mb-1'>
+          <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
             All Course 
           </h1>
+           <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
+                          <span className="material-symbols-outlined text-lg">
+                            <AiOutlinePlus />
+                          </span>
+                          Add Course
+                        </button>
+            </div>
           <p className="mt-2 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-0.5">
             Search and explore courses by semester, teacher, and category to
             plan your academic journey.
@@ -62,7 +72,7 @@ const AllCoursePage = () => {
                     </label>
                     <label className="flex flex-col gap-1.5 w-full md:col-span-3">
                       <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                        Creator Id
+                        Moderator Id
                       </span>
                       <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg  ">
                         <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
@@ -210,14 +220,14 @@ const AllCoursePage = () => {
                       </label>
                     </div>
                     <div className="flex items-center gap-3 w-full xl:w-auto mt-2 xl:mt-0 xl:ml-auto">
-                      <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold ">
+                      <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold active:scale-95 ">
                         <span className="material-symbols-outlined  text-[20px] font-semibold">
                           <MdRefresh />
                         </span>
                         Reset
                         <span classNameName="hidden md:block"> Filters</span>
                       </button>
-                      <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark ">
+                      <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark active:scale-95">
                         <span className="material-symbols-outlined text-[20px] font-semibold">
                           <AiOutlineSearch />
                         </span>

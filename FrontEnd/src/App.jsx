@@ -9,11 +9,12 @@ import CheckPage from './Pages/CheckPage.jsx'
 import CoursePage from './Pages/CoursePage.jsx'
 import CourseDetailsPage from './Pages/CourseDetailsPage.jsx'
 import LoginPage from './Pages/LoginPage.jsx'
-import CrCoursePage from './Pages/CrCoursePage.jsx'
+import ModeratorCoursePage from './Pages/ModeratorCoursePage.jsx'
 import CourseDetailsEditPage from './Pages/CourseDetailsEditPage.jsx'
 import AddCoursePage from './Pages/AddCoursePage.jsx'
 import AdminPage from './Pages/AdminPage.jsx'
 import AllCoursePage from './Pages/AllCoursePage.jsx'
+import AllModeratorPage from './Pages/AllModeratorPage.jsx'
 
 
 
@@ -25,11 +26,12 @@ function App() {
     { path:'/courses', element: <CoursePage /> },
     { path:'/courseid', element: <CourseDetailsPage /> },
     { path:'/login', element: <LoginPage /> },
-    { path:'/my-courses', element: <CrCoursePage /> },
+    { path:'/my-courses', element: <ModeratorCoursePage /> },
     { path:'/edit', element: <CourseDetailsEditPage /> },
     { path:'/add-course', element: <AddCoursePage /> },
     { path:'/admin', element: <AdminPage /> },
     { path:'/all', element: <AllCoursePage /> },
+    { path:'/moderators', element: <AllModeratorPage /> },
   ])
 
   return (
