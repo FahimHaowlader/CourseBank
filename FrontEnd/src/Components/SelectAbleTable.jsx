@@ -9,6 +9,8 @@ import { MdDeleteOutline } from "react-icons/md";
 import { GrShareOption } from "react-icons/gr";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { GoCircleSlash } from "react-icons/go";
+import { MdCallMade } from "react-icons/md";
+
 
 const DATA = Array.from({ length: 50 }, (_, i) => ({
   id: i + 1,
@@ -87,7 +89,8 @@ export default function GmailTableWithSort() {
   return (
     <div className="space-y-3">
       {/* Action bar */}
-      <div className={`${selectionMode ? "flex flex-col sm:flex-row gap-3 justify-between items-center":"flex " }  p-3 rounded`}>
+       <div className={`${selectionMode ? "flex flex-col sm:flex-row gap-3 justify-between items-center":"flex justify-between " }  p-3 rounded`}> 
+    
         <div className="flex items-center gap-4 ">
           {selectionMode && (
             <span className="text-sm border-r-2 border-primary pr-4 font-semibold">
@@ -147,7 +150,7 @@ export default function GmailTableWithSort() {
           </div>
         )}
         {/* Sort section, only visible when row selected */}
-        {selectionMode && (
+        {/* {selectionMode && (
           <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <div class="flex-1 flex justify-end items-center gap-2 ml-auto">
               
@@ -199,13 +202,158 @@ export default function GmailTableWithSort() {
                        9
                      </span>{" "}
                      pages
+                   </div> 
+          </div>
+        )} */}
+        {/* Sort section, only visible when row selected */}
+        {selectionMode && (
+          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+             <div class="flex-1 flex justify-end items-center gap-2 ml-auto">
+               <button
+                 class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded-xl text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-md font-medium shadow-sm cursor-pointer active:scale-95"
+                title="Deny Access"
+              >
+                <span class="material-icons text-base">
+                  <FiEdit size={18}/>
+                </span>
+                <span class="">Change</span>
+              </button>
+              <button
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-md font-medium shadow-sm cursor-pointer active:scale-95"
+                title="Give Access"
+              >
+                <span class="material-icons text-base">
+                  <MdCallMade  size={18}/>
+                </span>
+                <span class="">Create</span>
+              </button>
+             
+            </div>
+            {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-secondary dark:text-gray-400 shadow-sm whitespace-nowrap">
+                     <span className="material-symbols-outlined text-[20px] text-primary">
+                       layers
+                     </span>
+                     <span className="hidden sm:inline">Total:</span>{" "}
+                     <span className="font-bold text-text-main dark:text-white ml-0.5">
+                       9
+                     </span>{" "}
+                     pages
                    </div> */}
           </div>
         )}
+
       </div>
       {/* this one to create new moderators */}
       {/* Table */}
       <table className="w-full  rounded-lg">
+        <thead>
+          <tr className="flex justify-between bg-primary text-white rounded-t-lg">
+            <th className="p-3 w-40 ">Moderator ID</th>
+            <th className="p-3 w-40 text-center">Password</th>
+            <th className="p-3 hidden sm:block w-40  text-center ">Access</th>
+           {/*  <th className="p-3 w-20 sm:w-28 lg:w-32 text-center">Courses</th> */}
+            {/* <th className={`p-3 hidden lg:block lg:w-40 xl:w-80 text-center`}>Gmail</th> */}
+            <th className={selectionMode ? "hidden" : " p-3  hidden sm:block w-40 lg:w-80"}>
+              <span className={selectionMode ? "hidden" : " hidden sm:block"}>Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {pageData.map((row) => {
+            const checked = selectAllGlobal || selectedIds.includes(row.id);
+
+            return (
+              <>
+                <tr
+                  key={row.id}
+                  onClick={() => toggleRow(row.id)}
+                  className={`flex justify-between cursor-pointer ${
+                    checked ? "bg-primary/5" : "hover:bg-primary/10"
+                  }`}
+                >
+                  <td className="w-40 flex items-center  pl-3 ">
+                    <div className={selectionMode ? "bolck" : "hidden"}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleRow(row.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        // className={selectionMode ? "p-3 w-6" : "hidden"}
+                      />
+                    </div>
+                    <h1 className="p-3 pl-4">{"CSE2023233"}</h1>
+                  </td>
+                  <td className="py-3 inline-flex justify-center items-center w-44 ">{"drfdgfgfggrfddqq"}</td>
+                 <td className="p-3 hidden w-40 sm:inline-flex justify-center items-center">
+                    Allow
+                  </td>
+                   {/* <td className="p-3 w-20 sm:w-28 lg:w-32 inline-flex justify-center items-center">
+                    <a
+                      href="#"
+                      className="hover:cursor-pointer hover:underline text-primary font-semibold"
+                    >
+                      View
+                    </a>
+                  </td> */}
+                  {/* <td className={`p-3 hidden ${checked ? "w-80":" w-40 xl:w-80"} lg:inline-flex items-center overflow-hidden mr-5`}>
+                    fcvftg
+                  </td> */}
+                  <td className={selectionMode ? "hidden" : " p-3 w-40 hidden sm:block lg:w-80 "}>
+                      <div class="flex-1 flex justify-evenly items-center gap-2 ml-auto">
+               <button
+                 class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded-xl text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-md font-medium shadow-sm cursor-pointer active:scale-95"
+                title="Deny Access"
+              >
+                <span class="material-icons text-base">
+                  <FiEdit size={18}/>
+                </span>
+                <span class="hidden  lg:inline">Change</span>
+              </button>
+              <button
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-md font-medium shadow-sm cursor-pointer active:scale-95"
+                title="Give Access"
+              >
+                <span class="material-icons text-base">
+                  <MdCallMade  size={18}/>
+                </span>
+                <span class="hidden lg:inline">Create</span>
+              </button>
+             
+            </div>
+                  </td>
+                </tr>
+                {/* <tr
+                key={row.id}
+                onClick={() => toggleRow(row.id)}
+                className={`border-t cursor-pointer ${
+                  checked ? "bg-blue-50" : "hover:bg-gray-50"
+                }`}
+              >
+                <td className="p-3 w-12">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleRow(row.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className={selectionMode ? "" : "invisible"}
+                  />
+                </td>
+                <td className="p-3">{row.name}</td>
+                <td className="p-3">{row.role}</td>
+                <td className="p-3">
+                  <span className={selectionMode ? "invisible" : ""}>
+                    {row.email}
+                  </span>
+                </td>
+              </tr> */}
+              </>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* done one for already exists user  */}
+      {/* <table className="w-full  rounded-lg">
         <thead>
           <tr className="flex justify-between bg-primary text-white rounded-t-lg">
             <th className="p-3 w-40 ">Moderator ID</th>
@@ -262,127 +410,6 @@ export default function GmailTableWithSort() {
                     <div className="flex items-center justify-evenly">
                       <button
                         className="hidden xl:flex h-9 cursor-pointer  items-center justify-center rounded-xl bg-slate-200 text-slate-600 transition-colors duration-300 hover:bg-orange-50 hover:text-orange-500 dark:bg-gray-800 dark:text-orange-400 dark:hover:bg-gray-700"
-                        title="Edit Course"
-                      >
-                        <span className="material-symbols-outlined text-md px-3">
-                          Give Access
-                        </span>
-                      </button>
-                      <button
-                        className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-slate-200 text-slate-600 transition-colors duration-300 hover:bg-primary/20 hover:text-primary dark:bg-gray-800 dark:text-primary dark:hover:bg-gray-700"
-                        title="Edit Course"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          <FiEdit />
-                        </span>
-                      </button>
-                      <button
-                        className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-slate-200 text-slate-600 transition-colors duration-300 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                        title="Delete Course"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          <MdDeleteOutline size={24} />
-                        </span>
-                      </button>
-                      <button
-                        className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-slate-200 text-slate-600 transition-colors duration-300 hover:bg-blue-50 hover:text-blue-500 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
-                        title="Share Course"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          <GrShareOption size={24} />
-                        </span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                {/* <tr
-                key={row.id}
-                onClick={() => toggleRow(row.id)}
-                className={`border-t cursor-pointer ${
-                  checked ? "bg-blue-50" : "hover:bg-gray-50"
-                }`}
-              >
-                <td className="p-3 w-12">
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleRow(row.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    className={selectionMode ? "" : "invisible"}
-                  />
-                </td>
-                <td className="p-3">{row.name}</td>
-                <td className="p-3">{row.role}</td>
-                <td className="p-3">
-                  <span className={selectionMode ? "invisible" : ""}>
-                    {row.email}
-                  </span>
-                </td>
-              </tr> */}
-              </>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {/* done one for already exists user  */}
-      {/* <table className="w-full  rounded-lg">
-        <thead>
-          <tr className="flex justify-between bg-primary text-white rounded-t-lg">
-            <th className="p-3 w-40 ">Moderator ID</th>
-            <th className="p-3 w-40 text-center">Password</th>
-            <th className="p-3 w-32  text-center ">Access</th>
-            <th className="p-3 w-32 text-center">Courses</th>
-            <th className="p-3 text-center w-80 ">Gmail</th>
-            <th className={selectionMode ? "hidden" : "p-3 w-80"}>
-              <span className={selectionMode ? "hidden" : "p-3"}>Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {pageData.map((row) => {
-            const checked = selectAllGlobal || selectedIds.includes(row.id);
-
-            return (
-              <>
-                <tr
-                  key={row.id}
-                  onClick={() => toggleRow(row.id)}
-                  className={`flex justify-between cursor-pointer ${
-                    checked ? "bg-primary/5" : "hover:bg-primary/10"
-                  }`}
-                >
-                  <td className="w-40 flex items-center  pl-3 ">
-                    <div className={selectionMode ? "bolck" : "hidden"}>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleRow(row.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        // className={selectionMode ? "p-3 w-6" : "hidden"}
-                      />
-                    </div>
-                    <h1 className="p-3 pl-4">{"CSE2023233"}</h1>
-                  </td>
-                  <td className="py-3 text-center w-44 ">{"drfdgfgfggrfddqq"}</td>
-                  <td className="p-3 w-32  text-center">
-                    Allow
-                  </td>
-                  <td className="p-3 w-32 text-center">
-                    <a
-                      href="#"
-                      className="hover:cursor-pointer hover:underline text-primary font-semibold"
-                    >
-                      View
-                    </a>
-                  </td>
-                  <td className="p-3 w-80 text-center overflow-hidden mr-5">
-                    Fahimhaoggffgwlader07jahidfcddfssddsd@gmail.com
-                  </td>
-                  <td className={selectionMode ? "hidden" : "p-3 w-80 "}>
-                    <div className="flex items-center justify-evenly">
-                      <button
-                        className=" h-9 cursor-pointer flex items-center justify-center rounded-xl bg-slate-200 text-slate-600 transition-colors duration-300 hover:bg-orange-50 hover:text-orange-500 dark:bg-gray-800 dark:text-orange-400 dark:hover:bg-gray-700"
                         title="Edit Course"
                       >
                         <span className="material-symbols-outlined text-md px-3">
