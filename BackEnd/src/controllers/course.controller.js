@@ -2,8 +2,11 @@
 import apiError from '../utils/apiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import apiResponse from '../utils/apiResponse.js';
-import Course from '../models/course.model.js';
 import { v4 as uuidv4 } from 'uuid';
+import mongoose from 'mongoose';
+
+// model
+import Course from '../models/course.model.js';
 
 // In-memory cache (shared across requests)
 const userQueryCache = {};
@@ -106,7 +109,8 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
 }
 
 
-// Controller
+// Controller(User)
+// User dynamic seacrh with caching
 const userCourseSearch = asyncHandler(async (req, res) => {
   const { parameters = {}, page = 1, sort = {} } = req.body;
 
@@ -133,6 +137,33 @@ const userCourseSearch = asyncHandler(async (req, res) => {
 });
 
 
+// Get full course details
+const fullCourseDetails = asyncHandler(async (req, res) => {
+  const courseId = req.params?.courseId;
+  
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  const course = await Course.findById(courseId).select(
+    '+description +instructorDepartment +instructorImage +books +materials +tasks +assesments +handbook'
+  );
+
+  if (!course) {
+    throw new apiError(404, "Course not found");
+  }
+
+  res.status(200).json(apiResponse(200, course, "Course details fetched successfully"));
+});
+
+
+
+
+// Controller(user)
 
 
 
@@ -152,8 +183,4 @@ const userCourseSearch = asyncHandler(async (req, res) => {
 
 
 
-
-
-
-
-export { userCourseSearch };
+export { userCourseSearch, fullCourseDetails };
