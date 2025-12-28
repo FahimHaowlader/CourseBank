@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
     userId: {
         type: String,
         required: true,
+        lowercase: true,
+        unique: true,
     },
     Access: {
         type: Boolean,
@@ -18,6 +20,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+        select: false,
     },
     role: {
         type: String,

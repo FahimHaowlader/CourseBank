@@ -5,6 +5,7 @@ const courseSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      lowercase: true,
     },
     courseCode: {
       type: String,
@@ -14,21 +15,24 @@ const courseSchema = new mongoose.Schema(
     department: {
       type: String,
       required: true,
+      lowercase: true,
     },
     staringDate: {
       type: Date,
       required: true,
       set: (value) => new Date(value),
     },
-    degree: {
-      type: String,
-      required: true,
-      enum: ["Bachelors", "Masters", "PhD"],
-    },
-    year: {
-      type: Number,
-      required: true,
-    },
+   degree: {
+  type: String,
+  required: true,
+  lowercase: true,
+  enum: ["bachelors", "masters", "phd"],
+},
+
+    // year: {
+    //   type: Number,
+    //   required: true,
+    // },
     semester: {
       type: Number,
       required: true,
@@ -38,6 +42,7 @@ const courseSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
+       select: false,
     },
     credits: {
       type: Number,
@@ -45,26 +50,32 @@ const courseSchema = new mongoose.Schema(
       min: [1, "Credits cannot be negative"],
       max: [10, "Credits cannot exceed 10"],
     },
-    type: {
-      type: String,
-      required: true,
-      enum: ["Core", "Lab", "Project"],
-    },
-    category: {
-      type: String,
-      required: true,
-      enum: ["Major", "Non-Major", "Elective"],
-    },
-    instructor: {
-      name: {
+  
+category: {
+  type: String,
+  required: true,
+  lowercase: true,
+  enum: ["major", "non-major", "elective"],
+},
+
+   type: {
+  type: String,
+  required: true,
+  lowercase: true,
+  enum: ["core", "lab", "project"],
+},
+    instructorName: {
         type: String,
         required: true,
+        lowercase: true,
       },
-      department: {
+    instructorDepartment: {
         type: String,
         required: true,
+        lowercase: true,
+         select: false,
       },
-      image: {
+    instructorImage: {
         type: String,
         validate: {
           validator: function (v) {
@@ -73,8 +84,9 @@ const courseSchema = new mongoose.Schema(
           message: (props) => `${props.value} is not a valid image URL!`,
         },
         required: [true, "Instructor image URL is required"],
+         select: false,
       },
-    },
+  
     books: {
       type: [
         {
@@ -96,7 +108,7 @@ const courseSchema = new mongoose.Schema(
           },
         },
       ],
-
+      select: false,
       // required: [true, 'At least one book URL is required']
     },
     materials: {
@@ -120,6 +132,7 @@ const courseSchema = new mongoose.Schema(
           },
         },
       ],
+      select: false,
 
       // required: [true, 'At least one material URL is required']
     },
@@ -144,7 +157,7 @@ const courseSchema = new mongoose.Schema(
           },
         },
       ],
-
+       select: false,
       // required: [true, 'At least one task is required']
     },
     assesments: {
@@ -169,7 +182,7 @@ const courseSchema = new mongoose.Schema(
           },
         },
       ],
-
+       select: false,
       // required: [true, 'At least one assesment is required']
     },
     handbook: {
@@ -181,8 +194,15 @@ const courseSchema = new mongoose.Schema(
         message: (props) => `${props.value} is not a valid handbook URL!`,
       },
       required: [true, "Handbook URL is required"],
+      select: false,
     },
-    
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      select: false,
+    },
+
   },
   { timestamps: true }
 );
