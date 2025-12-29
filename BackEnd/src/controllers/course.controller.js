@@ -110,6 +110,7 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
 
 
 // Controller(User)
+
 // User dynamic seacrh with caching
 const userCourseSearch = asyncHandler(async (req, res) => {
   const { parameters = {}, page = 1, sort = {} } = req.body;
@@ -163,7 +164,38 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
 
 
 
-// Controller(user)
+// Controller(Moderators and admin)
+
+const courseCreate = asyncHandler(async (req, res) => {
+  const moderatorId = req.user._id;
+  const courseData = req.body;
+
+  const { title, courseCode, department, startingDate, instructorName, degree, semester, type, category } = courseData;
+
+  if (!title || !courseCode || !department || !startingDate || !instructorName || !degree || !semester || !type || !category) {
+    throw new apiError(400, "All required course fields must be provided");
+  }
+
+  try {
+    const newCourse = new Course({
+      ...courseData,
+      createdBy: moderatorId
+    });
+
+    await newCourse.save();
+
+    res.status(200).json(apiResponse(200, {}, "Course created successfully"));
+  } catch (err) {
+    if (err.code === 11000 && err.keyValue.courseCode) {
+      throw new apiError(400, `Course with code ${err.keyValue.courseCode} already exists`);
+    }
+    throw new apiError(500, "Error creating course");
+  }
+});
+
+
+
+//controller (Moderator)
 
 
 
