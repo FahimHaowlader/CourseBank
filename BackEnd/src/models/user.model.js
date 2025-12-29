@@ -6,12 +6,31 @@ const userSchema = new mongoose.Schema({
     userId: {
         type: String,
         required: true,
-        lowercase: true,
+        uppercase: true,
         unique: true,
     },
     access: {
         type: Boolean,
         default: true,
+    },
+    department: {
+        type: String,
+        required: true,
+        lowercase : true,
+    },
+    year: {
+        type: Number,
+        required: true,
+    },
+    semester: {
+        type: Number,
+        required: true,
+    },
+    degree: {
+        type: String,
+        required: true,
+        lowercase: true,
+        enum: ["bachelors", "masters", "phd"],
     },
     email: {
         type: String,
