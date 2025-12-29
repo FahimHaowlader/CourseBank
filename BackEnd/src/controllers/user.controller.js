@@ -102,7 +102,7 @@ const userLogin = asyncHandler(async (req, res) => {
     httpOnly: true,      // Cannot be accessed by JS (prevents XSS)
     secure: process.env.NODE_ENV === "production", // Only HTTPS in prod
     sameSite: "Strict",  // CSRF protection
-    maxAge: 1000 * 60 * 60 * 24, // 1 day in milliseconds
+    maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day in milliseconds
   });
 
   // Optional: return minimal user info

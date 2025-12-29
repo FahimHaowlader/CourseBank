@@ -111,6 +111,7 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
 }
 
 
+
 // Controller(User)
 
 // User dynamic seacrh with caching
@@ -164,6 +165,35 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
 });
 
 // Controller(Moderators and admin)
+
+const getCourseByCreatorId = asyncHandler(async (req, res) => {
+  const requesterId = req.user?._id;
+  const role = req.user?.role;
+  const { userId: queryUserId } = req.query;
+
+  // Auth check
+  if (!requesterId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  let filter = {};
+
+  if (role === "moderator") {
+    // Moderators can only see their own courses
+    filter.createdBy = requesterId;
+  } else if (role === "admin") {
+    // Admin sees courses of queryUserId if provided, otherwise their own courses
+    filter.createdBy = queryUserId || requesterId;
+  } else {
+    throw new apiError(403, "Forbidden");
+  }
+
+  const courses = await Course.find(filter);
+
+  res.status(200).json(
+    apiResponse(200, courses, "Courses fetched successfully")
+  );
+});
 
 const createCourse = asyncHandler(async (req, res) => {
   const moderatorId = req.user._id;
@@ -278,7 +308,17 @@ const uploadImage = asyncHandler(async (req, res) => {
     throw new apiError(400, "Image file is required");
   }
   // upload to cloudinary
+  const uploadResult = await uploadOnCloudinary(localImagePath);
+  if (!uploadResult) {
+    await deleteLocalFile(localImagePath);
+    throw new apiError(500, "Image upload failed");
+  }
+  
+  await deleteLocalFile(localImagePath);
 
+  res.status(200).json(
+    apiResponse(200, { imageUrl: uploadResult.secure_url }, "Image uploaded successfully")
+  );  
 
   // ONE DB CALL (ownership + update)
  
@@ -287,6 +327,7 @@ const uploadImage = asyncHandler(async (req, res) => {
 const uploadFile = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const role = req.user?.role;
+
 
   // Auth check
   if (!userId || !role) {
@@ -300,7 +341,41 @@ const uploadFile = asyncHandler(async (req, res) => {
 
   // upload in cloudinary
 
+  const uploadResult = await uploadOnCloudinary(localFilePath);
+  if (!uploadResult) {
+    await deleteLocalFile(localFilePath);
+    throw new apiError(500, "File upload failed");
+  }
 
+  await deleteLocalFile(localFilePath);
+
+  res.status(200).json(
+    apiResponse(200, { fileUrl: uploadResult.secure_url }, "File uploaded successfully")
+  );  
+});
+
+const deleteFile = asyncHandler(async (req, res) => {
+  const { fileUrl } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId || !role) {
+    throw new apiError(401, "Unauthorized: User ID or role missing");
+  }
+
+  if (!fileUrl) {
+    throw new apiError(400, "File URL is required");
+  }
+
+  const deletionResult = await deleteCloudFileByUrl(fileUrl);
+  if (!deletionResult) {
+    throw new apiError(500, "File deletion failed");
+  }
+
+  res.status(200).json(
+    apiResponse(200, {}, "File deleted successfully")
+  );  
 });
 
 const updateCourseMaterials = asyncHandler(async (req, res) => {

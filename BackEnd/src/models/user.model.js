@@ -16,20 +16,26 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     lowercase: true,
+    select : false,
   },
   year: {
     type: Number,
     required: true,
+        select : false,
+
   },
   semester: {
     type: Number,
     required: true,
+        select : false,
+
   },
   degree: {
     type: String,
     required: true,
     lowercase: true,
     enum: ["bachelors", "masters", "phd"],
+    select : false,
   },
   email: {
     type: String,
