@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import route from "./route.js";
+import router from "./route.js";
 
 
 const app = express();
@@ -45,6 +45,6 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-app.use('/api/v1', route); // Use the imported route for /api/v1
+app.use('/api/v1', router); // Use the imported route for /api/v1
 
 export default app;

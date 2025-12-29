@@ -826,4 +826,4 @@ const deleteCourse = asyncHandler(async (req, res) => {
 
 
 
-export { userCourseSearch, fullCourseDetails };
+export { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse };

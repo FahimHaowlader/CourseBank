@@ -9,6 +9,12 @@ import  User  from "../models/user.model.js";
 
 const createUser = asyncHandler(async (req, res) => {
   try {
+    const {role : adminRole }  = req.user?.role;
+    // Only admin can create users
+    if (adminRole !== "admin") {
+      throw new apiError(403, "Only admin can create users");
+    }
+
     const { userId, email, password, role,access } = req.body;
 
     // Validate required fields
@@ -36,7 +42,7 @@ const createUser = asyncHandler(async (req, res) => {
 const updateUserInfo = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   const updateData = { ...req.body };
-  const currentUserRole = req.user?.role;
+  const currentUserRole = req.user.role;
 
   // Validate userId
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -155,36 +161,44 @@ const deleteUser = asyncHandler(async (req, res) => {
 const getAllUserSearch = asyncHandler(async (req, res) => {
   const role = req.user?.role;
 
-  // Only admin can search users
   if (role !== "admin") {
     throw new apiError(403, "Only admin can search users");
   }
 
-  const { userId, year, degree, semester, department } = req.query;
+  const { parameter } = req.body;
 
-  // Build dynamic filter based on query parameters
+  if (!parameter || typeof parameter !== "object") {
+    throw new apiError(400, "parameter object is required");
+  }
+
+  const { userId, year, degree, semester, department } = parameter;
+
+  // Build dynamic filter
   const filter = {};
-  if (userId) filter.userId = { $regex: userId, $options: "i" };
+
+  // ✅ Partial, case-insensitive match
+  if (userId) {
+    filter.userId = { $regex: userId, $options: "i" };
+  }
+
   if (year) filter.year = year;
   if (degree) filter.degree = degree;
   if (semester) filter.semester = semester;
   if (department) filter.department = department;
 
-
-  // Query users with plain text password included
   const users = await User.find(filter)
-    .select("+password") // plain text password returned
-
+    .select("+password"); // Include password for admin view
 
   res.status(200).json(
     new apiResponse(
       200,
-      { users},
+      { users },
       "Users retrieved successfully"
     )
   );
 });
 
 
-export { createUser };
+
+export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch };
 
