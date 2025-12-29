@@ -75,7 +75,7 @@ category: {
         lowercase: true,
          select: false,
       },
-    instructorImage: {
+    imageUrl: {
         type: String,
         validate: {
           validator: function (v) {
@@ -94,7 +94,7 @@ category: {
             type: String,
             required: true,
           },
-          url: {
+          fileUrl: {
             type: String,
             validate: {
               validator: function (v) {
@@ -118,7 +118,7 @@ category: {
             type: String,
             required: true,
           },
-          url: {
+          fileUrl: {
             type: String,
             validate: {
               validator: function (v) {
@@ -143,7 +143,7 @@ category: {
             type: String,
             required: true,
           },
-          url: {
+          fileUrl: {
             type: String,
             validate: {
               validator: function (v) {
@@ -168,7 +168,7 @@ category: {
             required: true,
             enum: ["Midterm-1","Midterm-2","Termtest-1","Termtest-2","Quiz-1","Quiz-2", "Final", "Project"],
           },
-          url: {
+          fileUrl: {
             type: String,
             validate: {
               validator: function (v) {

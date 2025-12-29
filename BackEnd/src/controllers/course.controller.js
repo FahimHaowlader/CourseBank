@@ -3,6 +3,8 @@ import apiError from '../utils/apiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import apiResponse from '../utils/apiResponse.js';
 import mongoose from 'mongoose';
+import { deleteLocalFiles , deleteLocalFile } from '../utils/delete.js';
+import { uploadOnCloudinary , deleteCloudFileByUrl } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // model
@@ -263,7 +265,7 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
 
 
 const uploadImage = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
+  const userId = req.user?._id; // do not need to check those 
   const role = req.user?.role;
   
   // Auth check
@@ -276,6 +278,8 @@ const uploadImage = asyncHandler(async (req, res) => {
     throw new apiError(400, "Image file is required");
   }
   // upload to cloudinary
+
+
   // ONE DB CALL (ownership + update)
  
 });
@@ -294,8 +298,8 @@ const uploadFile = asyncHandler(async (req, res) => {
     throw new apiError(400, "File is required");
   }
 
-
   // upload in cloudinary
+
 
 });
 

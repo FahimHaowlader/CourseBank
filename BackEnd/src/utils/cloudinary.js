@@ -88,4 +88,27 @@ const uploadOnCloudinary = async (filePath) => {
   }
 };
 
-export default uploadOnCloudinary;
+
+const deleteCloudFileByUrl = async (url) => {
+    if (!url) return;
+    
+    try {
+        // Extract public ID from URL
+        const parts = url.split("/");
+        const publicIdWithFolder = parts.slice(parts.indexOf("upload") + 1).join("/"); 
+        const publicId = publicIdWithFolder.replace(/\.[^/.]+$/, ""); // remove extension
+        
+        const result = await cloudinary.uploader.destroy(publicId);
+        
+        if (result.result === "ok") {
+            console.log(`Deleted Cloudinary file: ${publicId}`);
+        } else {
+            console.warn(`Failed to delete Cloudinary file ${publicId}: ${result.result}`);
+        }
+    } catch (err) {
+        console.warn(`Error deleting Cloudinary file from URL ${url}: ${err.message}`);
+    }
+}
+
+
+export {uploadOnCloudinary, deleteCloudFileByUrl};
