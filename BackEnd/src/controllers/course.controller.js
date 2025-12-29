@@ -2,8 +2,8 @@
 import apiError from '../utils/apiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import apiResponse from '../utils/apiResponse.js';
-import { v4 as uuidv4 } from 'uuid';
 import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 // model
 import Course from '../models/course.model.js';
@@ -161,12 +161,9 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
   res.status(200).json(apiResponse(200, course, "Course details fetched successfully"));
 });
 
-
-
-
 // Controller(Moderators and admin)
 
-const courseCreate = asyncHandler(async (req, res) => {
+const createCourse = asyncHandler(async (req, res) => {
   const moderatorId = req.user._id;
   const courseData = req.body;
 
@@ -186,32 +183,567 @@ const courseCreate = asyncHandler(async (req, res) => {
 
     res.status(200).json(apiResponse(200, {}, "Course created successfully"));
   } catch (err) {
-    if (err.code === 11000 && err.keyValue.courseCode) {
-      throw new apiError(400, `Course with code ${err.keyValue.courseCode} already exists`);
+      if (err.code === 11000 && err.keyValue.courseCode) {
+          throw new apiError(400, `Course with code ${err.keyValue.courseCode} already exists`);
+        }
+        throw new apiError(500, "Error creating course");
     }
-    throw new apiError(500, "Error creating course");
+});
+
+const updateCourseInfo = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const updateData = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
   }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Block restricted fields
+  const restrictedFields = ["department", "semester", "degree"];
+  for (const field of restrictedFields) {
+    if (field in updateData) {
+      throw new apiError(
+        400,
+        "Department, Semester, and Degree fields cannot be updated"
+      );
+    }
+  }
+
+  // Build query based on role
+  const query = { _id: courseId };
+
+  // Moderator can update only their own course
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Admin can update any course (no ownership restriction)
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: updateData },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course updated successfully by admin"
+        : "Course updated successfully by moderator"
+    )
+  );
 });
 
 
+const uploadImage = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Auth check
+  if (!userId || !role) {
+    throw new apiError(401, "Unauthorized: User ID or role missing");
+  }
+  
+  const localImagePath = req.file?.path;
+  if (!localImagePath) {
+    throw new apiError(400, "Image file is required");
+  }
+  // upload to cloudinary
+  // ONE DB CALL (ownership + update)
+ 
+});
 
-//controller (Moderator)
+const uploadFile = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId || !role) {
+    throw new apiError(401, "Unauthorized: User ID or role missing");
+  }
+
+  const localFilePath = req.file?.path;
+  if (!localFilePath) {
+    throw new apiError(400, "File is required");
+  }
 
 
+  // upload in cloudinary
+
+});
+
+const updateCourseMaterials = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { materials } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Materials validation
+  if (!Array.isArray(materials)) {
+    throw new apiError(400, "Materials must be an array");
+  }
+
+  // Role-based query
+  const query = { _id: courseId };
+
+  // Moderator: ownership enforced
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  // ONE DB CALL
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { materials } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course materials updated successfully by admin"
+        : "Course materials updated successfully by moderator"
+    )
+  );
+});
+
+const updateCourseTasks = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { tasks } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Tasks validation
+  if (!Array.isArray(tasks)) {
+    throw new apiError(400, "Tasks must be an array");
+  }
+
+  // Role-based query
+  const query = { _id: courseId };
+
+  // Moderator → only own courses
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  // ONE DB CALL
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { tasks } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course tasks updated successfully by admin"
+        : "Course tasks updated successfully by moderator"
+    )
+  );
+});
+
+const updateCourseAssessments = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { assessments } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Assessments validation
+  if (!Array.isArray(assessments)) {
+    throw new apiError(400, "Assessments must be an array");
+  }
+
+  // Role-based query
+  const query = { _id: courseId };
+
+  // Moderator → only own courses
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  // ONE DB CALL
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { assessments } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course assessments updated successfully by admin"
+        : "Course assessments updated successfully by moderator"
+    )
+  );
+});
 
 
+const updateSuggestedBooks = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { books } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Books validation
+  if (!Array.isArray(books)) {
+    throw new apiError(400, "Books must be an array");
+  }
+
+  // Role-based query
+  const query = { _id: courseId };
+
+  // Moderator → only own courses
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  // ONE DB CALL
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { books } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course suggested books updated successfully by admin"
+        : "Course suggested books updated successfully by moderator"
+    )
+  );
+});
 
 
+const updateCourseHandbook = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { handbook } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Handbook validation
+  if (!handbook) {
+    throw new apiError(400, "Handbook URL is required");
+  }
+
+  // Role-based query
+  const query = { _id: courseId };
+
+  // Moderator → only own courses
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  // ONE DB CALL
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { handbook } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course handbook updated successfully by admin"
+        : "Course handbook updated successfully by moderator"
+    )
+  );
+});
 
 
+const deleteCourseHandbook = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const userId = req.user?._id;
+  const role = req.user?.role;
 
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
 
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
 
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
 
+  // Role-based query
+  const query = { _id: courseId };
 
+  // Moderator → only own courses
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
 
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
 
+  // ONE DB CALL
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $unset: { handbook: "" } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
+  if (!updatedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to update it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      updatedCourse,
+      role === "admin"
+        ? "Course handbook deleted successfully by admin"
+        : "Course handbook deleted successfully by moderator"
+    )
+  );
+});
+
+const deleteCourse = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+
+  // Auth check
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  // Course ID validation
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  // Role-based query
+  const query = { _id: courseId };
+
+  // Moderator → only own courses
+  if (role === "moderator") {
+    query.createdBy = userId;
+  }
+
+  // Only admin or moderator allowed
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden");
+  }
+
+  // ONE DB CALL
+  const deletedCourse = await Course.findOneAndDelete(query);
+
+  if (!deletedCourse) {
+    throw new apiError(
+      403,
+      "Course not found or you are not authorized to delete it"
+    );
+  }
+
+  res.status(200).json(
+    apiResponse(
+      200,
+      deletedCourse,
+      role === "admin"
+        ? "Course deleted successfully by admin"
+        : "Course deleted successfully by moderator"
+    )
+  );
+});
 
 
 

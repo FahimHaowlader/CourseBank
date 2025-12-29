@@ -9,9 +9,9 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         unique: true,
     },
-    Access: {
+    access: {
         type: Boolean,
-        required: true,
+        default: true,
     },
     email: {
         type: String,
