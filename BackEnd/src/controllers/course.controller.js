@@ -133,7 +133,7 @@ const userCourseSearch = asyncHandler(async (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  const result = await getCourses(userId, parameters, page, sort);
+  const result = await getCourses(userId, parameters, page, sort );
 
   if (!result) throw new apiError(500, "Error fetching courses");
 
