@@ -22,12 +22,12 @@ const courseSchema = new mongoose.Schema(
       required: true,
       set: (value) => new Date(value),
     },
-   degree: {
-  type: String,
-  required: true,
-  lowercase: true,
-  enum: ["bachelors", "masters", "phd"],
-},
+    degree: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["bachelors", "masters", "phd"],
+    },
 
     // year: {
     //   type: Number,
@@ -42,7 +42,7 @@ const courseSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
-       select: false,
+      select: false,
     },
     credits: {
       type: Number,
@@ -50,43 +50,50 @@ const courseSchema = new mongoose.Schema(
       min: [1, "Credits cannot be negative"],
       max: [10, "Credits cannot exceed 10"],
     },
-  
-category: {
-  type: String,
-  required: true,
-  lowercase: true,
-  enum: ["major", "non-major", "elective"],
-},
 
-   type: {
-  type: String,
-  required: true,
-  lowercase: true,
-  enum: ["core", "lab", "project"],
-},
+    category: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["major", "non-major", "elective"],
+    },
+
+    type: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["core", "lab", "project"],
+    },
     instructorName: {
-        type: String,
-        required: true,
-        lowercase: true,
-      },
+      type: String,
+      required: true,
+      lowercase: true,
+    },
     instructorDepartment: {
+      type: String,
+      required: true,
+      lowercase: true,
+      select: false,
+    },
+    instructorImage: {
+      imageURL: {
         type: String,
-        required: true,
-        lowercase: true,
-         select: false,
-      },
-    imageUrl: {
-        type: String,
+        required: [true, "Instructor image URL is required"],
+        // Simplified validation: just check if it's a valid URL format
         validate: {
           validator: function (v) {
-            return /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i.test(v);
+            return /^(https?:\/\/)/i.test(v);
           },
-          message: (props) => `${props.value} is not a valid image URL!`,
+          message: "Invalid image URL format",
         },
-        required: [true, "Instructor image URL is required"],
-         select: false,
       },
-  
+      publicId: {
+        type: String,
+        required: [true, "Public ID is required for image management"],
+        select: false,
+      },
+    },
+
     books: {
       type: [
         {
@@ -105,6 +112,11 @@ category: {
               message: (props) => `One or more book URLs are invalid!`,
             },
             required: [true, "Book URL is required"],
+          },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for book management"],
+            select: false,
           },
         },
       ],
@@ -129,6 +141,11 @@ category: {
               message: (props) => `One or more material URLs are invalid!`,
             },
             required: [true, "Material URL is required"],
+          },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for material management"],
+            select: false,
           },
         },
       ],
@@ -155,9 +172,14 @@ category: {
             },
             required: [true, "Task URL is required"],
           },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for task management"],
+            select: false,
+          },
         },
       ],
-       select: false,
+      select: false,
       // required: [true, 'At least one task is required']
     },
     assesments: {
@@ -166,7 +188,16 @@ category: {
           name: {
             type: String,
             required: true,
-            enum: ["Midterm-1","Midterm-2","Termtest-1","Termtest-2","Quiz-1","Quiz-2", "Final", "Project"],
+            enum: [
+              "Midterm-1",
+              "Midterm-2",
+              "Termtest-1",
+              "Termtest-2",
+              "Quiz-1",
+              "Quiz-2",
+              "Final",
+              "Project",
+            ],
           },
           fileUrl: {
             type: String,
@@ -180,12 +211,18 @@ category: {
             },
             required: [true, "Assesment URL is required"],
           },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for assesment management"],
+            select: false,
+          },
         },
       ],
-       select: false,
+      select: false,
       // required: [true, 'At least one assesment is required']
     },
     handbook: {
+      fileUrl: {
       type: String,
       validate: {
         validator: function (v) {
@@ -194,7 +231,12 @@ category: {
         message: (props) => `${props.value} is not a valid handbook URL!`,
       },
       required: [true, "Handbook URL is required"],
-      select: false,
+    },
+      publicId: {
+        type: String,
+        required: [true, "Public ID is required for handbook management"],
+        select: false,
+      },
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -202,7 +244,6 @@ category: {
       required: true,
       select: false,
     },
-
   },
   { timestamps: true }
 );
