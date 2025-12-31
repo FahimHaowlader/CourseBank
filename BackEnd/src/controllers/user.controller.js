@@ -9,16 +9,17 @@ import  User  from "../models/user.model.js";
 
 const createUser = asyncHandler(async (req, res) => {
   try {
-    const {role : adminRole }  = req.user?.role;
+    const {role :adminRole }  = req.user;
+    // console.log("Admin Role:", adminRole  );
     // Only admin can create users
     if (adminRole !== "admin") {
       throw new apiError(403, "Only admin can create users");
     }
-
-    const { userId, email, password, role,access } = req.body;
+    const {user} = req.body;
+    const { userId, password,role } = user;
 
     // Validate required fields
-    if (!userId || !password || !role) {
+    if (!userId || !password || !role)  {
       throw new apiError(400, "Please provide all required fields");
     }
 
@@ -29,7 +30,7 @@ const createUser = asyncHandler(async (req, res) => {
     }
 
     // Create new user
-    const newUser = new User({ userId, email, password, role, access })
+    const newUser = new User(user)
     await newUser.save();
 
     res.status(201).json(new apiResponse(201, newUser, "User created successfully"));
@@ -44,10 +45,9 @@ const updateUserInfo = asyncHandler(async (req, res) => {
   const updateData = { ...req.body };
   const currentUserRole = req.user.role;
 
-  // Validate userId
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new apiError(400, "Invalid User ID");
-  }
+  // console.log("User ID to Update:", userId);
+  // console.log("Update Data:", updateData);
+  
 
   // Only admin can update roles
   if ("role" in updateData && currentUserRole !== "admin") {
@@ -60,7 +60,7 @@ const updateUserInfo = asyncHandler(async (req, res) => {
   }
 
   // ONE DB CALL
-  const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+  const updatedUser = await User.findOneAndUpdate({userId}, updateData, {
     new: true,
     runValidators: true,
   }).select("-password");
@@ -138,12 +138,12 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 
   // Validate userId
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new apiError(400, "Invalid User ID");
-  }
+  // if (!mongoose.Types.ObjectId.isValid(userId)) {
+  //   throw new apiError(400, "Invalid User ID");
+  // }
 
   // Delete the user
-  const deletedUser = await User.findByIdAndDelete(userId);
+  const deletedUser = await User.findOneAndDelete(userId);
 
   if (!deletedUser) {
     throw new apiError(404, "User not found");
@@ -165,15 +165,15 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
     throw new apiError(403, "Only admin can search users");
   }
 
-  const { parameter } = req.body;
-
+  // const { parameter } = req.body;g
+  console.log("Search Parameters:", parameter);
   if (!parameter || typeof parameter !== "object") {
     throw new apiError(400, "parameter object is required");
   }
 
   const { userId, year, degree, semester, department } = parameter;
 
-  // Build dynamic filter
+  // Build dynamic filtera
   const filter = {};
 
   // ✅ Partial, case-insensitive match
