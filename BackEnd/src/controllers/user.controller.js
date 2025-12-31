@@ -173,7 +173,7 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
 
   const { userId, year, degree, semester, department } = parameter;
 
-  // Build dynamic filtera
+  // Build dynamic filter add
   const filter = {};
 
   // ✅ Partial, case-insensitive match
