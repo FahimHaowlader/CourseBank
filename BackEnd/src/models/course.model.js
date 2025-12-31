@@ -97,21 +97,26 @@ const courseSchema = new mongoose.Schema(
     books: {
       type: [
         {
-          name: {
+          title: {
             type: String,
             required: true,
           },
+          authorName: {
+            // Add this field
+            type: String,
+            required: [true, "Book author name is required"],
+          },
           fileUrl: {
             type: String,
+            required: [true, "Book URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|epub|mobi))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more book URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for books",
             },
-            required: [true, "Book URL is required"],
           },
           publicId: {
             type: String,
@@ -132,15 +137,15 @@ const courseSchema = new mongoose.Schema(
           },
           fileUrl: {
             type: String,
+            required: [true, "Material URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|docx|pptx|xlsx|zip))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more material URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for materials",
             },
-            required: [true, "Material URL is required"],
           },
           publicId: {
             type: String,
@@ -162,15 +167,15 @@ const courseSchema = new mongoose.Schema(
           },
           fileUrl: {
             type: String,
+            required: [true, "Task URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|docx|pptx|xlsx|zip))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more tasks URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for tasks",
             },
-            required: [true, "Task URL is required"],
           },
           publicId: {
             type: String,
@@ -182,7 +187,7 @@ const courseSchema = new mongoose.Schema(
       select: false,
       // required: [true, 'At least one task is required']
     },
-    assesments: {
+    assessments: {
       type: [
         {
           name: {
@@ -201,15 +206,15 @@ const courseSchema = new mongoose.Schema(
           },
           fileUrl: {
             type: String,
+            required: [true, "Assessment URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|docx|pptx|xlsx|zip))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more assesment URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for assessments",
             },
-            required: [true, "Assesment URL is required"],
           },
           publicId: {
             type: String,
@@ -223,15 +228,16 @@ const courseSchema = new mongoose.Schema(
     },
     handbook: {
       fileUrl: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          return /^(https?:\/\/.*\.(?:pdf|epub|mobi))$/i.test(v);
+        type: String,
+        required: [true, "Handbook URL is required"],
+        validate: {
+          validator: function (v) {
+            // Use .test() for a single string
+            return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+          },
+          message: "The URL must be a valid PDF document link for handbook",
         },
-        message: (props) => `${props.value} is not a valid handbook URL!`,
       },
-      required: [true, "Handbook URL is required"],
-    },
       publicId: {
         type: String,
         required: [true, "Public ID is required for handbook management"],
