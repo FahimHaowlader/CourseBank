@@ -2,16 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.js",    
+      "src": "app.js",
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
           "controllers/**",
-          "models/**",
-          "middleware/**",
+          "middlewares/**",
           "routes.js",
+          "app.js",
+          "index.js",
           "bd.js",
-          "index.js"
+          "public/**"
         ]
       }
     }
