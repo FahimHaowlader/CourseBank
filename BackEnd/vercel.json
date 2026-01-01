@@ -1,22 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "src/app.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "src/controllers/**",
-          "src/models/**",
-          "src/middlewares/**",
-          "src/route.js",
-          "src/bd.js",
-          "src/index.js",
-          "src/public/**"
-        ]
-      }
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
@@ -24,4 +7,5 @@
     }
   ]
 }
+
 
