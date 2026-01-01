@@ -2,81 +2,49 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import path from "path";
-import { fileURLToPath } from "url";
-import mongoose from "mongoose";
-import connectDB from "./db.js";
-import dotenv from "dotenv";
+import router from "./route.js";
 
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// -------------------- Security --------------------
-app.use(helmet());
+app.use(helmet()); // Add helmet for security headers
 
-// -------------------- CORS --------------------
 const allowedOrigins = [
-  process.env.CLIENT_URL_PROD,
-  process.env.CLIENT_URL_DEV,
+  process.env.CLIENT_URL_PROD,  // production domain
+  process.env.CLIENT_URL_DEV,  // local development
 ];
 
-// app.use(
 
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin) return callback(null, true);
-//       if (allowedOrigins.indexOf(origin) === -1) {
-//         return callback(new Error(`CORS blocked for origin: ${origin}`), false);
-//       }
-//       return callback(null, true);
+app.use(cors()); // Enable CORS for all origins
+
+
+// app.use(cors({
+//     origin: function(origin, callback) {
+//         // allow requests with no origin (like mobile apps or curl)
+//         if (!origin) return callback(null, true);
+//         if (allowedOrigins.indexOf(origin) === -1) {
+//             const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+//             return callback(new Error(msg), false);
+//         }
+//         return callback(null, true);
 //     },
 //     credentials: true,
-//     optionsSuccessStatus: 200,
-//   })
-// );
+//     optionsSuccessStatus: 200 // for legacy browsers
+// }));
 
 
-// -------------------- Body Parsing --------------------
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
 
-// -------------------- Static Files --------------------
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true, limit: '1mb' })); // Parse URL-encoded request bodies
 
-// -------------------- Cookies --------------------
-app.use(cookieParser());
+app.use(express.static('public')); // Serve static files from the 'public' directory
+app.use(cookieParser()); // Parse cookies in request headers
 
-// -------------------- Health Check --------------------
-app.get("/", (req, res) => res.send("API is running...."));
 
-// -------------------- MongoDB Middleware --------------------
-let cached = global.mongo;
-if (!cached) cached = global.mongo = { conn: null, promise: null };
-
-app.use(async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      await connectDB();
-      console.log("✅ MongoDB connected (serverless).");
-    }
-    next();
-  } catch (err) {
-    next(err);
-  }
+app.get('/', (req, res) => {
+    res.send('API is running...');
 });
 
-// -------------------- Global Error Handler --------------------
-app.use((err, req, res, next) => {
-  console.error("❌ Serverless error:", err);
-  res.status(500).json({
-    error: "Internal Server Error",
-    message: err.message || "Something went wrong",
-  });
-});
+app.use('/api/v1', router); // Use the imported route for /api/v1
 
 export default app;
