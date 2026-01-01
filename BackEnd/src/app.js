@@ -49,7 +49,7 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 
 // -------------------- Health Check --------------------
-app.get("/", (req, res) => res.send("API is running..."));
+app.get("/", (req, res) => res.send("API is running...."));
 
 // -------------------- MongoDB Middleware --------------------
 let cached = global.mongo;
