@@ -1,4 +1,3 @@
-// src/app.js
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -30,8 +29,7 @@ app.use(
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-        return callback(new Error(msg), false);
+        return callback(new Error(`CORS blocked for origin: ${origin}`), false);
       }
       return callback(null, true);
     },
@@ -50,6 +48,9 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 // -------------------- Cookies --------------------
 app.use(cookieParser());
 
+// -------------------- Health Check --------------------
+app.get("/", (req, res) => res.send("API is running..."));
+
 // -------------------- MongoDB Middleware --------------------
 let cached = global.mongo;
 if (!cached) cached = global.mongo = { conn: null, promise: null };
@@ -57,13 +58,7 @@ if (!cached) cached = global.mongo = { conn: null, promise: null };
 app.use(async (req, res, next) => {
   try {
     if (mongoose.connection.readyState !== 1) {
-      if (!cached.promise) {
-        cached.promise = connectDB().then((conn) => {
-          cached.conn = conn;
-          return conn;
-        });
-      }
-      await cached.promise;
+      await connectDB();
       console.log("✅ MongoDB connected (serverless).");
     }
     next();
@@ -72,7 +67,13 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Health check
-app.get("/", (req, res) => res.send("API is running..."));
+// -------------------- Global Error Handler --------------------
+app.use((err, req, res, next) => {
+  console.error("❌ Serverless error:", err);
+  res.status(500).json({
+    error: "Internal Server Error",
+    message: err.message || "Something went wrong",
+  });
+});
 
 export default app;
