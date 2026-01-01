@@ -34,7 +34,7 @@ router.route('/course-details/:courseId').get(fullCourseDetails);
 
 {/** moderators route */} 
 
-// router.use(verifyJwt) ; // all routes below this line require authentication
+router.use(verifyJwt) ; // all routes below this line require authentication
 
 router.route('/courses-by-creator/:creatorId').get(getCourseByCreatorId);
 
