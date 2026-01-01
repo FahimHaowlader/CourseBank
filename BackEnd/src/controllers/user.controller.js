@@ -77,6 +77,8 @@ const updateUserInfo = asyncHandler(async (req, res) => {
 
 const userLogin = asyncHandler(async (req, res) => {
   const { userId, password } = req.body;
+  // console.log("Login attempt for userId:", userId);
+  // console.log("Request body:", req.body);
 
   // Validate required fields
   if (!userId || !password) {
@@ -88,7 +90,7 @@ const userLogin = asyncHandler(async (req, res) => {
   if (!user) {
     throw new apiError(401, "Invalid userId or password");
   }
-
+  // console.log("User found:", user);
   // Check if user has access
   if (!user.access) {
     throw new apiError(403, "Your account does not have access");
