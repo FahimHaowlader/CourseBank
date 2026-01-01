@@ -1,28 +1,18 @@
 import mongoose from "mongoose";
 
-let cached = global.mongo;
-if (!cached) cached = global.mongo = { conn: null, promise: null };
 
-const connectDB = async () => {
-  if (cached.conn) return cached.conn;
+ const connectDB = async () => {
+    try {
+        const connectionInstance = await mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_CLUSTER}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`)
+        console.log(`MongoDB connected !! DB HOST: ${connectionInstance.connection.host}`);
+    } catch (error) {
+        console.log("MONGODB connection FAILED ", error);
+        process.exit(1)
+    }
+}
 
-  if (!cached.promise) {
-    const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_CLUSTER}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`;
-    cached.promise = mongoose
-      .connect(uri)
-      .then((conn) => {
-        cached.conn = conn;
-        console.log(`✅ MongoDB connected: ${conn.connection.host}`);
-        return conn;
-      })
-      .catch((err) => {
-        console.error("❌ MongoDB connection error:", err);
-        throw err; // Do NOT exit process in serverless
-      });
-  }
+    // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_CLUSTER}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`;
+   
 
-  cached.conn = await cached.promise;
-  return cached.conn;
-};
 
 export default connectDB;
