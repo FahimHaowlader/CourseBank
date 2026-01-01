@@ -1,18 +1,28 @@
 import mongoose from "mongoose";
 
+let cached = global.mongo;
+if (!cached) cached = global.mongo = { conn: null, promise: null };
 
 const connectDB = async () => {
-    try {
-        const connectionInstance = await mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_CLUSTER}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`);
-        console.log(`Connected to database: ${connectionInstance.connection.host}`);
-        console.log("Database connected successfully");
+  if (cached.conn) return cached.conn;
 
-    }
-    catch (error) {
-        console.error("Database connection error:", error);
-        process.exit(1); // Exit the process with failure // *** it a node js command any non-zero exit  means errors and force quite and zero exit means successfull and force quite ,but we do not do this because if the database connected successfully then we do ot want force quite 
-    }
-}
+  if (!cached.promise) {
+    const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_CLUSTER}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`;
+    cached.promise = mongoose
+      .connect(uri)
+      .then((conn) => {
+        cached.conn = conn;
+        console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+        return conn;
+      })
+      .catch((err) => {
+        console.error("❌ MongoDB connection error:", err);
+        throw err; // Do NOT exit process in serverless
+      });
+  }
 
+  cached.conn = await cached.promise;
+  return cached.conn;
+};
 
 export default connectDB;
