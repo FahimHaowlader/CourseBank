@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "../controllers/course.controller.js";
+import { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "./controllers/course.controller.js";
 
 
-import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch } from "../controllers/user.controller.js";
+import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch } from "./controllers/user.controller.js";
 
-import  verifyJwt from "../middlewares/auth.middleware.js";
-import {upload} from "../middlewares/upload.middleware.js";
+import  verifyJwt from "./middlewares/auth.middleware.js";
+import {upload} from "./middlewares/multer.middleware.js";
 
 // Course Bank  version 1 apies
 
