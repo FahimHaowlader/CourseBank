@@ -16,6 +16,7 @@ import axios from "axios";
 import { useParams } from "react-router";
 
 // Components
+import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton";
 import NoCourse from "../Components/NoCourse";
 import NoElement from "../Components/NoElement";
 import SemesterDisplay from "../Components/semesterTransformer";
@@ -115,6 +116,10 @@ const CourseDetailsPage = () => {
     // }, 2000); // Simulate a 2-second delay
   }, []);
 
+
+  if (loading){
+    return <CourseDetailsSkeleton />;
+  }
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
