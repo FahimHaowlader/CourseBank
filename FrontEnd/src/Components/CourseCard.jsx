@@ -38,7 +38,7 @@ const CourseCard = ({Course}) => {
                     </div>
                   </div>
                   <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2 gap-x-1">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold tetext-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                       {Course?.type?.charAt(0).toUpperCase() + Course?.type?.slice(1)}
                     </div>
                     <div className="inline-flex max-w-[72%] items-center justify-center px-2.5 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
@@ -49,13 +49,13 @@ const CourseCard = ({Course}) => {
                               </span> */}
                   </div>
                   <div className="mt-auto space-y-2.5">
-                    <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 font-semibold text-sm ">
+                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-500 group-hover:text-slate-600 dark:text-slate-300 shadow-sm">
                       <span className="material-symbols-outlined text-[18px] opacity-70 ">
-                        <MdOutlinePersonOutline />
+                        <MdOutlinePersonOutline  className="font-semibold"/>
                       </span>
                       <span className="font-semibold capitalize ">{Course.instructorName}</span>
                     </div>
-                    <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm font-medium">
+                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-500 group-hover:text-slate-600 dark:text-slate-300 shadow-sm">
                       <span className="material-symbols-outlined text-[18px] opacity-70">
                         <LuCalendarDays />
                       </span>
@@ -65,7 +65,7 @@ const CourseCard = ({Course}) => {
                 </div>
       <div className="p-5 pt-0">
           <Link  to={'/course/' + Course._id}>
-        <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-xs transition-colors flex items-center gap-1.5 hover:cursor-pointer">
+        <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
         View Details 
           <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
             <IoArrowForwardSharp size={18} />
