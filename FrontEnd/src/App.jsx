@@ -24,7 +24,7 @@ function App() {
     { path: '/', element: <Navigate to="/courses" replace /> },
     { path:'/check-page', element: <CheckPage /> },
     { path:'/courses', element: <CoursePage /> },
-    { path:'/courseid', element: <CourseDetailsPage /> },
+    { path:'/course-details', element: <CourseDetailsPage /> },
     { path:'/login', element: <LoginPage /> },
     { path:'/my-courses', element: <ModeratorCoursePage /> },
     { path:'/edit', element: <CourseDetailsEditPage /> },
