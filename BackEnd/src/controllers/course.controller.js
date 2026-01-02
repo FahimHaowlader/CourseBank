@@ -137,7 +137,7 @@ const userCourseSearch = asyncHandler(async (req, res) => {
 
   if (!result) throw new apiError(500, "Error fetching courses");
 
-  res.status(200).json(apiResponse(200, result, "Courses fetched successfully"));
+  res.status(200).json(new apiResponse(200, result, "Courses fetched successfully"));
 });
 
 
@@ -161,7 +161,7 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
     throw new apiError(404, "Course not found");
   }
 
-  res.status(200).json(apiResponse(200, course, "Course details fetched successfully"));
+  res.status(200).json(new apiResponse(200, course, "Course details fetched successfully"));
 });
 
 // Controller(Moderators and admin)
@@ -191,7 +191,7 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
   const courses = await Course.find(filter);
 
   res.status(200).json(
-    apiResponse(200, courses, "Courses fetched successfully")
+    new apiResponse(200, courses, "Courses fetched successfully")
   );
 });
 
@@ -213,7 +213,7 @@ const createCourse = asyncHandler(async (req, res) => {
 
     await newCourse.save();
 
-    res.status(200).json(apiResponse(200, {}, "Course created successfully"));
+    res.status(200).json(new apiResponse(200, {}, "Course created successfully"));
   } catch (err) {
       if (err.code === 11000 && err.keyValue.courseCode) {
           throw new apiError(400, `Course with code ${err.keyValue.courseCode} already exists`);
@@ -283,7 +283,7 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -317,7 +317,7 @@ const uploadImage = asyncHandler(async (req, res) => {
   await deleteLocalFile(localImagePath);
 
   res.status(200).json(
-    apiResponse(200, { imageUrl: uploadResult.secure_url }, "Image uploaded successfully")
+    new apiResponse(200, { imageUrl: uploadResult.secure_url }, "Image uploaded successfully")
   );  
 
   // ONE DB CALL (ownership + update)
@@ -350,7 +350,7 @@ const uploadFile = asyncHandler(async (req, res) => {
   await deleteLocalFile(localFilePath);
 
   res.status(200).json(
-    apiResponse(200, { fileUrl: uploadResult.secure_url }, "File uploaded successfully")
+    new apiResponse(200, { fileUrl: uploadResult.secure_url }, "File uploaded successfully")
   );  
 });
 
@@ -374,7 +374,7 @@ const deleteFile = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(200, {}, "File deleted successfully")
+    new apiResponse(200, {}, "File deleted successfully")
   );  
 });
 
@@ -434,7 +434,7 @@ const updateCourseMaterials = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -500,7 +500,7 @@ const updateCourseTasks = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -566,7 +566,7 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -633,7 +633,7 @@ const updateSuggestedBooks = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -700,7 +700,7 @@ const updateCourseHandbook = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -761,7 +761,7 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       updatedCourse,
       role === "admin"
@@ -814,7 +814,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(
-    apiResponse(
+    new apiResponse(
       200,
       deletedCourse,
       role === "admin"
