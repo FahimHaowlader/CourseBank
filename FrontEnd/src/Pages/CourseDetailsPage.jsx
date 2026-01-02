@@ -1,4 +1,4 @@
-import React from "react";
+// Design Elements for Course Details Page
 import { GrShareOption } from "react-icons/gr";
 import { LuNotebook } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
@@ -9,14 +9,22 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { MdOutlineAssignment } from "react-icons/md";
 import { GiBookshelf } from "react-icons/gi";
 
+
+// Functional Elements and Hooks
 import { useState , useEffect} from "react";
+import axios from "axios";
+import { useParams } from "react-router";
+
+// Components
 import NoCourse from "../Components/NoCourse";
 import NoElement from "../Components/NoElement";
 import SemesterDisplay from "../Components/semesterTransformer";
 
 const CourseDetailsPage = () => {
   const [course, setCourse] =useState(null);
-
+  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
+  
    useEffect(() => {
     // 1. Try scrolling the window
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -29,69 +37,82 @@ const CourseDetailsPage = () => {
   }, []);
   useEffect(() => {
     // Simulate data fetching
-    setTimeout(() => {  
-      setCourse({
-        "instructorImage": {
-            "imageURL": "https://example.com/ludwig.jpg"
-        },
-        "handbook": {
-            "fileUrl": "https://edu.com/music-handbook.pdf"
-        },
-        "_id": "6957c3679ad2a10d20c2cdfc",
-        "title": "classical music theory classical music theory classical music theory classical music theory",
-        "courseCode": "MUS101",
-        "department": "music",
-        "staringDate": "2025-02-01T00:00:00.000Z",
-        "degree": "bachelors",
-        "semester": 1,
-        "description": "Notation, harmony, and rhythm.",
-        "credits": 2,
-        "category": "non-major",
-        "type": "core",
-        "instructorName": "ludwig van beethoven",
-        "instructorDepartment": "music",
-        "books": [
-            {
-                "_id": "6958373c971f79c164d2fe0a",
-                "title": "Tonal Harmony",
-                "authorName": "Kostka",
-                "fileUrl": "https://edu.com/music.pdf"
-            }
-        ],
-        "materials": [
-            {
-                "_id": "6958373c971f79c164d2fe0b",
-                "name": "Scale Sheets",
-                "fileUrl": "https://edu.com/scales.pdf"
-            },
-            {
-                "_id": "6958373c971f79c164d2fe0b",
-                "name": "Scale Sheets",
-                "fileUrl": "https://edu.com/scales.pdf"
-            },
-        ],
-        "tasks": [
-            {
-                "_id": "6958373c971f79c164d2fe0c",
-                "name": "Composition 1",
-                "fileUrl": "https://edu.com/comp.pdf"
-            }
-        ],
-         "assessments": [
-            {
-                "_id": "6958373c971f79c164d2fe0c",
-                "name": "midterm",
-                "fileUrl": "https://edu.com/comp.pdf"
-            },
-            {
-                "_id": "6958373c971f79c164d2fe0c",
-                "name": "final",
-                "fileUrl": "https://edu.com/comp.pdf"
-            }
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`https://coursebank.onrender.com/api/v1/course-details/${id}`);
+        setCourse(response.data.data);
+      } catch (error) {
+        console.error("Error fetching course data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourse();
+    
+    // setTimeout(() => {  
+    //   setCourse({
+    //     "instructorImage": {
+    //         "imageURL": "https://example.com/ludwig.jpg"
+    //     },
+    //     "handbook": {
+    //         "fileUrl": "https://edu.com/music-handbook.pdf"
+    //     },
+    //     "_id": "6957c3679ad2a10d20c2cdfc",
+    //     "title": "classical music theory classical music theory classical music theory classical music theory",
+    //     "courseCode": "MUS101",
+    //     "department": "music",
+    //     "staringDate": "2025-02-01T00:00:00.000Z",
+    //     "degree": "bachelors",
+    //     "semester": 1,
+    //     "description": "Notation, harmony, and rhythm.",
+    //     "credits": 2,
+    //     "category": "non-major",
+    //     "type": "core",
+    //     "instructorName": "ludwig van beethoven",
+    //     "instructorDepartment": "music",
+    //     "books": [
+    //         {
+    //             "_id": "6958373c971f79c164d2fe0a",
+    //             "title": "Tonal Harmony",
+    //             "authorName": "Kostka",
+    //             "fileUrl": "https://edu.com/music.pdf"
+    //         }
+    //     ],
+    //     "materials": [
+    //         {
+    //             "_id": "6958373c971f79c164d2fe0b",
+    //             "name": "Scale Sheets",
+    //             "fileUrl": "https://edu.com/scales.pdf"
+    //         },
+    //         {
+    //             "_id": "6958373c971f79c164d2fe0b",
+    //             "name": "Scale Sheets",
+    //             "fileUrl": "https://edu.com/scales.pdf"
+    //         },
+    //     ],
+    //     "tasks": [
+    //         {
+    //             "_id": "6958373c971f79c164d2fe0c",
+    //             "name": "Composition 1",
+    //             "fileUrl": "https://edu.com/comp.pdf"
+    //         }
+    //     ],
+    //      "assessments": [
+    //         {
+    //             "_id": "6958373c971f79c164d2fe0c",
+    //             "name": "midterm",
+    //             "fileUrl": "https://edu.com/comp.pdf"
+    //         },
+    //         {
+    //             "_id": "6958373c971f79c164d2fe0c",
+    //             "name": "final",
+    //             "fileUrl": "https://edu.com/comp.pdf"
+    //         }
 
-        ]
-    });
-    }, 2000); // Simulate a 2-second delay
+    //     ]
+    // });
+    // }, 2000); // Simulate a 2-second delay
   }, []);
 
 
@@ -147,16 +168,6 @@ const CourseDetailsPage = () => {
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              {/* <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
-                <span className="material-symbols-outlined text-lg">
-                  bookmark
-                </span>
-                Save
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
-                <span className="material-symbols-outlined text-lg">share</span>
-                Share
-              </button> */}
               <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
                 <span className="material-symbols-outlined text-lg">
                   <GrShareOption />
@@ -223,8 +234,7 @@ const CourseDetailsPage = () => {
                     Full Course Handbook
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl">
-                    Download the complete guide including detailed policies,
-                    grading rubric
+                    Download the complete hand written guide 
                   </p>
                 </div>
               </div>
@@ -249,17 +259,11 @@ const CourseDetailsPage = () => {
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   Course Materials
                 </h2>
-                {/* <a
-                  className="text-sm font-semibold text-primary hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
-                  href="#"
-                >
-                  View All Files
-                </a> */}
               </div>
               { course.materials?.length > 0 ? ( <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {
                   course.materials.map((material) => (
-                    <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                    <div key={material._id} className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                       <span className="material-symbols-outlined">
@@ -287,126 +291,7 @@ const CourseDetailsPage = () => {
               </div>):(
                 < NoElement title={'material'} />
               )}
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                        <FaRegFilePdf size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdOutlineFileDownload size={26} />
-                  </span>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                        <FaRegFilePdf size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdOutlineFileDownload size={26} />
-                  </span>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                        <FaRegFilePdf size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdOutlineFileDownload size={26} />
-                  </span>
-                </div>
-                {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                      <span className="material-symbols-outlined">code</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lab Starter Code
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        ZIP • 156 KB • Week 2 Resources
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                    download
-                  </span>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                      <span className="material-symbols-outlined">
-                        slideshow
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Python Setup Guide
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PPTX • 5.1 MB • Supplementary
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                    download
-                  </span>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                      <span className="material-symbols-outlined">
-                        table_view
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Dataset: Iris.csv
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        CSV • 12 KB • For Lab 3
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                    download
-                  </span>
-                </div> 
-              </div> */}
+             
             </section>
             <section>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
@@ -415,7 +300,7 @@ const CourseDetailsPage = () => {
               {
                 course.books?.length > 0 ? ( <div className="space-y-4">
                   { course.books.map((book) => (
-                    <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
+                    <div key={book._id} className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
                       <span className="material-symbols-outlined text-primary text-2xl ">
@@ -439,31 +324,6 @@ const CourseDetailsPage = () => {
                   </span>
                 </div>
                   ))}
-                
-              
-                {/* <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-16 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
-                      <span className="material-symbols-outlined text-primary text-2xl">
-                        menu_book
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-base">
-                        Clean Code: A Handbook of Agile Software Craftsmanship
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                        Robert C. Martin • 1st Edition • Prentice Hall
-                      </p>
-                      <p className="text-xs font-mono text-slate-400 mt-2">
-                        ISBN: 978-0132350884
-                      </p>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    download
-                  </span>
-                </div> */}
               </div> ) : ( < NoElement title={'suggested book'} /> )
               }
              
@@ -479,7 +339,7 @@ const CourseDetailsPage = () => {
                   course.tasks?.length > 0 ? (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {
                       course.tasks.map((task) => (
-                        <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                        <div key={task._id} className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                         <span className="material-symbols-outlined">
@@ -491,7 +351,7 @@ const CourseDetailsPage = () => {
                           {task.name}
                         </h4>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          {task?.type}. Updated yesterday
+                          {task?.type} Updated yesterday
                         </p>
                       </div>
                     </div>
@@ -524,8 +384,8 @@ const CourseDetailsPage = () => {
                     Term Test Questions
                   </h3>
                   {
-                    course.assessments.filter((assessment) => assessment.name !== 'final').length === 0 ? (<NoElement title={"term test question"} />)  : ( course.assessments.filter((assessment) => assessment.name !== 'final').map((assessment) => (
-                      <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
+                    course.assessments?.filter((assessment) => assessment.name !== 'final').length === 0 ? (<NoElement title={"term test question"} />)  : ( course.assessments?.filter((assessment) => assessment.name !== 'final').map((assessment) => (
+                      <div key={assessment._id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
                         <IoDocumentTextOutline size={24} />
@@ -555,8 +415,8 @@ const CourseDetailsPage = () => {
                     Final Exam Questions
                   </h3>
                   { 
-                    course.assessments.filter((assessment) => assessment.name === 'final').length === 0 ? (<NoElement title={"final question"} />)  : ( course.assessments.filter((assessment) => assessment.name === 'final').map((assessment) => (
-                      <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
+                    course.assessments?.filter((assessment) => assessment.name === 'final').length === 0 ? (<NoElement title={"final question"} />)  : ( course.assessments?.filter((assessment) => assessment.name === 'final').map((assessment) => (
+                      <div key={assessment._id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
                         <IoDocumentTextOutline size={24} />
@@ -579,8 +439,7 @@ const CourseDetailsPage = () => {
                 </div>
               </div>
               )
-              }
-             
+              }           
             </section>
           </div>
         </div>
