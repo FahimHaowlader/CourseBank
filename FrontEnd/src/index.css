@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@theme {
+  /* ================= Colors ================= */
+  --color-primary: #0d9488;
+  --color-primary-hover: #0b857a;
+  --color-primary-dark: #0a766c;
+
+ 
+  --color-secondary-text: #5a7f96;
+
+  --color-background-light: #ffffff;
+  --color-background-dark: #101622;
+
+  --color-card-light: #f6fefd;
+  --color-card-dark: #1a2332;
+
+  --color-text-main: #334155;
+  --color-text-secondary: #64748b;
+
+  --color-border-light: #e0f7f5;
+  --color-border-dark: #2a3441;
+
+  /* ================= Fonts ================= */
+  --font-display: "Lexend", sans-serif;
+  --font-body: "Noto Sans", sans-serif;
+
+  /* ================= Border Radius ================= */
+  --radius-default: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+
+
+   /* extra for detail page */
+   
+  --color-secondary: #14b8a6;
+  --color-secondary-background-light: #f8fafc;
+  --color-secondary-background-dark: #0f172a;
+  --color-surface-light:#ffffff;
+  --color-surface-dark:#1e293b;
+  /* --color-border-light: #e2e8f0;
+  --color-border-dark: #334155; */
+
+
+
+}
