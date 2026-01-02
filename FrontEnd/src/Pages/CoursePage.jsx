@@ -188,10 +188,10 @@ const handleSortChange = (e) => {
   });
 };
 
-  console.log(sort);
-  console.log(page);
-  console.log(filters);
-  console.log(courses);
+  // console.log(sort);
+  // console.log(page);
+  // console.log(filters);
+  // console.log(courses);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
