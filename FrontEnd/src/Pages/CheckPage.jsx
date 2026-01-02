@@ -16,6 +16,7 @@ import AddAssessment from "../Components/AddAssessment";
 import UpdateDescription from "../Components/UpdateDescription";
 import UpdateHandbook from "../Components/UpdateHandbook";
 import SelectAbleTable from "../Components/SelectAbleTable";
+import SemesterDisplay from "../Components/semesterTransformer";
 
 const CheckPage = () => {
   return (
@@ -48,7 +49,9 @@ const CheckPage = () => {
       {/* <UpdateDescription /> */}
       {/* <UpdateDescription /> */}
       {/* <UpdateHandbook/> */}
-      <SelectAbleTable />
+      {/* <SelectAbleTable /> */}
+      <SemesterDisplay code={11} />
+<SemesterDisplay code={50} /> 
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
       {/* <AddFirstElement title="Document" onAdd={() => alert("Add Document clicked")} /> */}
 
