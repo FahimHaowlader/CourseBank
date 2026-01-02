@@ -3,7 +3,7 @@ import React from "react";
 const CourseDetailsSkeleton = () => {
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen antialiased animate-pulse">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-8">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         
         {/* --- Header Skeleton --- */}
         <header className="mb-10">
@@ -16,7 +16,7 @@ const CourseDetailsSkeleton = () => {
               
               {/* Badges */}
               <div className="flex flex-wrap gap-3 mt-6">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-8 w-28 rounded-lg skeleton-shimmer"></div>
                 ))}
               </div>

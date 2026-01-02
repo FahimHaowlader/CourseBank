@@ -6,6 +6,7 @@ import SemesterDisplay from "./semesterTransformer";
 import { Link } from "react-router";
 
 const CourseCard = ({Course}) => {
+  console.log(Course.instructorName);
   return (
     <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
       <div className="p-5 flex flex-col flex-1">
