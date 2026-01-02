@@ -4,8 +4,8 @@ import asyncHandler from '../utils/asyncHandler.js';
 import apiResponse from '../utils/apiResponse.js';
 import mongoose from 'mongoose';
 import { deleteLocalFiles , deleteLocalFile } from '../utils/delete.js';
-import { uploadOnCloudinary , deleteCloudFileByUrl } from '../utils/cloudinary.js';
-import { v4 as uuidv4 } from 'uuid';
+import { uploadOnCloudinary , deleteCloudinaryFileById } from '../utils/cloudinary.js';
+import { v4 as uuidv4, validate } from 'uuid';
 
 // model
 import Course from '../models/course.model.js';
@@ -133,7 +133,7 @@ const userCourseSearch = asyncHandler(async (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  const result = await getCourses(userId, parameters, page, sort);
+  const result = await getCourses(userId, parameters, page, sort );
 
   if (!result) throw new apiError(500, "Error fetching courses");
 
@@ -169,7 +169,7 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
 const getCourseByCreatorId = asyncHandler(async (req, res) => {
   const requesterId = req.user?._id;
   const role = req.user?.role;
-  const { userId: queryUserId } = req.query;
+  const { userId: queryUserId } = req.params;
 
   // Auth check
   if (!requesterId) {
@@ -177,6 +177,7 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
   }
 
   let filter = {};
+  // console.log("Role:", role);
 
   if (role === "moderator") {
     // Moderators can only see their own courses
@@ -187,7 +188,7 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
   } else {
     throw new apiError(403, "Forbidden");
   }
-
+  // console.log("Filter:", filter);
   const courses = await Course.find(filter);
 
   res.status(200).json(
@@ -196,19 +197,28 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
 });
 
 const createCourse = asyncHandler(async (req, res) => {
-  const moderatorId = req.user._id;
-  const courseData = req.body;
+  const Id = req.user._id;
+  const {courseData} = req.body;
+  console.log("Course Data:", courseData);
 
-  const { title, courseCode, department, startingDate, instructorName, degree, semester, type, category } = courseData;
+  if (!Id) {
+    throw new apiError(401, "Unauthorized");
+  }
 
-  if (!title || !courseCode || !department || !startingDate || !instructorName || !degree || !semester || !type || !category) {
+  // Validate required fields
+  if(!courseData){
+    throw new apiError(400, "Course data is required");
+  }
+ 
+ const { title, courseCode, department, staringDate, instructorName, degree, semester, type, category } = courseData;
+  if (!title || !courseCode || !department || !staringDate || !instructorName || !degree || !semester || !type || !category) {
     throw new apiError(400, "All required course fields must be provided");
   }
 
   try {
     const newCourse = new Course({
       ...courseData,
-      createdBy: moderatorId
+      createdBy: Id
     });
 
     await newCourse.save();
@@ -224,7 +234,7 @@ const createCourse = asyncHandler(async (req, res) => {
 
 const updateCourseInfo = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const updateData = req.body;
+  const {updatedData} = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
 
@@ -242,10 +252,13 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
     throw new apiError(400, "Invalid Course ID");
   }
 
+  if(!updatedData){
+    throw new apiError(400, "Update data is required");
+  }
   // Block restricted fields
   const restrictedFields = ["department", "semester", "degree"];
   for (const field of restrictedFields) {
-    if (field in updateData) {
+    if (field in updatedData) {
       throw new apiError(
         400,
         "Department, Semester, and Degree fields cannot be updated"
@@ -257,7 +270,7 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
   const query = { _id: courseId };
 
   // Moderator can update only their own course
-  if (role === "moderator") {
+  if (role === "moderator" ) {
     query.createdBy = userId;
   }
 
@@ -268,7 +281,7 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
 
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: updateData },
+    { $set: updatedData },
     {
       new: true,
       runValidators: true,
@@ -303,19 +316,32 @@ const uploadImage = asyncHandler(async (req, res) => {
     throw new apiError(401, "Unauthorized: User ID or role missing");
   }
   
+
+  const file = req.file;
+  if(!file){
+    throw new apiError(400, "Image file is required");
+  }
+
+  // Checks if the mimetype starts with "image/" (e.g., image/jpeg, image/png)
+if (!file.mimetype.startsWith("image/")) {
+  await deleteLocalFile(req.file.path);
+  throw new apiError(400, "Only image files are allowed");
+}
+
   const localImagePath = req.file?.path;
+
+ 
   if (!localImagePath) {
+      await deleteLocalFile(req.file.path);
     throw new apiError(400, "Image file is required");
   }
   // upload to cloudinary
   const uploadResult = await uploadOnCloudinary(localImagePath);
+  
   if (!uploadResult) {
-    await deleteLocalFile(localImagePath);
     throw new apiError(500, "Image upload failed");
   }
   
-  await deleteLocalFile(localImagePath);
-
   res.status(200).json(
     new apiResponse(200, { imageUrl: uploadResult.secure_url }, "Image uploaded successfully")
   );  
@@ -333,21 +359,31 @@ const uploadFile = asyncHandler(async (req, res) => {
   if (!userId || !role) {
     throw new apiError(401, "Unauthorized: User ID or role missing");
   }
+  
+  const file = req.file;
+  if(!file){
+    throw new apiError(400, "File is required");
+  }
 
+  if (file.mimetype !== "application/pdf") {
+    await deleteLocalFile(req.file.path);
+    throw new apiError(400, "Only PDF files are allowed");
+  }
   const localFilePath = req.file?.path;
+
   if (!localFilePath) {
+    await deleteLocalFile(req.file.path);
     throw new apiError(400, "File is required");
   }
 
   // upload in cloudinary
 
   const uploadResult = await uploadOnCloudinary(localFilePath);
+
   if (!uploadResult) {
-    await deleteLocalFile(localFilePath);
     throw new apiError(500, "File upload failed");
   }
 
-  await deleteLocalFile(localFilePath);
 
   res.status(200).json(
     new apiResponse(200, { fileUrl: uploadResult.secure_url }, "File uploaded successfully")
@@ -355,20 +391,21 @@ const uploadFile = asyncHandler(async (req, res) => {
 });
 
 const deleteFile = asyncHandler(async (req, res) => {
-  const { fileUrl } = req.body;
+  const { publicId } = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
 
+  console.log("Delete fileUrl:", publicId);
   // Auth check
   if (!userId || !role) {
     throw new apiError(401, "Unauthorized: User ID or role missing");
   }
 
-  if (!fileUrl) {
-    throw new apiError(400, "File URL is required");
+  if (!publicId) {
+    throw new apiError(400, "File public ID is required");
   }
 
-  const deletionResult = await deleteCloudFileByUrl(fileUrl);
+  const deletionResult = await deleteCloudinaryFileById(publicId);
   if (!deletionResult) {
     throw new apiError(500, "File deletion failed");
   }
@@ -380,66 +417,51 @@ const deleteFile = asyncHandler(async (req, res) => {
 
 const updateCourseMaterials = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const { materials } = req.body;
+  const { materials } = req.body; // Expecting [{name, fileUrl, publicId}]
   const userId = req.user?._id;
   const role = req.user?.role;
 
-  // Auth check
-  if (!userId) {
-    throw new apiError(401, "Unauthorized");
+  if (!userId) throw new apiError(401, "Unauthorized");
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
   }
 
-  // Course ID validation
-  if (!courseId) {
-    throw new apiError(400, "Course ID is required");
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
-    throw new apiError(400, "Invalid Course ID");
-  }
-
-  // Materials validation
   if (!Array.isArray(materials)) {
     throw new apiError(400, "Materials must be an array");
   }
 
-  // Role-based query
+  // Define authorization query
   const query = { _id: courseId };
-
-  // Moderator: ownership enforced
   if (role === "moderator") {
     query.createdBy = userId;
+  } else if (role !== "admin") {
+    throw new apiError(403, "Forbidden: Only admins and moderators can update materials");
   }
 
-  // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
-  }
-
-  // ONE DB CALL
+  // ONE DB CALL - Fixed Options and Select
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { $set: { materials } },
     {
       new: true,
       runValidators: true,
+      // Select is passed inside the options object
+      select: '+materials +materials.publicId' 
     }
   );
 
   if (!updatedCourse) {
     throw new apiError(
-      403,
-      "Course not found or you are not authorized to update it"
+      404, // Use 404 if not found, or 403 if it's strictly an auth issue
+      "Course not found or you lack the necessary permissions"
     );
   }
 
   res.status(200).json(
     new apiResponse(
       200,
-      updatedCourse,
-      role === "admin"
-        ? "Course materials updated successfully by admin"
-        : "Course materials updated successfully by moderator"
+      {updatedMaterials : updatedCourse.materials},
+      `Course materials updated successfully by ${role}`
     )
   );
 });
@@ -489,6 +511,7 @@ const updateCourseTasks = asyncHandler(async (req, res) => {
     {
       new: true,
       runValidators: true,
+      select: '+tasks +tasks.publicId'
     }
   );
 
@@ -502,7 +525,7 @@ const updateCourseTasks = asyncHandler(async (req, res) => {
   res.status(200).json(
     new apiResponse(
       200,
-      updatedCourse,
+      {updatedCourseTasks : updatedCourse.tasks},
       role === "admin"
         ? "Course tasks updated successfully by admin"
         : "Course tasks updated successfully by moderator"
@@ -555,6 +578,7 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
     {
       new: true,
       runValidators: true,
+      select: '+assessments +assessments.publicId'
     }
   );
 
@@ -564,11 +588,11 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
       "Course not found or you are not authorized to update it"
     );
   }
-
+  // console.log("Updated Assessments:", updatedCourse.assessments);
   res.status(200).json(
     new apiResponse(
       200,
-      updatedCourse,
+      {updatedCourseAssessments : updatedCourse.assessments},
       role === "admin"
         ? "Course assessments updated successfully by admin"
         : "Course assessments updated successfully by moderator"
@@ -583,62 +607,41 @@ const updateSuggestedBooks = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const role = req.user?.role;
 
-  // Auth check
-  if (!userId) {
-    throw new apiError(401, "Unauthorized");
-  }
-
-  // Course ID validation
-  if (!courseId) {
-    throw new apiError(400, "Course ID is required");
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+  if (!userId) throw new apiError(401, "Unauthorized");
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
     throw new apiError(400, "Invalid Course ID");
   }
 
-  // Books validation
   if (!Array.isArray(books)) {
     throw new apiError(400, "Books must be an array");
   }
 
-  // Role-based query
   const query = { _id: courseId };
-
-  // Moderator → only own courses
   if (role === "moderator") {
     query.createdBy = userId;
-  }
-
-  // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
+  } else if (role !== "admin") {
     throw new apiError(403, "Forbidden");
   }
 
-  // ONE DB CALL
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { books } },
+    { $set: { books } }, // Overwrites existing books with the new list
     {
       new: true,
       runValidators: true,
+      select: '+books' // publicId is usually select: false in schema, adding it here if needed
     }
   );
 
   if (!updatedCourse) {
-    throw new apiError(
-      403,
-      "Course not found or you are not authorized to update it"
-    );
+    throw new apiError(404, "Course not found or unauthorized");
   }
 
   res.status(200).json(
     new apiResponse(
       200,
-      updatedCourse,
-      role === "admin"
-        ? "Course suggested books updated successfully by admin"
-        : "Course suggested books updated successfully by moderator"
+      { updatedSuggestedBooks: updatedCourse.books }, // Fixed syntax here
+      `Course suggested books updated successfully by ${role}`
     )
   );
 });
@@ -689,6 +692,7 @@ const updateCourseHandbook = asyncHandler(async (req, res) => {
     {
       new: true,
       runValidators: true,
+      select: '+handbook +handbook.publicId'
     }
   );
 
@@ -702,7 +706,7 @@ const updateCourseHandbook = asyncHandler(async (req, res) => {
   res.status(200).json(
     new apiResponse(
       200,
-      updatedCourse,
+      {updatedCourseHandbook : updatedCourse.handbook},
       role === "admin"
         ? "Course handbook updated successfully by admin"
         : "Course handbook updated successfully by moderator"
@@ -744,14 +748,12 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
   }
 
   // ONE DB CALL
-  const updatedCourse = await Course.findOneAndUpdate(
-    query,
-    { $unset: { handbook: "" } },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+ const updatedCourse = await Course.findOneAndUpdate(
+  query,
+  { $unset: { handbook: "" } }, // Removes the entire handbook field
+  { new: true },
+  {runValidators: true,}
+);
 
   if (!updatedCourse) {
     throw new apiError(
@@ -763,7 +765,7 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
   res.status(200).json(
     new apiResponse(
       200,
-      updatedCourse,
+      {},
       role === "admin"
         ? "Course handbook deleted successfully by admin"
         : "Course handbook deleted successfully by moderator"
@@ -816,7 +818,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
   res.status(200).json(
     new apiResponse(
       200,
-      deletedCourse,
+      {},
       role === "admin"
         ? "Course deleted successfully by admin"
         : "Course deleted successfully by moderator"

@@ -22,12 +22,12 @@ const courseSchema = new mongoose.Schema(
       required: true,
       set: (value) => new Date(value),
     },
-   degree: {
-  type: String,
-  required: true,
-  lowercase: true,
-  enum: ["bachelors", "masters", "phd"],
-},
+    degree: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["bachelors", "masters", "phd"],
+    },
 
     // year: {
     //   type: Number,
@@ -42,7 +42,7 @@ const courseSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
-       select: false,
+      select: false,
     },
     credits: {
       type: Number,
@@ -50,61 +50,78 @@ const courseSchema = new mongoose.Schema(
       min: [1, "Credits cannot be negative"],
       max: [10, "Credits cannot exceed 10"],
     },
-  
-category: {
-  type: String,
-  required: true,
-  lowercase: true,
-  enum: ["major", "non-major", "elective"],
-},
 
-   type: {
-  type: String,
-  required: true,
-  lowercase: true,
-  enum: ["core", "lab", "project"],
-},
+    category: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["major", "non-major", "elective"],
+    },
+
+    type: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["core", "lab", "project"],
+    },
     instructorName: {
-        type: String,
-        required: true,
-        lowercase: true,
-      },
+      type: String,
+      required: true,
+      lowercase: true,
+    },
     instructorDepartment: {
+      type: String,
+      required: true,
+      lowercase: true,
+      select: false,
+    },
+    instructorImage: {
+      imageURL: {
         type: String,
-        required: true,
-        lowercase: true,
-         select: false,
-      },
-    imageUrl: {
-        type: String,
+        required: [true, "Instructor image URL is required"],
+        // Simplified validation: just check if it's a valid URL format
         validate: {
           validator: function (v) {
-            return /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i.test(v);
+            return /^(https?:\/\/)/i.test(v);
           },
-          message: (props) => `${props.value} is not a valid image URL!`,
+          message: "Invalid image URL format",
         },
-        required: [true, "Instructor image URL is required"],
-         select: false,
       },
-  
+      publicId: {
+        type: String,
+        required: [true, "Public ID is required for image management"],
+        select: false,
+      },
+    },
+
     books: {
       type: [
         {
-          name: {
+          title: {
             type: String,
             required: true,
           },
+          authorName: {
+            // Add this field
+            type: String,
+            required: [true, "Book author name is required"],
+          },
           fileUrl: {
             type: String,
+            required: [true, "Book URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|epub|mobi))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more book URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for books",
             },
-            required: [true, "Book URL is required"],
+          },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for book management"],
+            select: false,
           },
         },
       ],
@@ -120,15 +137,20 @@ category: {
           },
           fileUrl: {
             type: String,
+            required: [true, "Material URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|docx|pptx|xlsx|zip))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more material URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for materials",
             },
-            required: [true, "Material URL is required"],
+          },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for material management"],
+            select: false,
           },
         },
       ],
@@ -145,56 +167,82 @@ category: {
           },
           fileUrl: {
             type: String,
+            required: [true, "Task URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|docx|pptx|xlsx|zip))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more tasks URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for tasks",
             },
-            required: [true, "Task URL is required"],
+          },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for task management"],
+            select: false,
           },
         },
       ],
-       select: false,
+      select: false,
       // required: [true, 'At least one task is required']
     },
-    assesments: {
+    assessments: {
       type: [
         {
           name: {
             type: String,
             required: true,
-            enum: ["Midterm-1","Midterm-2","Termtest-1","Termtest-2","Quiz-1","Quiz-2", "Final", "Project"],
+            enum: [
+              "Midterm-1",
+              "Midterm-2",
+              "Termtest-1",
+              "Termtest-2",
+              "Quiz-1",
+              "Quiz-2",
+              "Final",
+              "Project",
+            ],
           },
           fileUrl: {
             type: String,
+            required: [true, "Assessment URL is required"],
             validate: {
               validator: function (v) {
-                return v.every((url) =>
-                  /^(https?:\/\/.*\.(?:pdf|docx|pptx|xlsx|zip))$/i.test(url)
-                );
+                // Use .test() for a single string
+                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
               },
-              message: (props) => `One or more assesment URLs are invalid!`,
+              message:
+                "The URL must be a valid PDF document link for assessments",
             },
-            required: [true, "Assesment URL is required"],
+          },
+          publicId: {
+            type: String,
+            required: [true, "Public ID is required for assesment management"],
+            select: false,
           },
         },
       ],
-       select: false,
+      select: false,
       // required: [true, 'At least one assesment is required']
     },
     handbook: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          return /^(https?:\/\/.*\.(?:pdf|epub|mobi))$/i.test(v);
+      fileUrl: {
+        type: String,
+        required: [true, "Handbook URL is required"],
+        validate: {
+          validator: function (v) {
+            // Use .test() for a single string
+            return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+          },
+          message: "The URL must be a valid PDF document link for handbook",
         },
-        message: (props) => `${props.value} is not a valid handbook URL!`,
       },
-      required: [true, "Handbook URL is required"],
-      select: false,
+      publicId: {
+        type: String,
+        required: [true, "Public ID is required for handbook management"],
+        select: false,
+      },
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -202,7 +250,6 @@ category: {
       required: true,
       select: false,
     },
-
   },
   { timestamps: true }
 );

@@ -66,7 +66,7 @@ router.route('/update-user-info/:userId').patch(updateUserInfo);
 
 router.route('/delete-user/:userId').delete(deleteUser);
 
-router.route('/search-users').get( getAllUserSearch);
+router.route('/search-users').post( getAllUserSearch);
 
 
 
