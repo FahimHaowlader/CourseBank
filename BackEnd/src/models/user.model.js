@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    uppercase: true,
+    lowercase: true,
     unique: true,
   },
   access: {
