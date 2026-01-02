@@ -75,13 +75,13 @@ const uploadOnCloudinary = async (filePath) => {
       resource_type: 'auto',
     });
 
-    console.log("Upload response:", response);
+    // console.log("Upload response:", response);
 
     // Delete the uploaded file
       await fs.unlink(filePath)
     return response;
   } catch (error) {
-    console.error("Upload error:", error);
+    // console.error("Upload error:", error);
     // Clean up the file on error
       await fs.unlink(filePath);
     return null;
@@ -89,26 +89,28 @@ const uploadOnCloudinary = async (filePath) => {
 };
 
 
-const deleteCloudFileByUrl = async (url) => {
-    if (!url) return;
-    
+/**
+
+ */
+const deleteCloudinaryFileById = async (publicId, resourceType = "image") => {
     try {
-        // Extract public ID from URL
-        const parts = url.split("/");
-        const publicIdWithFolder = parts.slice(parts.indexOf("upload") + 1).join("/"); 
-        const publicId = publicIdWithFolder.replace(/\.[^/.]+$/, ""); // remove extension
-        
-        const result = await cloudinary.uploader.destroy(publicId);
-        
+        if (!publicId) return null;
+
+        const result = await cloudinary.uploader.destroy(publicId, {
+            resource_type: resourceType,
+            invalidate: true // Optional: clears CDN cache so the old image disappears immediately
+        });
+
         if (result.result === "ok") {
-            console.log(`Deleted Cloudinary file: ${publicId}`);
+            // console.log(`Successfully deleted from Cloudinary: ${publicId}`);
         } else {
-            console.warn(`Failed to delete Cloudinary file ${publicId}: ${result.result}`);
+            // console.warn(`Cloudinary deletion status: ${result.result} for ID: ${publicId}`);
         }
-    } catch (err) {
-        console.warn(`Error deleting Cloudinary file from URL ${url}: ${err.message}`);
+
+        return result;
+    } catch (error) {
+        console.error("Cloudinary Deletion Error:", error.message);
+        return null;
     }
-}
-
-
-export {uploadOnCloudinary, deleteCloudFileByUrl};
+};
+export {uploadOnCloudinary, deleteCloudinaryFileById};
