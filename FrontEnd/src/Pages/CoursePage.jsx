@@ -13,12 +13,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 import CourseCard from "../Components/CourseCard";
+import Pagination from "../Components/Pagination";
 
 const CoursePage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalDocs, setTotalDocs] = useState(1);
+  const [totalDocs, setTotalDocs] = useState(0);
   const [sort, setSort] = useState({
     sortField: "",
     sortOrder: "",
@@ -42,6 +43,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
+          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -80,6 +82,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
+          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -123,6 +126,8 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
+          console.log(response.data.data);
+          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -447,9 +452,9 @@ const handleSortChange = (e) => {
             <span className="font-bold text-text-main dark:text-white">{((page-1)*12)+1}</span>{" "}
             to{" "}
             <span className="font-bold text-text-main dark:text-white">
-              { courses.length < page*12 ? courses.length : page*12}</span>{" "}
+              { totalDocs < page*12 ? totalDocs : page*12}</span>{" "}
             courses of {" "}
-            <span className="font-bold text-text-main dark:text-white">{courses.length}</span>
+            <span className="font-bold text-text-main dark:text-white">{totalDocs}</span>
           </div>
           <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-2 ml-auto sm:ml-0">
@@ -517,7 +522,7 @@ const handleSortChange = (e) => {
               Next
             </a>
           </div> */}
-          <div className="flex flex-1 items-center justify-center  ">
+          {/* <div className="flex flex-1 items-center justify-center  ">
             <div>
               <nav
                 aria-label="Pagination"
@@ -577,7 +582,8 @@ const handleSortChange = (e) => {
                 </a>
               </nav>
             </div>
-          </div>
+          </div> */}
+          <Pagination page={page} setPage={setPage} totalDocs={totalDocs}/>
         </div>
         <div className="hidden mt-12 flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
           {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">

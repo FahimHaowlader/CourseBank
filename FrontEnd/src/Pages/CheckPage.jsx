@@ -17,6 +17,7 @@ import UpdateDescription from "../Components/UpdateDescription";
 import UpdateHandbook from "../Components/UpdateHandbook";
 import SelectAbleTable from "../Components/SelectAbleTable";
 import SemesterDisplay from "../Components/semesterTransformer";
+import Pagination from "../Components/Pagination";
 
 const CheckPage = () => {
   return (
@@ -50,8 +51,9 @@ const CheckPage = () => {
       {/* <UpdateDescription /> */}
       {/* <UpdateHandbook/> */}
       {/* <SelectAbleTable /> */}
-      <SemesterDisplay code={11} />
-<SemesterDisplay code={50} /> 
+      {/* <SemesterDisplay code={11} />
+<SemesterDisplay code={50} />  */}
+  <Pagination page={3} setPage={(p) => console.log(p)} totalDocs={244} />
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
       {/* <AddFirstElement title="Document" onAdd={() => alert("Add Document clicked")} /> */}
 
