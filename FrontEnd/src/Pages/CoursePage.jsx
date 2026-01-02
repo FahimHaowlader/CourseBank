@@ -14,15 +14,28 @@ import axios from "axios";
 
 import CourseCard from "../Components/CourseCard";
 import Pagination from "../Components/Pagination";
+import SkeletonCard from "../Components/SkeletonCard";
 
 const CoursePage = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
   const [sort, setSort] = useState({
     sortField: "",
     sortOrder: "",
+  });
+  const [filters, setFilters] = useState({
+    title: "",
+    instructorName: "",
+    courseCode: "",
+    department: "",
+    degree: "",
+    year: "",
+    semester: "",
+    type: "",
+    credits: "",
+    format: "",
   });
     const handleSearch = () => {
     // setPage(1); // Reset to first page on new search
@@ -101,18 +114,6 @@ const CoursePage = () => {
     });
   };
 
-  const [filters, setFilters] = useState({
-    title: "",
-    instructorName: "",
-    courseCode: "",
-    department: "",
-    degree: "",
-    year: "",
-    semester: "",
-    type: "",
-    credits: "",
-    format: "",
-  });
   useEffect(() => {
     // 1. Try scrolling the window
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -506,7 +507,49 @@ const handleSortChange = (e) => {
                )
               }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-           
+           {loading && (
+            <>
+              <div>
+              <SkeletonCard />
+              </div>
+              <div>
+              <SkeletonCard />
+              </div>
+              <div>
+              <SkeletonCard />
+              </div>
+              <div>
+              <SkeletonCard />
+              </div>
+              <div>
+              <SkeletonCard />
+              </div>
+              <div>
+              <SkeletonCard />
+              </div>
+              <div className="hidden xl:block">
+              <SkeletonCard />
+              </div>
+             <div className="hidden xl:block">
+              <SkeletonCard />
+              </div>
+                <div className="hidden xl:block">
+              <SkeletonCard />
+              </div>
+                <div className="hidden lg:block">
+              <SkeletonCard />
+              </div>
+                <div className="hidden lg:block">
+              <SkeletonCard />
+              </div>
+              <div className="hidden lg:block">
+              <SkeletonCard />
+              </div>
+             
+            
+         
+            </>
+          )}
           {!loading && courses && courses.length > 0
             ? courses.map((course) => (
                 <CourseCard key={course._id} Course={course} />
