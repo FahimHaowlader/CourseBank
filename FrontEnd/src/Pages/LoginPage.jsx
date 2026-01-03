@@ -6,14 +6,14 @@ import { useAuth } from "../Contexts/Auth.Context.jsx";
 import axios from "axios";
 
 const LoginPage = () => {
+  
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const { loginWithUserIdAndPassword, error, setError, loading, setLoading } =
-    useAuth();
+  const {loginWithUserIdAndPassword, error, setError,loading,setLoading} = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-
+    
     const userid = e.target.userid.value;
     const password = e.target.password.value;
 
@@ -22,14 +22,14 @@ const LoginPage = () => {
       setError("Please enter both User ID and password.");
       return;
     }
-    // if (userid.length !== 11 && userid.length !== 10) {
-    //   setError("Invalid User ID .");
-    //   return;
-    // }
-    // if (password.length !== 6) {
-    //   setError("wrong password .");
-    //   return;
-    // }
+    if (userid.length !== 11 && userid.length !== 10) {
+      setError("Invalid User ID .");
+      return;
+    }
+    if (password.length !== 6) {
+      setError("wrong password .");
+      return;
+    }
 
     // 2. Simulated Login Logic
     setLoading(true);
@@ -66,6 +66,7 @@ const LoginPage = () => {
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
           <div className="p-8 sm:p-10">
+            
             {/* Header Section */}
             <div className="mb-8 text-center">
               <div className="w-16 h-16 bg-teal-50 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
