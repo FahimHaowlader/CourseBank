@@ -12,8 +12,7 @@ app.use(helmet({
 
 const allowedOrigins = [
   process.env.CLIENT_URL_PROD,
-  process.env.CLIENT_URL_DEV,
-  "http://localhost:5173" // Hardcode this temporarily to test
+  process.env.CLIENT_URL_DEV, // Hardcode this temporarily to test
 ].filter(Boolean); // This removes any 'undefined' values from the array
 
 app.use(cors({

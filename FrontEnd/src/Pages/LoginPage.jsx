@@ -33,16 +33,14 @@ const LoginPage = () => {
 
     // 2. Simulated Login Logic
     setLoading(true);
-    console.log("Logging in with:", userid.toLowerCase());
-
+    try {
     const response =  await loginWithUserIdAndPassword(userid.toLowerCase(), password);
-    console.log("Login response:", response);
-
-    // Simulate API delay
-    setTimeout(() => {
+    }
+    catch(err) {
+      return;
+    }finally {
       setLoading(false);
-      // Handle actual login redirect or logic here
-    }, 1500);
+    }
   };
 
   return (

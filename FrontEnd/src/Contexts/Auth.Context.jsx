@@ -37,20 +37,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginWithUserIdAndPassword = async (userId, password) => {
-    console.log("Attempting login for:", userId);
+    // console.log("Attempting login for:", userId);
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, { userId, password });
+      const response = await axios.post(`${API_BASE_URL}/login`, { userId, password },{ withCredentials: true });
       setUser(response.data.user);
       setLoading(false);
       return response.data.user;
     } catch (err) {
-      console.error("Login error:", err);
+      // console.error("Login error:", err.response?.data?.message || err.message);
       setLoading(false);
       const msg = err.response?.data?.message || "Login failed";
       setError(msg);
-      throw err;
+      
     }
   };
 
