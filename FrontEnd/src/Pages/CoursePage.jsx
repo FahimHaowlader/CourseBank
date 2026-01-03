@@ -1,4 +1,3 @@
-import React from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { MdOutlinePersonSearch } from "react-icons/md";
 import { BiHash } from "react-icons/bi";
@@ -10,10 +9,189 @@ import { MdOutlinePersonOutline } from "react-icons/md";
 import { LuCalendarDays } from "react-icons/lu";
 import { IoArrowForwardSharp } from "react-icons/io5";
 import { GrShareOption } from "react-icons/gr";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 import CourseCard from "../Components/CourseCard";
+import Pagination from "../Components/Pagination";
+import SkeletonCard from "../Components/SkeletonCard";
 
 const CoursePage = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [sort, setSort] = useState({
+    sortField: "",
+    sortOrder: "",
+  });
+  const [filters, setFilters] = useState({
+    title: "",
+    instructorName: "",
+    courseCode: "",
+    department: "",
+    degree: "",
+    year: "",
+    semester: "",
+    type: "",
+    credits: "",
+    format: "",
+  });
+    const handleSearch = () => {
+    // setPage(1); // Reset to first page on new search
+    // setSort({
+    //   sortField: "",
+    //   sortOrder: "",
+    // });
+
+     const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          "https://coursebank.onrender.com/api/v1/users-all-course",
+          { parameters: filters},
+          
+        );
+
+        // Look at your log: response.data.data.courses is where the array lives
+        if (response.data && response.data.data && response.data.data.courses) {
+          setCourses(response.data.data.courses);
+          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+        } else {
+          setCourses([]); // Fallback to empty array if structure is wrong
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+
+  };
+  const clearFilters = () => {
+    setFilters({
+      title: "",
+      instructorName: "",
+      courseCode: "",
+      department: "",
+      degree: "",
+      year: "",
+      semester: "",
+      type: "",
+      credits: "",
+      format: "",
+    });
+      const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          "https://coursebank.onrender.com/api/v1/users-all-course",
+          { parameters: {} },
+          
+        );
+
+        // Look at your log: response.data.data.courses is where the array lives
+        if (response.data && response.data.data && response.data.data.courses) {
+          setCourses(response.data.data.courses);
+          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+        } else {
+          setCourses([]); // Fallback to empty array if structure is wrong
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+    setPage(1);
+    setSort({
+      sortField: "",
+      sortOrder: "",
+    });
+  };
+
+  useEffect(() => {
+    // 1. Try scrolling the window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 2. Safety: Try scrolling the HTML element (for some mobile browsers)
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // 3. Optional: If you have a specific container that scrolls, use:
+    // document.getElementById('main-container').scrollTo({ top: 0 });
+  }, [page]);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          "https://coursebank.onrender.com/api/v1/users-all-course",
+          { parameters: filters, sort, page },
+          
+        );
+
+        // Look at your log: response.data.data.courses is where the array lives
+        if (response.data && response.data.data && response.data.data.courses) {
+          setCourses(response.data.data.courses);
+          console.log(response.data.data);
+          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+        } else {
+          setCourses([]); // Fallback to empty array if structure is wrong
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, [sort, page]);
+  
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value, // value will be "bachelors", "masters", etc.
+    }));
+  };
+  const handleFilterChangeIntoNumber = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value === "" ? "" : isNaN(value) ? value : +value,
+    }));
+  };
+  const generateYearRange = (start) => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: current - start + 1 }, (_, i) => current - i);
+  };
+  const years = generateYearRange(2025);
+const handleSortChange = (e) => {
+  const value = e.target.value; // e.g., "year_desc"
+
+  if (!value) {
+    setSort({ sortField: "", sortOrder: "" });
+    return;
+  }
+
+  const [field, order] = value.split("_");
+
+  setSort({
+    sortField: field,
+    sortOrder: order,
+  });
+};
+
+  // console.log(sort);
+  // console.log(page);
+  // console.log(filters);
+  // console.log(courses);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
@@ -37,6 +215,13 @@ const CoursePage = () => {
                   <AiOutlineSearch />
                 </span>
                 <input
+                value={filters.title}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      title: e.target.value.toLowerCase(),
+                    })
+                  }
                   placeholder="e.g. Intro to Computer Science"
                   type="text"
                   className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
@@ -52,6 +237,13 @@ const CoursePage = () => {
                   <MdOutlinePersonSearch />
                 </span>
                 <input
+                value={filters.instructorName}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      instructorName: e.target.value.toLowerCase(),
+                    })
+                  }
                   type="text"
                   placeholder="e.g. Dr. Sarah Jenkins"
                   className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
@@ -60,13 +252,20 @@ const CoursePage = () => {
             </label>
             <label className="flex flex-col gap-1.5 w-full md:col-span-3">
               <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Course ID
+                Course Code
               </span>
               <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
                 <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
                   <BiHash />
                 </span>
                 <input
+                value={filters.courseCode}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      courseCode: e.target.value.toUpperCase(),
+                    })
+                  }
                   placeholder="ABCD-1234-EFGH-5678"
                   type="text"
                   className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
@@ -78,13 +277,18 @@ const CoursePage = () => {
                 Department
               </span>
               <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                <select
+                  className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                  name="department"
+                  value={filters.department}
+                  onChange={handleFilterChange}
+                >
                   <option value="">All Departments</option>
-                  <option>Computer Science</option>
-                  <option>Arts &amp; Design</option>
-                  <option>Physics</option>
-                  <option>Mathematics</option>
-                  <option>Business</option>
+                  <option value="cse">CSE</option>
+                  <option value="xyz">Arts &amp; Design</option>
+                  <option value="phy">Physics</option>
+                  <option value="mat">Mathematics</option>
+                  <option value="bus">Business</option>
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                   <IoIosArrowDown />
@@ -99,12 +303,17 @@ const CoursePage = () => {
                   Degree
                 </span>
                 <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <select
+                    className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="degree"
+                    value={filters.degree}
+                    onChange={handleFilterChange}
+                  >
                     <option value="">All Degrees</option>
-                    <option>Bachelor</option>
-                    <option>Master</option>
-                    <option>PhD</option>
-                    <option>Associate</option>
+                    <option value="bachelor">Bachelor</option>
+                    <option value="master">Master</option>
+                    <option value="phd">PhD</option>
+                    <option value="associate">Associate</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -116,11 +325,18 @@ const CoursePage = () => {
                   Year
                 </span>
                 <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <select
+                    className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="year"
+                    value={filters.year}
+                    onChange={handleFilterChangeIntoNumber}
+                  >
                     <option value="">All Years</option>
-                    <option>2024</option>
-                    <option>2023</option>
-                    <option>2022</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -132,11 +348,16 @@ const CoursePage = () => {
                   Semester
                 </span>
                 <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <select
+                    className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="semester"
+                    value={filters.semester}
+                    onChange={handleFilterChangeIntoNumber}
+                  >
                     <option value="">All Semesters</option>
-                    <option>Fall</option>
-                    <option>Spring</option>
-                    <option>Summer</option>
+                    <option value="21">Fall</option>
+                    <option value="22">Spring</option>
+                    <option value="32">Summer</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -148,11 +369,16 @@ const CoursePage = () => {
                   Type
                 </span>
                 <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <select 
+                  className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                  name="type"
+                  value={filters.type}
+                  onChange={handleFilterChange}
+                  >
                     <option value="">All Types</option>
-                    <option>Core</option>
-                    <option>Elective</option>
-                    <option>Lab</option>
+                    <option value={'core'}>Core</option>
+                    <option value='elective'>Elective</option>
+                    <option value='lab'>Lab</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -164,11 +390,19 @@ const CoursePage = () => {
                   Credit
                 </span>
                 <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <select 
+                  className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                  name="credits"
+                  value={filters.credits}
+                  onChange={handleFilterChangeIntoNumber}
+                  >
                     <option value="">All Credits</option>
-                    <option>1 - 3 Credits</option>
-                    <option>3 - 6 Credits</option>
-                    <option>6+ Credits</option>
+                    <option value='1'>1 Credits</option>
+                    <option value='2'>2 Credits</option>
+                    <option value='3'>3 Credits</option>
+                    <option value='4'>4 Credits</option>
+                    <option value='5'>5 Credits</option>
+                    <option value='6'>6 Credits</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -177,14 +411,19 @@ const CoursePage = () => {
               </label>
               <label className="flex flex-col gap-1.5 w-full">
                 <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Major / Non-Major
+                  Format
                 </span>
                 <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <select 
+                  className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                  name="format"
+                  value={filters.format}
+                  onChange={handleFilterChange}
+                  >
                     <option value="">All Categories</option>
-                    <option>Major Required</option>
-                    <option>Major Elective</option>
-                    <option>Non-Major (General)</option>
+                    <option value="major">Major</option>
+                    <option value="elective">Elective</option>
+                    <option value="non-major">Non-Major</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -193,14 +432,21 @@ const CoursePage = () => {
               </label>
             </div>
             <div className="flex items-center gap-3 w-full xl:w-auto mt-2 xl:mt-0 xl:ml-auto">
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold active:scale-95 ">
+              <button 
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold active:scale-95 "
+              onClick={clearFilters}
+              >
                 <span className="material-symbols-outlined  text-[20px] font-semibold">
                   <MdRefresh />
                 </span>
                 Reset
                 <span className="hidden md:block"> Filters</span>
               </button>
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark active:scale-95 ">
+              <button 
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark active:scale-95 "
+              name="searchButton"
+              onClick={handleSearch}
+              >
                 <span className="material-symbols-outlined text-[20px] font-semibold">
                   <AiOutlineSearch />
                 </span>
@@ -209,13 +455,17 @@ const CoursePage = () => {
             </div>
           </div>
         </div>
-        <div className="flex px-2 flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+              {
+               totalDocs > 0 && (
+                <div className="flex px-2 flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center">
             Showing{" "}
-            <span className="font-bold text-text-main dark:text-white">1</span>{" "}
+            <span className="font-bold text-text-main dark:text-white">{((page-1)*12)+1}</span>{" "}
             to{" "}
-            <span className="font-bold text-text-main dark:text-white">12</span>{" "}
-            courses
+            <span className="font-bold text-text-main dark:text-white">
+              { totalDocs < page*12 ? totalDocs : page*12}</span>{" "}
+            courses of {" "}
+            <span className="font-bold text-text-main dark:text-white">{totalDocs}</span>
           </div>
           <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-2 ml-auto sm:ml-0">
@@ -223,11 +473,19 @@ const CoursePage = () => {
                 Sort by:
               </span>
               <div className="relative">
-                <select className="pl-3 pr-10 py-2 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-main dark:text-white focus:border-primary focus:ring-0 cursor-pointer appearance-none shadow-sm hover:shadow transition-shadow">
-                  <option>Course Title (A-Z)</option>
-                  <option>Professor Name (A-Z)</option>
-                  <option>Year (Newest First)</option>
-                  <option>Credit (High to Low)</option>
+                <select 
+                className="pl-3 pr-10 py-2 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-main dark:text-white focus:border-primary focus:ring-0 cursor-pointer appearance-none shadow-sm hover:shadow transition-shadow"
+                value={sort.sortField ? `${sort.sortField}_${sort.sortOrder}` : ""}
+                onChange={handleSortChange}
+                >
+                  <option value={'title_asc'}>Course Title (A-Z)</option>
+                  <option value={'title_desc'}>Course Title (Z-A)</option>
+                  <option value={'professor_asc'}>Professor Name (A-Z)</option>
+                  <option value={'professor_desc'}>Professor Name (Z-A)</option>
+                  <option value={'staringDate_desc'}>Newest First</option>
+                  <option value={'staringDate_asc'}>Oldest First</option>
+                  <option value={'credits_desc'}>Credit (High to Low)</option>
+                  <option value={'credits_asc'}>Credit (Low to High)</option>
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                   <IoIosArrowDown />
@@ -246,541 +504,61 @@ const CoursePage = () => {
             </div> */}
           </div>
         </div>
+               )
+              }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <h3 className="text-lg font-bold tracking-tight text-text-main dark:text-white mb-2 line-clamp-1 leading-tight group-hover:text-primary transition-colors">
-                Introduction to Computer Science dfgdgdbgdfgdrrfdfrgrgr
-              </h3>
-              <div className="flex justify-between items-start mb-3 flex-wrap gap-y-2">
-                {/* <div className="flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Core
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    4 Credits
-                  </span>
-                </div> */}
-                <span className="text-sm group-hover:text-gray-600 font-mono font-bold text-text-secondary dark:text-gray-400 tracking-tighter">
-                  CSE-2023-101-A001
-                </span>
+          {loading && (
+            <>
+              <div>
+              <SkeletonCard />
               </div>
-
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
-                  Bachelor
-                </span>
-                <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
-                  Bachelar
-                </span>
-                <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
-                  2 Credits
-                </span>
+              <div>
+              <SkeletonCard />
               </div>
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
-                  Theurey
-                </span>
-                <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
-                  1est Year
-                </span>
-                <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
-                  2nd Semester
-                </span>
+              <div>
+              <SkeletonCard />
               </div>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 font-semibold text-sm ">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    <MdOutlinePersonOutline />
-                  </span>
-                  <span className="font-semibold ">Dr. Sarah Jenkins</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm font-medium">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    <LuCalendarDays />
-                  </span>
-                  <span>2023 - Fall Semester</span>
-                </div>
+              <div>
+              <SkeletonCard />
               </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-xs transition-colors flex items-center gap-1.5 hover:cursor-pointer">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  <IoArrowForwardSharp size={18} />
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Elective
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    3 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  ART-2024-HIS-B204
-                </span>
+              <div>
+              <SkeletonCard />
               </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                History of Modern Art &amp; Design
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Prof. Alan Grant</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2024 - Spring Semester</span>
-                </div>
+              <div>
+              <SkeletonCard />
               </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Lab
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    2 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  PHY-2023-LAB-C302
-                </span>
+              <div className="hidden xl:block">
+              <SkeletonCard />
               </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Advanced Physics Laboratory II
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Dr. Ellie Sattler</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2023 - Fall Semester</span>
-                </div>
+             <div className="hidden xl:block">
+              <SkeletonCard />
               </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Core
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    4 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  MTH-2024-CAL-D201
-                </span>
+                <div className="hidden xl:block">
+              <SkeletonCard />
               </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Calculus for Engineering
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Dr. Ian Malcolm</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2024 - Spring Semester</span>
-                </div>
+                <div className="hidden lg:block">
+              <SkeletonCard />
               </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Elective
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    3 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  BUS-2023-ETH-E105
-                </span>
+                <div className="hidden lg:block">
+              <SkeletonCard />
               </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Business Ethics &amp; Society
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Prof. Claire Dearing</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2023 - Summer Semester</span>
-                </div>
+              <div className="hidden lg:block">
+              <SkeletonCard />
               </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Core
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    4 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  CSE-2023-101-F002
-                </span>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Introduction to Computer Science
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Dr. Sarah Jenkins</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2023 - Fall Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Elective
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    3 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  ART-2024-HIS-G205
-                </span>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                History of Modern Art &amp; Design
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Prof. Alan Grant</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2024 - Spring Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                    {/* <span className="material-symbols-outlined text-primary text-lg">
-                                     <GrShareOption/>
-                                   </span> */}
-                    Lab
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                    {/* <span className="material-symbols-outlined text-primary text-lg">
-                                      <GrShareOption/>
-                                    </span> */}
-                    3 Credits
-                  </div>
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
-                  3 Credits
-                </div>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Advanced Physics Laboratory II
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Dr. Ellie Sattler</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2023 - Fall Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Core
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    4 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  MTH-2024-CAL-I202
-                </span>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Calculus for Engineering
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Dr. Ian Malcolm</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2024 - Spring Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Elective
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    3 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  BUS-2023-ETH-J106
-                </span>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Business Ethics &amp; Society
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Prof. Claire Dearing</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2023 - Summer Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Core
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    4 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  CSE-2023-101-K003
-                </span>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                Introduction to Computer Science
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Dr. Sarah Jenkins</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2023 - Fall Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                    Elective
-                  </span>
-                  <span className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-1 rounded-md">
-                    3 Credits
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-text-secondary dark:text-gray-400 bg-white dark:bg-background-dark px-2 py-1 rounded border border-border-light dark:border-border-dark tracking-tighter">
-                  ART-2024-HIS-L206
-                </span>
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-text-main dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                History of Modern Art &amp; Design
-              </h3>
-              <div className="mt-auto space-y-2.5">
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    person
-                  </span>
-                  <span className="font-medium">Prof. Alan Grant</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-text-secondary dark:text-gray-400 text-sm">
-                  <span className="material-symbols-outlined text-[18px] opacity-70">
-                    calendar_month
-                  </span>
-                  <span>2024 - Spring Semester</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 pt-0">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
-                View Details
-                <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </article>
-          {<CourseCard />}
+             
+            
+         
+            </>
+          )}
+          {!loading && courses && courses.length > 0
+            ? courses.map((course) => (
+                <CourseCard key={course._id} Course={course} />
+              ))
+            : !loading && (
+                <p className="col-span-full text-center py-10 text-gray-500">
+                  No courses available.
+                </p>
+              )}
         </div>
         <div className=" flex items-center justify-between  px-4 py-2 sm:px-6 mt-8 ">
           {/* <div className="flex flex-1 justify-between sm:hidden">
@@ -797,7 +575,7 @@ const CoursePage = () => {
               Next
             </a>
           </div> */}
-          <div className="flex flex-1 items-center justify-center  ">
+          {/* <div className="flex flex-1 items-center justify-center  ">
             <div>
               <nav
                 aria-label="Pagination"
@@ -857,7 +635,8 @@ const CoursePage = () => {
                 </a>
               </nav>
             </div>
-          </div>
+          </div> */}
+          <Pagination page={page} setPage={setPage} totalDocs={totalDocs}/>
         </div>
         <div className="hidden mt-12 flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
           {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">

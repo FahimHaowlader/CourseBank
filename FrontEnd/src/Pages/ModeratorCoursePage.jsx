@@ -4,6 +4,69 @@ import AddCourseCard from "../Components/AddCourseCard";
 import CourseDeleteConformation from "../Components/CourseDeleteConformation";
 
 const ModeratorCoursePage = () => {
+  const course = [
+    {
+        "instructorImage": {
+            "imageURL": "https://example.com/ludwig.jpg"
+        },
+        "handbook": {
+            "fileUrl": "https://edu.com/music-handbook.pdf"
+        },
+        "_id": "6957c3679ad2a10d20c2cdfc",
+        "title": "classical music theory classical music theory classical music theory classical music theory",
+        "courseCode": "MUS101",
+        "department": "music",
+        "staringDate": "2025-02-01T00:00:00.000Z",
+        "degree": "bachelors",
+        "semester": 1,
+        "description": "Notation, harmony, and rhythm.",
+        "credits": 2,
+        "category": "non-major",
+        "type": "core",
+        "instructorName": "ludwig van beethoven",
+        "instructorDepartment": "music",
+        "books": [
+            {
+                "_id": "6958373c971f79c164d2fe0a",
+                "title": "Tonal Harmony",
+                "authorName": "Kostka",
+                "fileUrl": "https://edu.com/music.pdf"
+            }
+        ],
+        "materials": [
+            {
+                "_id": "6958373c971f79c164d2fe0b",
+                "name": "Scale Sheets",
+                "fileUrl": "https://edu.com/scales.pdf"
+            },
+            {
+                "_id": "6958373c971f79c164d2fe0b",
+                "name": "Scale Sheets",
+                "fileUrl": "https://edu.com/scales.pdf"
+            },
+        ],
+        "tasks": [
+            {
+                "_id": "6958373c971f79c164d2fe0c",
+                "name": "Composition 1",
+                "fileUrl": "https://edu.com/comp.pdf"
+            }
+        ],
+         "assessments": [
+            {
+                "_id": "6958373c971f79c164d2fe0c",
+                "name": "midterm",
+                "fileUrl": "https://edu.com/comp.pdf"
+            },
+            {
+                "_id": "6958373c971f79c164d2fe0c",
+                "name": "final",
+                "fileUrl": "https://edu.com/comp.pdf"
+            }
+
+        ]
+    }
+  ]
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-5">
@@ -55,11 +118,11 @@ const ModeratorCoursePage = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-           < CustomCourseCard/>
-           < CustomCourseCard/>
-           < CustomCourseCard/>
+           < CustomCourseCard Course={course[0]}/>
+           {/* < CustomCourseCard/> */}
+           {/* < CustomCourseCard/> */}
            < AddCourseCard/>
-          <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
+          {/* <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
             <div className="p-5 flex flex-col flex-1">
               <div className="flex justify-between items-start mb-4 flex-wrap gap-y-2">
                 <div className="flex items-center gap-2">
@@ -778,15 +841,15 @@ const ModeratorCoursePage = () => {
                 </button>
               </div>
             </div>
-          </article>
-          <div className="group relative bg-transparent rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/60 dark:border-primary/20 dark:hover:border-primary/50 flex flex-col justify-center items-center h-full min-h-80 cursor-pointer hover:bg-primary/5 transition-all duration-300">
+          </article> */}
+          {/* <div className="group relative bg-transparent rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/60 dark:border-primary/20 dark:hover:border-primary/50 flex flex-col justify-center items-center h-full min-h-80 cursor-pointer hover:bg-primary/5 transition-all duration-300">
             <div className="flex flex-col items-center gap-3 text-primary/80 group-hover:text-primary transition-colors">
               <div className="w-16 h-16 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
                 <span className="material-symbols-outlined text-3xl">add</span>
               </div>
               <span className="font-bold text-lg">Add Card</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
       {/* <footer className="bg-background-light dark:bg-card-dark border-t border-border-light dark:border-border-dark py-8 mt-auto">

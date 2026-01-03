@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import { AiOutlineSearch } from "react-icons/ai";
 import { MdOutlinePersonSearch } from "react-icons/md";
 import { BiHash } from "react-icons/bi";
@@ -13,11 +13,57 @@ import { GrShareOption } from "react-icons/gr";
 import { LiaIdCardSolid } from "react-icons/lia";
 import CustomCourseCard from '../Components/CustomCourseCard';
 import { AiOutlinePlus } from "react-icons/ai";
+import axios from 'axios';
 
 
 
 
 const AllCoursePage = () => {
+  const [courses, setCourses] = useState([]);
+  const [page,setPage]=useState(1);
+  const [sort , setSort] = useState({
+    sortField: '',
+    sortOrder: ''
+  });
+  const [filters, setFilters] = useState({
+    title: '',
+    teacher: '',
+    courseId: '',
+    department: '',
+    degree: '',
+    year: '',
+    semester: '',
+    type: '',
+    credit: '',
+    category: ''
+  }); 
+  useEffect(() => {
+ 
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.post('https://coursebank.onrender.com/api/v1/users-all-course', {
+    "parameters" : {
+        
+    }
+});
+        console.log('Fetched courses:', response);
+        setCourses(response.data);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
+
+    // const fetchedCourses = [
+    //   // Sample course data
+    //   { id: 1, title: 'Introduction to Computer Science', teacher: 'Dr. Smith' },
+    //   { id: 2, title: 'Advanced Mathematics', teacher: 'Prof. Johnson' },
+    //   // Add more courses as needed
+    // ];
+    // setCourses(fetchedCourses);
+  }, []);
+
   return (
    <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
@@ -274,7 +320,11 @@ const AllCoursePage = () => {
                    </div>
                  </div>
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        
+         {
+          courses.map((course) => (
+            <CustomCourseCard key={course.id} course={course} />
+          ))
+         }
          <CustomCourseCard/>
          <CustomCourseCard/>
          <CustomCourseCard/>
