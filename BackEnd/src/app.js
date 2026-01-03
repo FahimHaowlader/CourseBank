@@ -32,22 +32,7 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-// This MUST be the last middleware in your app.js
-app.use((err, req, res, next) => {
-    // If the error is an instance of your apiError, use its statusCode
-    // Otherwise, default to 500 (Internal Server Error)
-    const statusCode = err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
 
-    console.error(`[ERROR] ${statusCode} - ${message}`);
-
-    res.status(statusCode).json({
-        success: false,
-        statusCode,
-        message,
-        errors: err.errors || []
-    });
-});
 
 app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
 
@@ -65,6 +50,24 @@ app.use(cookieParser()); // Moved up
 
 // 4. STATIC FILES
 app.use(express.static('public'));
+
+
+// This MUST be the last middleware in your app.js
+app.use((err, req, res, next) => {
+    // If the error is an instance of your apiError, use its statusCode
+    // Otherwise, default to 500 (Internal Server Error)
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    console.error(`[ERROR] ${statusCode} - ${message}`);
+
+    res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message,
+        errors: err.errors || []
+    });
+});
 
 // 5. ROUTES
 app.get('/', (req, res) => {
