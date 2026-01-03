@@ -19,6 +19,7 @@ import SelectAbleTable from "../Components/SelectAbleTable";
 import SemesterDisplay from "../Components/semesterTransformer";
 import Pagination from "../Components/Pagination";
 import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton";
+import GeneralSkeleton from "../Components/GeneralSkeleton"; 
 // import Skeleton from "../Components/SkeletonCard";
 
 const CheckPage = () => {
@@ -55,7 +56,8 @@ const CheckPage = () => {
       {/* <SelectAbleTable /> */}
       {/* <SemesterDisplay code={11} />
 <SemesterDisplay code={50} />  */}
-<CourseDetailsSkeleton />
+{/* <CourseDetailsSkeleton /> */}
+<GeneralSkeleton />
   {/* <Pagination page={3} setPage={(p) => console.log(p)} totalDocs={244} /> */}
   {/* <Skeleton /> */}
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
