@@ -71,10 +71,12 @@ const LoginPage = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              
               {/* UserID Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" htmlFor="userid">
+                <label
+                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                  htmlFor="userid"
+                >
                   User ID
                 </label>
                 <div className="relative">
@@ -95,7 +97,10 @@ const LoginPage = () => {
 
               {/* Password Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" htmlFor="password">
+                <label
+                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                  htmlFor="password"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -115,9 +120,15 @@ const LoginPage = () => {
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                    aria-label={passwordVisible ? "Hide password" : "Show password"}
+                    aria-label={
+                      passwordVisible ? "Hide password" : "Show password"
+                    }
                   >
-                    {passwordVisible ? <TbEyeClosed className="text-xl" /> : <TbEye className="text-xl" />}
+                    {passwordVisible ? (
+                      <TbEyeClosed className="text-xl" />
+                    ) : (
+                      <TbEye className="text-xl" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -137,7 +148,6 @@ const LoginPage = () => {
                 </button>
               </div>
             </form>
-
           </div>
         </div>
       </main>
