@@ -33,32 +33,14 @@ const LoginPage = () => {
 
     // 2. Simulated Login Logic
     setLoading(true);
-    console.log("Logging in with:", userid.toLowerCase());
-
-    // const response =  await loginWithUserIdAndPassword(userid.toLowerCase(), password);
-    // console.log("Login response:", response);
-    
     try {
-      const response = await axios.post(
-        `https://coursebank.onrender.com/api/v1/login`,
-        {
-          userId: userid.toLowerCase(),
-          password: password,
-        },
-        { withCredentials: true }
-      );
-      console.log("Login response:", response.data);
-    } catch (error) {
-      console.error("Login error:", error.message);
-      setError("Login failed. Please check your User ID and password.");
-      setLoading(false);
-      return;
+    const response =  await loginWithUserIdAndPassword(userid.toLowerCase(), password);
     }
-    // Simulate API delay
-    setTimeout(() => {
+    catch(err) {
+      return;
+    }finally {
       setLoading(false);
-      // Handle actual login redirect or logic here
-    }, 1500);
+    }
   };
 
   return (
