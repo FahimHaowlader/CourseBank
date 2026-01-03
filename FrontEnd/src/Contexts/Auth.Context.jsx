@@ -23,17 +23,17 @@ export const AuthProvider = ({ children }) => {
   // axios.defaults.withCredentials = true;
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/me`);
-        if (response.data) setUser(response.data);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkSession();
+    // const checkSession = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_BASE_URL}/me`);
+    //     if (response.data) setUser(response.data);
+    //   } catch (err) {
+    //     setUser(null);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    // checkSession();
   }, []);
 
   const loginWithUserIdAndPassword = async (userId, password) => {
