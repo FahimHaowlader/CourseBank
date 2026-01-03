@@ -56,7 +56,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+          setTotalDocs(response.data.data?.totalDocuments);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -95,7 +95,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+          setTotalDocs(response.data.data?.totalDocuments);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -138,7 +138,7 @@ const CoursePage = () => {
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
           console.log(response.data.data);
-          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+          setTotalDocs(response.data.data?.totalDocuments);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -551,15 +551,28 @@ const handleSortChange = (e) => {
             </>
           )}
           {!loading && courses && courses.length > 0
-            ? courses.map((course) => (
+            && courses.map((course) => (
                 <CourseCard key={course._id} Course={course} />
               ))
-            : !loading && (
-                <p className="col-span-full text-center py-10 text-gray-500">
-                  No courses available.
-                </p>
-              )}
+          }
         </div>
+          {!loading && courses && courses.length === 0 && (
+            <div className="mt-12 w-full flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
+          {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
+            <span className="material-symbols-outlined text-4xl">search_off</span>
+          </div> */}
+          <h3 className="text-xl font-bold text-text-main dark:text-white mb-2">
+            No courses found
+          </h3>
+          <p className="text-text-secondary dark:text-gray-400 px-5 ">
+            We couldn't find any courses matching your filters. Try adjusting
+            your search criteria.
+          </p>
+          <button onClick={clearFilters} className="mt-5 text-primary font-semibold hover:underline hover:cursor-pointer">
+            Clear all filters
+          </button>
+        </div>
+          )}
         <div className=" flex items-center justify-between  px-4 py-2 sm:px-6 mt-8 ">
           {/* <div className="flex flex-1 justify-between sm:hidden">
             <a
@@ -638,21 +651,7 @@ const handleSortChange = (e) => {
           </div> */}
           <Pagination page={page} setPage={setPage} totalDocs={totalDocs}/>
         </div>
-        <div className="hidden mt-12 flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
-          {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
-            <span className="material-symbols-outlined text-4xl">search_off</span>
-          </div> */}
-          <h3 className="text-xl font-bold text-text-main dark:text-white mb-2">
-            No courses found
-          </h3>
-          <p className="text-text-secondary dark:text-gray-400 px-5 ">
-            We couldn't find any courses matching your filters. Try adjusting
-            your search criteria.
-          </p>
-          <button className="mt-5 text-primary font-semibold hover:underline hover:cursor-pointer">
-            Clear all filters
-          </button>
-        </div>
+        
       </main>
       <footer className="bg-background-light dark:bg-card-dark border-t border-border-light dark:border-border-dark py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-text-secondary dark:text-gray-500">

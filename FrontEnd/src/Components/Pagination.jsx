@@ -20,7 +20,7 @@ const Pagination = ({ page, setPage, totalDocs }) => {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex flex-1 items-center justify-center mt-10 mb-10">
+    <div className="flex flex-1 items-center justify-center my-5">
       <nav
         aria-label="Pagination"
         className="isolate inline-flex -space-x-px rounded-md shadow-sm bg-white dark:bg-card-dark"
