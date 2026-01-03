@@ -6,14 +6,14 @@ import { useAuth } from "../Contexts/Auth.Context.jsx";
 import axios from "axios";
 
 const LoginPage = () => {
-  
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const {loginWithUserIdAndPassword, error, setError,loading,setLoading} = useAuth();
+  const { loginWithUserIdAndPassword, error, setError, loading, setLoading } =
+    useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
+
     const userid = e.target.userid.value;
     const password = e.target.password.value;
 
@@ -22,14 +22,14 @@ const LoginPage = () => {
       setError("Please enter both User ID and password.");
       return;
     }
-    if (userid.length !== 11 && userid.length !== 10) {
-      setError("Invalid User ID .");
-      return;
-    }
-    if (password.length !== 6) {
-      setError("wrong password .");
-      return;
-    }
+    // if (userid.length !== 11 && userid.length !== 10) {
+    //   setError("Invalid User ID .");
+    //   return;
+    // }
+    // if (password.length !== 6) {
+    //   setError("wrong password .");
+    //   return;
+    // }
 
     // 2. Simulated Login Logic
     setLoading(true);
@@ -37,14 +37,23 @@ const LoginPage = () => {
 
     // const response =  await loginWithUserIdAndPassword(userid.toLowerCase(), password);
     // console.log("Login response:", response);
-
-    const response  = await axios.post(`https://coursebank.onrender.com/api/v1/login`, {
-      userId: userid.toLowerCase(),
-      password: password
-    },
-    { withCredentials: true }
-  );
-    console.log("Login response:", response.data);
+    
+    try {
+      const response = await axios.post(
+        `https://coursebank.onrender.com/api/v1/login`,
+        {
+          userId: userid.toLowerCase(),
+          password: password,
+        },
+        { withCredentials: true }
+      );
+      console.log("Login response:", response.data);
+    } catch (error) {
+      console.error("Login error:", error.message);
+      setError("Login failed. Please check your User ID and password.");
+      setLoading(false);
+      return;
+    }
     // Simulate API delay
     setTimeout(() => {
       setLoading(false);
@@ -57,7 +66,6 @@ const LoginPage = () => {
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
           <div className="p-8 sm:p-10">
-            
             {/* Header Section */}
             <div className="mb-8 text-center">
               <div className="w-16 h-16 bg-teal-50 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -80,10 +88,12 @@ const LoginPage = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              
               {/* UserID Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" htmlFor="userid">
+                <label
+                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                  htmlFor="userid"
+                >
                   User ID
                 </label>
                 <div className="relative">
@@ -104,7 +114,10 @@ const LoginPage = () => {
 
               {/* Password Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" htmlFor="password">
+                <label
+                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                  htmlFor="password"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -124,9 +137,15 @@ const LoginPage = () => {
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                    aria-label={passwordVisible ? "Hide password" : "Show password"}
+                    aria-label={
+                      passwordVisible ? "Hide password" : "Show password"
+                    }
                   >
-                    {passwordVisible ? <TbEyeClosed className="text-xl" /> : <TbEye className="text-xl" />}
+                    {passwordVisible ? (
+                      <TbEyeClosed className="text-xl" />
+                    ) : (
+                      <TbEye className="text-xl" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -146,7 +165,6 @@ const LoginPage = () => {
                 </button>
               </div>
             </form>
-
           </div>
         </div>
       </main>
