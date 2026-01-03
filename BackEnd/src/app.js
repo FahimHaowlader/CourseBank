@@ -4,47 +4,33 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import router from "./route.js";
 
-
 const app = express();
 
-app.use(helmet()); // Add helmet for security headers
-
-const allowedOrigins = [
-  process.env.CLIENT_URL_PROD,  // production domain
-  process.env.CLIENT_URL_DEV,  // local development
-];
-
-
-// app.use(cors()); // Enable CORS for all origins
-
-
-app.use(cors({
-    origin: function(origin, callback) {
-        // allow requests with no origin (like mobile apps or curl)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
-    credentials: true,
-    optionsSuccessStatus: 200 // for legacy browsers 
+// 1. HELMET - Configure to allow cross-origin
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// 2. CORS - Explicitly allow your frontend
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
+// 3. PARSERS - Must be before routes
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(cookieParser()); // Moved up
 
-app.use(express.urlencoded({ extended: true, limit: '1mb' })); // Parse URL-encoded request bodies
+// 4. STATIC FILES
+app.use(express.static('public'));
 
-app.use(express.static('public')); // Serve static files from the 'public' directory
-app.use(cookieParser()); // Parse cookies in request headers
-
-
+// 5. ROUTES
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-app.use('/api/v1', router); // Use the imported route for /api/v1
+app.use('/api/v1', router);
 
 export default app;
