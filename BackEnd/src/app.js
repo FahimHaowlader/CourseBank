@@ -6,17 +6,41 @@ import router from "./route.js";
 
 const app = express();
 
-// 1. HELMET - Configure to allow cross-origin
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// 2. CORS - Explicitly allow your frontend
+const allowedOrigins = [
+  process.env.CLIENT_URL_PROD,
+  process.env.CLIENT_URL_DEV,
+  "http://localhost:5173" // Hardcode this temporarily to test
+].filter(Boolean); // This removes any 'undefined' values from the array
+
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("Blocked by CORS. Origin was:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"]
+  optionsSuccessStatus: 200
 }));
+
+
+app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
+
+// 2. CORS - Explicitly allow your frontend
+// app.use(cors({
+//   origin: "http://localhost:5173", 
+//   credentials: true,
+//   allowedHeaders: ["Content-Type", "Authorization"]
+// }));
 
 // 3. PARSERS - Must be before routes
 app.use(express.json({ limit: '1mb' }));
