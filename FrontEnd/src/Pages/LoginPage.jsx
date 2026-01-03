@@ -41,7 +41,9 @@ const LoginPage = () => {
     const response  = await axios.post(`https://coursebank.onrender.com/api/v1/login`, {
       userId: userid.toLowerCase(),
       password: password
-    });
+    },
+    { withCredentials: true }
+  );
     console.log("Login response:", response.data);
     // Simulate API delay
     setTimeout(() => {
