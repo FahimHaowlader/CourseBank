@@ -506,7 +506,7 @@ const handleSortChange = (e) => {
         </div>
                )
               }
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ">
           {loading && (
             <>
               <div>
@@ -561,7 +561,7 @@ const handleSortChange = (e) => {
           {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
             <span className="material-symbols-outlined text-4xl">search_off</span>
           </div> */}
-          <h3 className="text-xl font-bold text-text-main dark:text-white mb-2">
+          <h3 className="text-xl font-bold text-text-main dark:text-white">
             No courses found
           </h3>
           <p className="text-text-secondary dark:text-gray-400 px-5 ">

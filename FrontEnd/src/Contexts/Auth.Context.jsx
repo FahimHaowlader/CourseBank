@@ -28,11 +28,13 @@ const checkSession = async () => {
         withCredentials: true 
       });
       if (response.data?.success) {
+        console.log("Session valid:", response.data);
         setUser(response.data.data);
       } else {
         setUser(null);
       }
     } catch (err) {
+      console.log("Session check failed", err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -40,9 +42,9 @@ const checkSession = async () => {
   };
 
   // Check session once on initial load
-  useEffect(() => {
-    checkSession();
-  }, []);
+  // useEffect(() => {
+  //   checkSession();
+  // }, []);
   const loginWithUserIdAndPassword = async (userId, password) => {
     // console.log("Attempting login for:", userId);
     setLoading(true);

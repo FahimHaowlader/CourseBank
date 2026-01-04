@@ -4,7 +4,7 @@ import { LuCalendarDays } from "react-icons/lu";
 import { IoArrowForwardSharp } from "react-icons/io5";
 import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
-
+import { Link } from 'react-router';
 
 import SemesterDisplay from './semesterTransformer';
 
@@ -76,12 +76,14 @@ const CustomCourseCard = ({Course}) => {
             </button>
           </div> */}
            <div className="p-5 pt-0 flex items-center justify-between">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
-              View Details
-              <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                <IoArrowForwardSharp size={18} />
-              </span>
-            </button>
+               <Link  to={'/courses/' + Course._id}>
+        <button className="w-auto px-4 h-9 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
+        View Details 
+          <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
+            <IoArrowForwardSharp size={18} />
+          </span>
+        </button>
+        </Link> 
               <div className="flex items-center gap-2">
                 <button
                   className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 hover:bg-primary/20 dark:bg-gray-800 dark:text-primary dark:hover:bg-gray-700"
