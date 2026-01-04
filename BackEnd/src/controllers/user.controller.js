@@ -200,6 +200,18 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
   );
 });
 
+const logoutUser = asyncHandler(async (req, res) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+  });
+  res.status(200).json(new apiResponse(200, {}, "User logged out successfully"));
+});
+
+const verifyToken = asyncHandler(async (req, res) => {
+  const user = req.user;
+  res.status(200).json(new apiResponse(200, { user }, "Token is valid"));
+});
 
 
-export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch };
+
+export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch ,verifyToken , logoutUser};

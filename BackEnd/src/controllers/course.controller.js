@@ -154,7 +154,7 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
   }
 
   const course = await Course.findById(courseId).select(
-    '+description +instructorDepartment +instructorImage +books +materials +tasks +assesments +handbook'
+    '+description +instructorDepartment +instructorImage +books +materials +tasks +assessments +handbook'
   );
 
   if (!course) {
