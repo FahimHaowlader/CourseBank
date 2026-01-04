@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { LuAsterisk } from "react-icons/lu";
 
 const CustomDatePicker = () => {
   const today = new Date();
@@ -55,8 +56,13 @@ const CustomDatePicker = () => {
 
   return (
     <div className="col-span-1 relative z-20">
+
       <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-        Starting Date
+       <div className="flex gap-1 " >
+
+        Starting Date 
+         <span> <LuAsterisk className="text-red-500" size={14}/></span>
+       </div>
       </label>
 
       {/* INPUT BUTTON */}

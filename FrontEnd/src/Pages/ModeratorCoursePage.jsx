@@ -1,9 +1,30 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
 import CustomCourseCard from "../Components/CustomCourseCard";
 import AddCourseCard from "../Components/AddCourseCard";
-import CourseDeleteConformation from "../Components/CourseDeleteConformation";
+import CourseDeleteConformation from "../Components/CourseDeleteConformation";  
+import { useAuth } from "../Contexts/Auth.Context";
+import axios from "axios";
 
 const ModeratorCoursePage = () => {
+  const { user } = useAuth();
+  const [loading,setLoading] = useState(false);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    // Fetch courses for the logged-in moderator
+    const fetchModeratorCourses = async () => {
+      try {
+        const response = await axios.get(`http://localhost:4000/api/moderator/${user?._id}/courses`);
+        setCourses(response.data);
+      } catch (error) {
+        console.error("Error fetching moderator courses:", error);
+      }
+    };
+    fetchModeratorCourses();
+  }, [user?._id]);
+
+          
+
   const course = [
     {
         "instructorImage": {
