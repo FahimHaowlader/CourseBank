@@ -22,28 +22,27 @@ export const AuthProvider = ({ children }) => {
   const API_BASE_URL = 'https://coursebank.onrender.com/api/v1';
   // axios.defaults.withCredentials = true;
 
-useEffect(() => {
-  const checkSession = async () => {
+const checkSession = async () => {
     try {
-      // withCredentials is required to send the cookie to the backend
-      const response = await axios.get(`${API_BASE_URL}/me`, {
+      const response = await axios.get(`${API_BASE_URL}/verify-token`, {
         withCredentials: true 
       });
-
       if (response.data?.success) {
-        setUser(response.data.data); // Setting the user from your API response structure
+        setUser(response.data.data);
+      } else {
+        setUser(null);
       }
     } catch (err) {
-      // We catch the 401 here silently
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  checkSession();
-}, []);
-
+  // Check session once on initial load
+  useEffect(() => {
+    checkSession();
+  }, []);
   const loginWithUserIdAndPassword = async (userId, password) => {
     // console.log("Attempting login for:", userId);
     setLoading(true);
@@ -79,6 +78,7 @@ useEffect(() => {
     logOut,
     error,
     setError,
+    checkSession,
     
   };
 

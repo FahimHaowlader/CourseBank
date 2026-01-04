@@ -143,7 +143,7 @@ const CoursePage = () => {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
       } catch (error) {
-        console.error("Error fetching courses:", error);
+        // console.error("Error fetching courses:", error);
         setCourses([]);
       } finally {
         setLoading(false);
