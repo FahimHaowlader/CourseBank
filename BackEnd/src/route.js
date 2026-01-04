@@ -2,7 +2,7 @@ import { Router } from "express";
 import { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "./controllers/course.controller.js";
 
 
-import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch } from "./controllers/user.controller.js";
+import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, logoutUser , verifyToken } from "./controllers/user.controller.js";
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
 import {upload} from "./middlewares/multer.middleware.js";
@@ -56,7 +56,9 @@ router.route('/delete-course-handbook/:courseId').delete(deleteCourseHandbook);
 
 router.route('/delete-course/:courseId').delete(deleteCourse);
 
+router.route('/verify-token').get(verifyToken);
 
+router.route ('/logout').post(logoutUser);
 
 {/** admin route */} 
 
