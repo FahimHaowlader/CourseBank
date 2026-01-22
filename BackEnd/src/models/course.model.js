@@ -75,24 +75,24 @@ const courseSchema = new mongoose.Schema(
       lowercase: true,
       select: false,
     },
-    instructorImage: {
-      imageURL: {
-        type: String,
-        required: [true, "Instructor image URL is required"],
-        // Simplified validation: just check if it's a valid URL format
-        validate: {
-          validator: function (v) {
-            return /^(https?:\/\/)/i.test(v);
-          },
-          message: "Invalid image URL format",
-        },
-      },
-      publicId: {
-        type: String,
-        required: [true, "Public ID is required for image management"],
-        select: false,
-      },
-    },
+    // instructorImage: {
+    //   imageURL: {
+    //     type: String,
+    //     required: [true, "Instructor image URL is required"],
+    //     // Simplified validation: just check if it's a valid URL format
+    //     validate: {
+    //       validator: function (v) {
+    //         return /^(https?:\/\/)/i.test(v);
+    //       },
+    //       message: "Invalid image URL format",
+    //     },
+    //   },
+    //   publicId: {
+    //     type: String,
+    //     required: [true, "Public ID is required for image management"],
+    //     select: false,
+    //   },
+    // },
 
     books: {
       type: [
@@ -112,17 +112,17 @@ const courseSchema = new mongoose.Schema(
             validate: {
               validator: function (v) {
                 // Use .test() for a single string
-                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+                return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
               },
               message:
                 "The URL must be a valid PDF document link for books",
             },
           },
-          publicId: {
-            type: String,
-            required: [true, "Public ID is required for book management"],
-            select: false,
-          },
+          // publicId: {
+          //   type: String,
+          //   required: [true, "Public ID is required for book management"],
+          //   select: false,
+          // },
         },
       ],
       select: false,
@@ -141,17 +141,17 @@ const courseSchema = new mongoose.Schema(
             validate: {
               validator: function (v) {
                 // Use .test() for a single string
-                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+                return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
               },
               message:
                 "The URL must be a valid PDF document link for materials",
             },
           },
-          publicId: {
-            type: String,
-            required: [true, "Public ID is required for material management"],
-            select: false,
-          },
+          // publicId: {
+          //   type: String,
+          //   required: [true, "Public ID is required for material management"],
+          //   select: false,
+          // },
         },
       ],
       select: false,
@@ -171,17 +171,17 @@ const courseSchema = new mongoose.Schema(
             validate: {
               validator: function (v) {
                 // Use .test() for a single string
-                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+               return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
               },
               message:
                 "The URL must be a valid PDF document link for tasks",
             },
           },
-          publicId: {
-            type: String,
-            required: [true, "Public ID is required for task management"],
-            select: false,
-          },
+          // publicId: {
+          //   type: String,
+          //   required: [true, "Public ID is required for task management"],
+          //   select: false,
+          // },
         },
       ],
       select: false,
@@ -210,17 +210,18 @@ const courseSchema = new mongoose.Schema(
             validate: {
               validator: function (v) {
                 // Use .test() for a single string
-                return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+               return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
+
               },
               message:
                 "The URL must be a valid PDF document link for assessments",
             },
           },
-          publicId: {
-            type: String,
-            required: [true, "Public ID is required for assesment management"],
-            select: false,
-          },
+          // publicId: {
+          //   type: String,
+          //   required: [true, "Public ID is required for assesment management"],
+          //   select: false,
+          // },
         },
       ],
       select: false,
@@ -233,16 +234,16 @@ const courseSchema = new mongoose.Schema(
         validate: {
           validator: function (v) {
             // Use .test() for a single string
-            return /^(https?:\/\/.*\.(?:pdf))$/i.test(v);
+            return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
           },
           message: "The URL must be a valid PDF document link for handbook",
         },
       },
-      publicId: {
-        type: String,
-        required: [true, "Public ID is required for handbook management"],
-        select: false,
-      },
+        // publicId: {
+        //   type: String,
+        //   required: [true, "Public ID is required for handbook management"],
+        //   select: false,
+        // },
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
