@@ -15,37 +15,9 @@ const CourseDetailsEditPage = () => {
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
-        {/* <nav
-             aria-label="Breadcrumb"
-             className="flex text-sm text-slate-500 dark:text-slate-400 mb-6"
-           >
-             <ol className="flex items-center space-x-2">
-               <li>
-                 <a className="hover:text-primary transition-colors" href="#">
-                   Courses
-                 </a>
-               </li>
-               <li>
-                 <span className="material-symbols-outlined text-xs text-slate-400">
-                   /
-                 </span>
-               </li>
-               <li className="font-medium text-slate-900 dark:text-white">
-                 CS101
-               </li>
-             </ol>
-           </nav> */}
         <header className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="flex-1">
-              {/* <div className="flex items-center gap-3 mb-3">
-                   <span className="bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 text-xs font-bold px-2.5 py-0.5 rounded uppercase tracking-wider">
-                     Spring 2024
-                   </span>
-                   <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 text-xs font-bold px-2.5 py-0.5 rounded uppercase tracking-wider">
-                     Open
-                   </span>
-                 </div> */}
               <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
                 Introduction to Computer Science
               </h1>
@@ -69,6 +41,25 @@ const CourseDetailsEditPage = () => {
                   <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span>
+                  Undergraduate
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                  <span className="material-symbols-outlined text-primary text-lg">
+                    <GrShareOption />
+                  </span>
+                  Undergraduate
+                </div>
+               
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                  <span className="material-symbols-outlined text-primary text-lg">
+                    <GrShareOption />
+                  </span>
+                  Undergraduate
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                  <span className="material-symbols-outlined text-primary text-lg">
+                    <GrShareOption />
+                  </span>
                   In-Person
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
@@ -80,16 +71,6 @@ const CourseDetailsEditPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              {/* <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
-                   <span className="material-symbols-outlined text-lg">
-                     bookmark
-                   </span>
-                   Save
-                 </button>
-                 <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
-                   <span className="material-symbols-outlined text-lg">share</span>
-                   Share
-                 </button> */}
               <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
                 <span className="material-symbols-outlined ">
                   <FiEdit2 size={20} />
@@ -99,41 +80,10 @@ const CourseDetailsEditPage = () => {
             </div>
           </div>
         </header>
-        {/* <div className="border-b border-border-light dark:border-border-dark mb-8">
-             <nav className="flex space-x-8 -mb-px overflow-x-auto">
-               <a
-                 className="border-b-2 border-primary text-primary font-semibold py-4 px-1 text-sm whitespace-nowrap"
-                 href="#"
-               >
-                 Overview
-               </a>
-               <a
-                 className="border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 font-medium py-4 px-1 text-sm whitespace-nowrap transition-colors"
-                 href="#"
-               >
-                 Syllabus
-               </a>
-               <a
-                 className="border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 font-medium py-4 px-1 text-sm whitespace-nowrap transition-colors"
-                 href="#"
-               >
-                 Materials
-               </a>
-               <a
-                 className="border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 font-medium py-4 px-1 text-sm whitespace-nowrap transition-colors flex items-center gap-1"
-                 href="#"
-               >
-                 Reviews
-                 <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded text-xs font-bold">
-                   4.8
-                 </span>
-               </a>
-             </nav>
-           </div> */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-3 flex flex-col gap-8">
             <section>
-              <div className="flex  items-center justify-between pr-10 mb-4">
+              <div className="flex items-center justify-between pr-10 mb-2">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white ">
                   Instructor Info
                 </h2>
@@ -143,11 +93,11 @@ const CourseDetailsEditPage = () => {
               </div>
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                  <img
+                  {/* <img
                     alt="Dr. Sarah Jenkins"
                     className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuD916ur3Kw62VYw88YBsrNnkZ6ke42kDz0jYaHhQAqaXLhIwRuvwEuUrxicp0CetW2aGZFuonbY0jz1MWz_-C1ryyMAKpPuvGjiHTRYi8MB-RGQB4wRr3z3cTnpcGWLbst8PDjjg6VtLQ1XKoI_74KHsEISGlxppCAYWrT_5_-aXRldEBw0EGSlF5c3Ds3T6hRfCrZR1HxJwKbLxFSInIrkWZDsP2zdM_Otno_7_MgQBUtu73AyDbRWGpBCc0tr8oB5rGEK2EzfdLgP"
-                  />
+                  /> */}
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                       Dr. Sarah Jenkins
@@ -166,19 +116,6 @@ const CourseDetailsEditPage = () => {
                       15th January 2024
                     </span>
                   </div>
-                  {/* <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                     <div className="flex flex-col sm:text-right">
-                       <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
-                         Format
-                       </span>
-                       <span className="font-medium text-slate-800 dark:text-slate-200">
-                         Theory + Lab
-                       </span>
-                     </div> */}
-                  {/* <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                     <span className="inline-flex items-center justify-center px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-mono text-xs font-semibold">
-                       ● CS101-S24
-                     </span> */}
                 </div>
               </div>
             </section>
@@ -225,16 +162,16 @@ const CourseDetailsEditPage = () => {
                 </p>
               </div>
             </section>
-            <div className="flex  items-center justify-end pr-10">
+            {/* <div className="flex  items-center justify-end pr-10">
               {/* <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                    Course Description
                  </h2> */}
               {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
 
-              <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+              {/* <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
                 <FiEdit2 size={22} />
-              </div>
-            </div>
+              </div> 
+            </div> */}
             <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-800 flex items-center justify-center shrink-0">
