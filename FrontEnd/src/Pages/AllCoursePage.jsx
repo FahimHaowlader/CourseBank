@@ -42,9 +42,7 @@ const AllCoursePage = () => {
     const fetchCourses = async () => {
       try {
         const response = await axios.post('https://coursebank.onrender.com/api/v1/users-all-course', {
-    "parameters" : {
-        
-    }
+    "parameters" : { }
 });
         console.log('Fetched courses:', response);
         setCourses(response.data);
@@ -320,11 +318,11 @@ const AllCoursePage = () => {
                    </div>
                  </div>
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-         {
+         {/* {
           courses.map((course) => (
             <CustomCourseCard key={course.id} course={course} />
           ))
-         }
+         } */}
          <CustomCourseCard/>
          <CustomCourseCard/>
          <CustomCourseCard/>
