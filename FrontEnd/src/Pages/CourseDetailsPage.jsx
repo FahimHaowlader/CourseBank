@@ -190,11 +190,11 @@ const CourseDetailsPage = () => {
               </h2>
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                  <img
+                  {/* <img
                     alt={course.instructorName}
                     className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
                     src={course.instructorImage.imageURL}
-                  />
+                  /> */}
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white capitalize">
                       {course.instructorName}
