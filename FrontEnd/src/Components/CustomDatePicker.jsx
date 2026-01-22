@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const CustomDatePicker = () => {
+const CustomDatePicker = ({label}) => {
   const today = new Date();
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -56,7 +56,7 @@ const CustomDatePicker = () => {
   return (
     <div className="col-span-1 relative z-20">
       <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-        Starting Date
+        {label}
       </label>
 
       {/* INPUT BUTTON */}
