@@ -42,8 +42,8 @@ const CourseCard = ({Course}) => {
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                       {Course?.type?.charAt(0).toUpperCase() + Course?.type?.slice(1)}
                     </div>
-                    <div className="inline-flex max-w-[72%] items-center justify-center px-2.5 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
-                      <SemesterDisplay code={21} />
+                    <div className="inline-flex max-w-[72%] min-w-[70%] items-center justify-center px-2.5 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
+                <SemesterDisplay code={Course?.semester ?? 11} />
                     </div>
                     {/* <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
                                 2nd Semester 

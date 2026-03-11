@@ -20,6 +20,7 @@ import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton";
 import NoCourse from "../Components/NoCourse";
 import NoElement from "../Components/NoElement";
 import SemesterDisplay from "../Components/semesterTransformer";
+import { DepartmentMap } from "../Components/DepartmentMap";
 
 const CourseDetailsPage = () => {
   const [course, setCourse] =useState(null);
@@ -134,40 +135,44 @@ const CourseDetailsPage = () => {
                selection:text-gray-600 dark:selection:text-gray-300">
                   {course.title.charAt(0).toUpperCase() + course.title.slice(1) }
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-5">
-                Department of Engineering • School of Computing
+              <p className="text-lg text-slate-600 dark:text-slate-400 mb-1 ">
+               {DepartmentMap[course.department] ? "Department of " + DepartmentMap[course.department] : "Unknown Department"}
               </p>
+              <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
+               selection:text-gray-600 dark:selection:text-gray-300 mb-6" >{course.courseCode}</p>
+              
+              
               <div className="flex flex-wrap gap-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                    {course.degree.charAt(0).toUpperCase() + course.degree.slice(1)}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   {course.type.charAt(0).toUpperCase() + course.type.slice(1)}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   {course.category.charAt(0).toUpperCase() + course.category.slice(1)}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   {course.credits} Credits
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   {/* <SemesterDisplay code={course.semester} /> */}
-                  <SemesterDisplay code={11} />
+                  <SemesterDisplay code={course.semester} />
                 </div>
               </div>
             </div>
@@ -189,21 +194,22 @@ const CourseDetailsPage = () => {
                 Instructor Info
               </h2>
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  {/* <img
+                {/* <div className="flex items-center gap-4">
+                   <img
                     alt={course.instructorName}
                     className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
                     src={course.instructorImage.imageURL}
                   /> */}
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white capitalize">
+                  <div className="flex flex-col sm:items-center">
+                    <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white capitalize">
                       {course.instructorName}
                     </h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">
-                      School of Computing
+                    <p className="text-slate-500 text-center dark:text-slate-400 text-sm">
+
+                      {DepartmentMap[course.instructorDepartment] ? "Department of " + DepartmentMap[course.instructorDepartment] : "Unknown Department"}
                     </p>
                   </div>
-                </div>
+             {/* </div>  */}
                 <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm">
                   <div className="flex flex-col text-center sm:text-right">
                     <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
