@@ -4,11 +4,10 @@ import { MdOutlinePeopleAlt } from "react-icons/md";
 import { LuChartNoAxesCombined } from "react-icons/lu";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdOutlineGavel } from "react-icons/md";
-import { MdOutlineCampaign } from "react-icons/md";
+
 import { IoArrowForwardSharp } from "react-icons/io5";
 
-
-
+import { MdEditNote } from "react-icons/md";
 
 const AdminPage = () => {
   return (
@@ -23,7 +22,6 @@ const AdminPage = () => {
               Manage university resources, users, and system settings.
             </p>
           </div>
-          
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <a
@@ -32,7 +30,7 @@ const AdminPage = () => {
           >
             <div class="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <span class="material-symbols-outlined text-[28px]">
-                <MdOutlineAssignment/>
+                <MdOutlineAssignment />
               </span>
             </div>
             <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
@@ -49,12 +47,40 @@ const AdminPage = () => {
               </span>
             </div>
           </a>
+
+
+          <a
+            class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
+            href="#"
+          >
+            <div class="h-12 w-12 rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-4 group-hover:bg-sky-500 group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[32px]">
+                <MdEditNote />
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
+              Manage Contributors
+            </h3>
+            <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
+              Manage permissions, track scholarly input, and collaborate with 
+              academic staff across departments.
+            </p>
+            <div class="flex items-center text-sky-600 dark:text-sky-400 font-semibold text-sm mt-auto hover:underline">
+              <span>Access Module</span>
+              <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
+                <IoArrowForwardSharp />
+              </span>
+            </div>
+          </a>
+
           <a
             class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             href="#"
           >
             <div class="h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined text-[28px]"><MdOutlinePeopleAlt/></span>
+              <span class="material-symbols-outlined text-[28px]">
+                <MdOutlinePeopleAlt />
+              </span>
             </div>
             <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
               Manage Moderators
@@ -66,10 +92,36 @@ const AdminPage = () => {
             <div class="flex items-center text-blue-600 dark:text-blue-400 font-semibold text-sm mt-auto hover:underline">
               <span>Access Module</span>
               <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
-               <IoArrowForwardSharp />
+                <IoArrowForwardSharp />
               </span>
             </div>
           </a>
+
+
+          <a
+            class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
+            href="#"
+          >
+            <div class="h-12 w-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[28px]">
+                <MdOutlineGavel />
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
+              Content Moderation
+            </h3>
+            <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
+              Review reported content, manage feedback, and ensure community
+              guidelines.
+            </p>
+            <div class="flex items-center text-amber-600 dark:text-amber-400 font-semibold text-sm mt-auto hover:underline">
+              <span>Access Module</span>
+              <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
+                <IoArrowForwardSharp />
+              </span>
+            </div>
+          </a>
+
           <a
             class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             href="#"
@@ -93,6 +145,7 @@ const AdminPage = () => {
               </span>
             </div>
           </a>
+          
           <a
             class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             href="#"
@@ -116,54 +169,12 @@ const AdminPage = () => {
               </span>
             </div>
           </a>
-          <a
-            class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
-            href="#"
-          >
-            <div class="h-12 w-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined text-[28px]"><MdOutlineGavel /></span>
-            </div>
-            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
-              Content Moderation
-            </h3>
-            <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
-              Review reported content, manage feedback, and ensure community
-              guidelines.
-            </p>
-            <div class="flex items-center text-amber-600 dark:text-amber-400 font-semibold text-sm mt-auto hover:underline">
-              <span>Access Module</span>
-              <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
-                <IoArrowForwardSharp />
-              </span>
-            </div>
-          </a>
-          <a
-            class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
-            href="#"
-          >
-            <div class="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined text-[28px]">
-                <MdOutlineCampaign />
-              </span>
-            </div>
-            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
-              Announcements
-            </h3>
-            <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
-              Broadcast important updates, alerts, and news to the entire
-              university network.
-            </p>
-            <div class="flex items-center text-indigo-600 dark:text-indigo-400 font-semibold text-sm mt-auto hover:underline">
-              <span>Access Module</span>
-              <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
-                <IoArrowForwardSharp />
-              </span>
-            </div>
-          </a>
+
+          
+         
         </div>
       </main>
-
-    </div>
+    </div> 
   );
 };
 

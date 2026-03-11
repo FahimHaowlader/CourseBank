@@ -56,7 +56,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+          setTotalDocs(response.data.data?.totalDocuments || 0 );
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -188,7 +188,7 @@ const handleSortChange = (e) => {
   });
 };
 
-  // console.log(sort);
+  // console.log(totalDocs);
   // console.log(page);
   // console.log(filters);
   // console.log(courses);
@@ -555,7 +555,7 @@ const handleSortChange = (e) => {
                 <CourseCard key={course._id} Course={course} />
               ))
             : !loading && (
-                <p className="col-span-full text-center py-10 text-gray-500">
+                <p className="col-span-full text-center py-10 text-gray-500 md:pt-28">
                   No courses available.
                 </p>
               )}
