@@ -25,8 +25,57 @@ import { MdDeleteOutline } from "react-icons/md";
 
 import CustomDatePicker from "../Components/CustomDatePicker";
 import Department from "../Components/Department";
+import { getDeptName } from "../Components/DepartmentMap";
 
 const AddCoursePage = () => {
+
+  const [formData, setFormData] = useState({
+    title: "",
+    courseCode: "",
+    startDate: "",
+    format: "", 
+    type: "",
+    credits: "",
+    description: "",
+    handbook: "",
+    instructorName: "",
+    instructorDepartment: "",
+  });
+
+    const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+  const handleDepartmentChange = (e) => {
+    const { value } = e.target;
+    setFormData({ ...formData, instructorDepartment: value });
+  };
+
+  const handleDateChange = (date) => {  
+    setFormData({ ...formData, startDate: date });  
+  };
+
+  // const [title, setTitle] = useState("");
+  // const [courseCode, setCourseCode] = useState("");
+  // const [startDate, setStartDate] = useState('');
+  // const [format, setFormat] = useState("");
+  // const [type, setType] = useState("");
+  // const [credits, setCredits] = useState("");
+  // const [description, setDescription] = useState(""); 
+  // const [handbook, setHandbook] = useState("");
+  // const [instructorName,setInstructorName] = useState("");
+  // const [instructorDepartment,setInstructorDepartment] = useState("");
+
+  
+ const handleSubmit = (e) => {
+    e.preventDefault(); // prevent page reload
+    console.log(formData); // all form data here
+    console.log("Books:", books);
+    console.log("Materials:", materials);
+    console.log("Tasks:", tasks);
+    console.log("Assessments:", assessments);
+  };
+
   const [books, setBooks] = useState([
     { id: Date.now(), name: "", author: "", link: "" },
   ]);
@@ -44,7 +93,7 @@ const AddCoursePage = () => {
   };
 
   // Update input values
-  const handleChange = (id, field, value) => {
+  const handleBookChange = (id, field, value) => {
     setBooks(
       books.map((book) =>
         book.id === id ? { ...book, [field]: value } : book,
@@ -147,7 +196,7 @@ const AddCoursePage = () => {
             comprehensive course entry.
           </p>
         </div>
-        <form className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           {/** course basic info */}
           <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
             <div className="flex items-center gap-2 mb-6">
@@ -173,6 +222,9 @@ const AddCoursePage = () => {
                     <input
                       placeholder="e.g. Intro to Computer Science"
                       type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
                       className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
                     />
                   </div>
@@ -181,7 +233,7 @@ const AddCoursePage = () => {
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full md:col-span-3">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Course ID
+                    Course Code
                   </span>
                   <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
                     <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
@@ -190,7 +242,10 @@ const AddCoursePage = () => {
                     <input
                       placeholder="ABCD-1234-EFGH-5678"
                       type="text"
-                      className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
+                      className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all uppercase  "
+                      name="courseCode"
+                      value={formData.courseCode}
+                      onChange={handleChange}
                     />
                   </div>
                 </label>
@@ -201,13 +256,17 @@ const AddCoursePage = () => {
                     Department
                   </span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option value="">All Departments</option>
+                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed"
+                    value="cse"
+                    disabled
+                    >
+                      {/* <option value="">All Departments</option>
                       <option>Computer Science</option>
                       <option>Arts &amp; Design</option>
                       <option>Physics</option>
-                      <option>Mathematics</option>
-                      <option>Business</option>
+                      <option>Mathematics</option> */}
+                      <option >{getDeptName('cse')}</option>
+                      
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                       <IoIosArrowDown />
@@ -218,43 +277,64 @@ const AddCoursePage = () => {
 
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full">
-                  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Degree
-                  </span>
-                  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option value="">All Degrees</option>
-                      <option>Bachelor</option>
-                      <option>Master</option>
-                      <option>PhD</option>
-                      <option>Associate</option>
-                    </select>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                      <IoIosArrowDown />
-                    </span>
-                  </div>
-                </label>
+  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
+    Degree
+  </span>
+
+  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg transition-colors">
+    <select
+      className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed opacity-70"
+      name="degree"
+      value="master"
+      disabled
+    >
+      <option value="">All Degrees</option>
+      <option value="bachelor">Bachelor</option>
+      <option value="master">Master</option>
+      <option value="phd">PhD</option>
+      <option value="associate">Associate</option>
+    </select>
+
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary text-[20px]">
+      <IoIosArrowDown />
+    </span>
+  </div>
+</label>
               </div>
               <div className="col-span-1">
-                <label className="flex flex-col gap-1.5 w-full">
-                  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Semester
-                  </span>
-                  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option value="">All Semesters</option>
-                      <option>Fall</option>
-                      <option>Spring</option>
-                      <option>Summer</option>
-                    </select>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                      <IoIosArrowDown />
-                    </span>
-                  </div>
-                </label>
+           <label className="flex flex-col gap-1.5 w-full">
+  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
+    Semester
+  </span>
+
+  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg transition-colors">
+    <select
+      className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed opacity-70"
+      name="semester"
+      value="41"
+      disabled
+    >
+      <option value="">All Semesters</option>
+      <option value="11">Frist Year 1est Semester</option>
+      <option value="12">Frist Year 2nd Semester</option>
+      <option value="21">Second Year 1est Semester</option>
+      <option value="22">Second Year 2nd Semester</option>
+      <option value="31">Third Year 1est Semester</option>
+      <option value="32">Third Year 2nd Semester</option>
+      <option value="41">Fourth Year 1est Semester</option>
+      <option value="42">Fourth Year 2nd Semester</option>
+      <option value="51">Fifth Year 1est Semester</option>
+      <option value="52">Fifth Year 2nd Semester</option>
+    </select>
+
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary text-[20px]">
+      <IoIosArrowDown />
+    </span>
+  </div>
+</label>
               </div>
               <div className="col-span-1 relative z-20">
-                <CustomDatePicker label="Stating Date" />
+                <CustomDatePicker label="Stating Date" onChange={handleDateChange} />
               </div>
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full">
@@ -262,11 +342,15 @@ const AddCoursePage = () => {
                     Type
                   </span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option value="">All Types</option>
-                      <option>Core</option>
-                      <option>Elective</option>
-                      <option>Lab</option>
+                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    >
+                       
+                    <option value={"core"}>Core</option>
+                    <option value="lab">Lab</option>
+                    <option value="project">Project</option>  
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                       <IoIosArrowDown />
@@ -280,11 +364,17 @@ const AddCoursePage = () => {
                     Credit
                   </span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option value="">All Credits</option>
-                      <option>1 - 3 Credits</option>
-                      <option>3 - 6 Credits</option>
-                      <option>6+ Credits</option>
+                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="credits"
+                    value={formData.credits}
+                    onChange={handleChange}
+                    >
+                   <option value="1">1 Credits</option>
+                    <option value="2">2 Credits</option>
+                    <option value="3">3 Credits</option>
+                    <option value="4">4 Credits</option>
+                    <option value="5">5 Credits</option>
+                    <option value="6">6 Credits</option>
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                       <IoIosArrowDown />
@@ -295,14 +385,17 @@ const AddCoursePage = () => {
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Major / Non-Major
+                    Format
                   </span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option value="">All Categories</option>
-                      <option>Major Required</option>
-                      <option>Major Elective</option>
-                      <option>Non-Major (General)</option>
+                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="format"
+                    value={formData.format}
+                    onChange={handleChange}
+                    >
+                     <option value="major">Major</option>
+                    <option value="non-major">Non-Major</option>
+                    <option value="elective">Elective</option>
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                       <IoIosArrowDown />
@@ -420,6 +513,9 @@ const AddCoursePage = () => {
                     <input
                       placeholder="e.g. Dr. John Doe / Prof. Jane Smith"
                       type="text"
+                        name="instructorName"
+                      value={formData.instructorName}
+                      onChange={handleChange}
                       className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
                     />
                   </div>
@@ -443,7 +539,7 @@ const AddCoursePage = () => {
                     </span>
                   </div>
                 </label> */}
-                <Department />
+                <Department value={formData.instructorDepartment} onChange={handleDepartmentChange} />
               </div>
             </div>
           </div>
@@ -463,6 +559,9 @@ const AddCoursePage = () => {
               </div>
               <textarea
                 className="w-full p-4 rounded-lg bg-background-light  dark:bg-background-dark/30 border border-primary/60  dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60 resize-none h-60"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
                 placeholder="Provide a detailed overview of the course objectives, topics covered, and expected learning outcomes..."
               ></textarea>
             </div>
@@ -512,7 +611,7 @@ const AddCoursePage = () => {
                           placeholder="e.g. Clean Code"
                           value={book.name}
                           onChange={(e) =>
-                            handleChange(book.id, "name", e.target.value)
+                            handleBookChange(book.id, "name", e.target.value)
                           }
                         />
                       </div>
@@ -532,7 +631,7 @@ const AddCoursePage = () => {
                           placeholder="e.g. Robert C. Martin"
                           value={book.author}
                           onChange={(e) =>
-                            handleChange(book.id, "author", e.target.value)
+                            handleBookChange(book.id, "author", e.target.value)
                           }
                         />
                       </div>
@@ -552,7 +651,7 @@ const AddCoursePage = () => {
                           placeholder="https://example.com/book.pdf"
                           value={book.link}
                           onChange={(e) =>
-                            handleChange(book.id, "link", e.target.value)
+                            handleBookChange(book.id, "link", e.target.value)
                           }
                         />
                       </div>
@@ -682,6 +781,9 @@ const AddCoursePage = () => {
                       className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
                       placeholder="e.g. https://example.com/book.pdf"
                       type="text"
+                      name="handbook"
+                      value={formData.handbook}
+                      onChange={handleChange}
                     />
                     <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
                       <FiLink className="text-primary" />
@@ -906,8 +1008,9 @@ const AddCoursePage = () => {
           </div>
 
           <button
+          type="submit"
             className=" px-6 py-4 rounded-lg bg-primary hover:bg-primary-dark text-white dark:text-background-dark font-bold shadow-sm shadow-primary/30 transition-all transform active:scale-95 w-full flex items-center justify-center gap-2 cursor-pointer my-5"
-            type="button"
+         
           >
             <span className="material-symbols-outlined text-lg">
               <FaRegSave />

@@ -448,7 +448,7 @@ const CoursePage = () => {
                   >
                     <option value="">All Types</option>
                     <option value={"core"}>Core</option>
-                    {/* <option value='elective'>Elective</option> */}
+                    <option value="project">Project</option>
                     <option value="lab">Lab</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
@@ -493,8 +493,8 @@ const CoursePage = () => {
                   >
                     <option value="">All Categories</option>
                     <option value="major">Major</option>
-                    <option value="elective">Elective</option>
                     <option value="non-major">Non-Major</option>
+                    <option value="elective">Elective</option>
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />

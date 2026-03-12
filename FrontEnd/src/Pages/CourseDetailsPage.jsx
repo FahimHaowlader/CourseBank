@@ -227,7 +227,7 @@ const CourseDetailsPage = () => {
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                 Course Description
               </h2>
-              <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
+              <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed first-letter:uppercase">
                 <p className="mb-4">
                  {course.description}
                 </p>
@@ -282,12 +282,12 @@ const CourseDetailsPage = () => {
                       </span>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors capitalize">
                         {material.name}
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         PDF • {material?.size} MB 
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
@@ -319,10 +319,10 @@ const CourseDetailsPage = () => {
                       </span>
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-base capitalize">
                         {book.title}
                       </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 capitalize">
                         {book.authorName}
                       </p>
                       {/* <p className="text-xs font-mono text-slate-400 mt-2">
@@ -358,12 +358,12 @@ const CourseDetailsPage = () => {
                         </span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
+                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors capitalize">
                           {task.name}
                         </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                           {task?.type} Updated yesterday
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
@@ -405,9 +405,15 @@ const CourseDetailsPage = () => {
                          <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
                             {assessment.name}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                            {assessment?.type} paper test
+                        <div className="flex items-center gap-2"  >
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                          1/1/1
                         </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                             50 mark
+                        </p>
+                        
+                        </div>
                       </div>
                     </div>
                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
