@@ -1,4 +1,7 @@
 import React from "react";
+import { useState } from "react";
+
+
 import { TbIdBadge2 } from "react-icons/tb";
 import { AiOutlineSearch } from "react-icons/ai";
 import { BiHash } from "react-icons/bi";
@@ -19,10 +22,99 @@ import { MdOutlineTask } from "react-icons/md";
 import { MdOutlineAssignment } from "react-icons/md";
 import { MdOutlineAssessment } from "react-icons/md";
 import { FaRegSave } from "react-icons/fa";
+import { MdDeleteOutline } from "react-icons/md";
+
 
 import CustomDatePicker from "../Components/CustomDatePicker";
+import Department from "../Components/Department";
 
 const AddCoursePage = () => {
+
+const [books, setBooks] = useState([
+  { id: Date.now(), name: "", author: "", link: "" }
+]);
+
+// Add a new row at the TOP
+const addMoreBooks = () => {
+  setBooks([{ id: Date.now(), name: "", author: "", link: "" }, ...books]);
+};
+
+// Remove a specific row
+const removeBook = (id) => {
+  if (books.length > 1) {
+    setBooks(books.filter((book) => book.id !== id));
+  }
+};
+
+// Update input values
+const handleChange = (id, field, value) => {
+  setBooks(books.map(book => 
+    book.id === id ? { ...book, [field]: value } : book
+  ));
+};
+
+const [materials, setMaterials] = useState([
+  { id: Date.now(), name: "", link: "" }
+]);
+
+const addMaterial = () => {
+  setMaterials([{ id: Date.now(), name: "", link: "" }, ...materials]);
+};
+
+const removeMaterial = (id) => {
+  if (materials.length > 1) {
+    setMaterials(materials.filter((m) => m.id !== id));
+  }
+};
+
+const handleMaterialChange = (id, field, value) => {
+  setMaterials(materials.map(m => 
+    m.id === id ? { ...m, [field]: value } : m
+  ));
+};
+
+
+const [tasks, setTasks] = useState([
+  { id: Date.now(), name: "", link: "" }
+]);
+
+const addTask = () => {
+  setTasks([{ id: Date.now(), name: "", link: "" }, ...tasks]);
+};
+
+const removeTask = (id) => {
+  if (tasks.length > 1) {
+    setTasks(tasks.filter((t) => t.id !== id));
+  }
+};
+
+const handleTaskChange = (id, field, value) => {
+  setTasks(tasks.map(t => 
+    t.id === id ? { ...t, [field]: value } : t
+  ));
+};
+
+const [assessments, setAssessments] = useState([
+  { id: Date.now(), type: "Termtest-1", mark: "", date: "", link: "" }
+]);
+
+const addAssessment = () => {
+  setAssessments([{ id: Date.now(), type: "Termtest-1", mark: "", date: "", link: "" }, ...assessments]);
+};
+
+const removeAssessment = (id) => {
+  if (assessments.length > 1) {
+    setAssessments(assessments.filter((a) => a.id !== id));
+  }
+};
+
+const handleAssessmentChange = (id, field, value) => {
+  setAssessments(assessments.map(a => 
+    a.id === id ? { ...a, [field]: value } : a
+  ));
+};
+
+
   return (
     <div className="bg-background-light dark:bg-background-dark font-display antialiased text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col transition-colors duration-200">
       <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 pt-5">
@@ -104,10 +196,7 @@ const AddCoursePage = () => {
                   </div>
                 </label>
               </div>
-              <div className="col-span-1 relative z-20">
-                <CustomDatePicker label="Stating Date" />
-              </div>
-
+             
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
@@ -144,6 +233,9 @@ const AddCoursePage = () => {
                     </span>
                   </div>
                 </label>
+              </div>
+               <div className="col-span-1 relative z-20">
+                <CustomDatePicker label="Stating Date" />
               </div>
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full">
@@ -284,6 +376,7 @@ const AddCoursePage = () => {
               </div>
             </div>
           </div> */}
+
           <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
             <div className="flex items-center gap-2 mb-6">
               <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
@@ -314,7 +407,7 @@ const AddCoursePage = () => {
                 </label>
               </div>
               <div>
-                <label className="flex flex-col gap-1.5 w-full md:col-span-2">
+                {/* <label className="flex flex-col gap-1.5 w-full md:col-span-2">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
                     Department
                   </span>
@@ -330,10 +423,13 @@ const AddCoursePage = () => {
                       <IoIosArrowDown />
                     </span>
                   </div>
-                </label>
+                </label> */}
+                <Department />
               </div>
             </div>
           </div>
+
+          {/* course description */}
           <div className="w-full md:w-[150%] max-w-full">
             <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
               <div className="flex items-center gap-2 mb-6">
@@ -347,7 +443,7 @@ const AddCoursePage = () => {
                 </h3>
               </div>
               <textarea
-                className="w-full p-4 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-primary/60  dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60 resize-none h-60"
+                className="w-full p-4 rounded-lg bg-background-light  dark:bg-background-dark/30 border border-primary/60  dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60 resize-none h-60"
                 placeholder="Provide a detailed overview of the course objectives, topics covered, and expected learning outcomes..."
               ></textarea>
             </div>
@@ -355,142 +451,163 @@ const AddCoursePage = () => {
 
           {/* Book Item */}
           <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
-                  <span className="material-symbols-outlined">
-                    <PiBooksLight size={24} />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
-                  Suggested Books
-                </h3>
-              </div>
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
+        <PiBooksLight size={24} />
+      </div>
+      <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
+        Suggested Books
+      </h3>
+    </div>
 
-              <button
-                className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  <AiOutlinePlus />
-                </span>{" "}
-                More
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark">
-                <div className="w-full">
-                  <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                    Book Name
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-text-muted-light text-lg">
-                      <MdOutlineMenuBook className="text-primary" />
-                    </span>
-                    <input
-                      className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                      placeholder="e.g. Clean Code"
-                      type="text"
-                    />
-                  </div>
-                </div>
-                <div className=" w-full">
-                  <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                    Author Name
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-text-muted-light text-lg">
-                      <MdOutlinePersonOutline className="text-primary" />
-                    </span>
-                    <input
-                      className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                      placeholder="e.g. Fahad Muhammad"
-                      type="text"
-                    />
-                  </div>
-                </div>
-                <div className="w-full">
-                  <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                    PDF Link 
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                        placeholder="e.g. https://example.com/book.pdf"
-                        type="text"
-                      />
-                      <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
-                        <FiLink className="text-primary" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    {/* Updated Button to trigger addMoreBooks */}
+    <button
+      onClick={addMoreBooks}
+      className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
+      type="button"
+    >
+      <AiOutlinePlus className="text-sm" /> More
+    </button>
+  </div>
+
+  <div className="space-y-4">
+    {/* Map through the books state */}
+    <div className="space-y-4">
+  {books.map((book) => (
+    <div 
+      key={book.id} 
+      className="group flex flex-col md:flex-row gap-4 items-start md:items-end bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark transition-all animate-in fade-in slide-in-from-top-2"
+    >
+      {/* Book Name */}
+      <div className="w-full">
+        <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">Book Name</label>
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-primary"><MdOutlineMenuBook /></span>
+          <input
+            className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+            placeholder="e.g. Clean Code"
+            value={book.name}
+            onChange={(e) => handleChange(book.id, 'name', e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Author Name */}
+      <div className="w-full">
+        <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">Author Name</label>
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-primary"><MdOutlinePersonOutline /></span>
+          <input
+            className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+            placeholder="e.g. Robert C. Martin"
+            value={book.author}
+            onChange={(e) => handleChange(book.id, 'author', e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* PDF Link */}
+      <div className="w-full">
+        <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">PDF Link</label>
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-primary"><FiLink /></span>
+          <input
+            className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+            placeholder="https://example.com/book.pdf"
+            value={book.link}
+            onChange={(e) => handleChange(book.id, 'link', e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* DELETE BUTTON */}
+      <button
+        onClick={() => removeBook(book.id)}
+        className={`material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors  ${books.length === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+        title="Remove Book"
+      >
+        <MdDeleteOutline size={26} />
+      </button>
+    </div>
+  ))}
+</div>
+  </div>
+</div>
           {/* course materials upload */}
-          <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
-                  <span className="material-symbols-outlined">
-                    <FaRegFolderOpen size={24} />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
-                  Course Materials
-                </h3>
-              </div>
-              <button
-                className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  <AiOutlinePlus />
-                </span>{" "}
-                More
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark">
-                <div className="flex-1 w-full">
-                  <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                    Material Name
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-text-secondary dark:text-gray-400 text-lg">
-                      <IoDocumentTextOutline className="text-primary" />
-                    </span>
-                    <input
-                      className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                      placeholder="e.g. Clean Code"
-                      type="text"
-                    />
-                  </div>
-                </div>
-              
-                  <div className="w-full md:w-1/3">
-                    <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                      PDF Link 
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                          placeholder="e.g. https://example.com/book.pdf"
-                          type="text"
-                        />
-                        <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
-                          <FiLink className="text-primary" />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-              </div>
-            </div>
+         <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
+  <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center gap-2">
+      <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
+        <FaRegFolderOpen size={24} />
+      </div>
+      <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
+        Course Materials
+      </h3>
+    </div>
+    <button
+      onClick={addMaterial}
+      className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
+      type="button"
+    >
+      <AiOutlinePlus className="text-sm" /> More
+    </button>
+  </div>
+
+  <div className="space-y-4">
+    {materials.map((m) => (
+      <div 
+        key={m.id} 
+        className="group flex flex-col md:flex-row gap-4 items-start md:items-end bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark transition-all animate-in fade-in slide-in-from-top-2"
+      >
+        {/* Material Name */}
+        <div className="flex-1 w-full">
+          <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
+            Material Name
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-2.5 text-primary text-lg">
+              <IoDocumentTextOutline />
+            </span>
+            <input
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark"
+              placeholder="e.g. Lecture Notes"
+              value={m.name}
+              onChange={(e) => handleMaterialChange(m.id, 'name', e.target.value)}
+            />
           </div>
+        </div>
+
+        {/* PDF Link */}
+        <div className="w-full md:w-1/3">
+          <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
+            PDF Link
+          </label>
+          <div className="relative flex-1">
+            <input
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark"
+              placeholder="https://example.com/file.pdf"
+              value={m.link}
+              onChange={(e) => handleMaterialChange(m.id, 'link', e.target.value)}
+            />
+            <span className="absolute left-3 top-2.5 text-primary text-lg">
+              <FiLink />
+            </span>
+          </div>
+        </div>
+
+        {/* Delete Button */}
+        <button
+          onClick={() => removeMaterial(m.id)}
+          className={`material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors ${materials.length === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+          title="Remove Material"
+        >
+          <MdDeleteOutline size={26} />
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
 
           {/* hand notes upload */}
           <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
@@ -525,209 +642,164 @@ const AddCoursePage = () => {
 
           {/* tasks upload */}
           <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
-                  <span className="material-symbols-outlined">
-                    <MdOutlineTask size={24} />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
-                  Tasks
-                </h3>
-              </div>
-              <button
-                className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  <AiOutlinePlus />
-                </span>{" "}
-                More
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark">
-                <div className="flex-1 w-full">
-                  <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                    Task Name
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-text-muted-light text-lg">
-                      <MdOutlineAssignment className="text-primary" />
-                    </span>
-                    <input
-                      className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                      placeholder="e.g. Clean Code"
-                      type="text"
-                    />
-                  </div>
-                </div>
-                  <div className="w-full md:w-1/3">
-                    <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                      PDF Link 
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                          placeholder="e.g. https://example.com/book.pdf"
-                          type="text"
-                        />
-                        <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
-                          <FiLink className="text-primary" />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-              </div>
-            </div>
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
+        <MdOutlineTask size={24} />
+      </div>
+      <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
+        Tasks
+      </h3>
+    </div>
+    <button
+      onClick={addTask}
+      className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
+      type="button"
+    >
+      <AiOutlinePlus className="text-sm" /> More
+    </button>
+  </div>
+
+  <div className="space-y-4">
+    {tasks.map((t) => (
+      <div 
+        key={t.id} 
+        className="group flex flex-col md:flex-row gap-4 items-start md:items-end bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark transition-all animate-in fade-in slide-in-from-top-2"
+      >
+        {/* Task Name */}
+        <div className="flex-1 w-full">
+          <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">Task Name</label>
+          <div className="relative">
+            <span className="absolute left-3 top-2.5 text-primary text-lg">
+              <MdOutlineAssignment />
+            </span>
+            <input
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark"
+              placeholder="e.g. Lab Report 1"
+              value={t.name}
+              onChange={(e) => handleTaskChange(t.id, 'name', e.target.value)}
+            />
           </div>
+        </div>
+
+        {/* PDF Link */}
+        <div className="w-full md:w-1/3">
+          <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">PDF Link</label>
+          <div className="relative">
+            <span className="absolute left-3 top-2.5 text-primary text-lg">
+              <FiLink />
+            </span>
+            <input
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark"
+              placeholder="https://example.com/task.pdf"
+              value={t.link}
+              onChange={(e) => handleTaskChange(t.id, 'link', e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Delete Button */}
+        <button
+          onClick={() => removeTask(t.id)}
+          className={`material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors ${tasks.length === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+          title="Remove Task"
+        >
+          <MdDeleteOutline size={26} />
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
 
           {/* Assessment upload */}
-          <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
-                  <span className="material-symbols-outlined">
-                    <MdOutlineAssessment size={24} />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
-                  Assessment
-                </h3>
-              </div>
-              <button
-                className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  <AiOutlinePlus />
-                </span>{" "}
-                More
-              </button>
-            </div>
-            <div className="space-y-6">
-              <div className="bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="col-span-1">
-                    <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">
-                      Type
-                    </label>
-                    <div className="relative">
-                      <select className="w-full h-12 px-3  rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark appearance-none cursor-pointer">
-                        <option>Termtest-1</option>
-                        <option>Termtest-2</option>
-                        <option>Midterm-1</option>
-                        <option>Midterm-2</option>
-                        <option>Quiz-2</option>
-                        <option>Quiz-2</option>
-                        <option>Final</option>
-                        <option>Project</option>
-                        <option>Presentation</option>
-                      </select>
-                      <span className="material-symbols-outlined absolute right-3 top-3.5 pointer-events-none text-text-muted-light text-base">
-                        <IoIosArrowDown size={20} />
-                      </span>
-                    </div>
-                  </div>
-                  <div className="col-span-1">
-                    <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">
-                      Mark
-                    </label>
-                    <div className="relative">
-                      <input
-                        className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                        placeholder="e.g. 30"
-                        type="number"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-1">
-                    <CustomDatePicker label="Date" />
-                  </div>
-                  <div className="col-span-1">
-                    <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                      PDF Link 
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          className="w-full h-12 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                          placeholder="e.g. https://example.com/book.pdf"
-                          type="text"
-                        />
-                        <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
-                          <FiLink className="text-primary" />
-                        </span>
-                      </div> 
-                    </div>
-                  </div>
-                </div>
+         <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
+        <MdOutlineAssessment size={24} />
+      </div>
+      <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
+        Assessment
+      </h3>
+    </div>
+    <button
+      onClick={addAssessment}
+      className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
+      type="button"
+    >
+      <AiOutlinePlus className="text-sm" /> More
+    </button>
+  </div>
 
-                {/* <div class="col-span-1">
-                  <label class="block text-sm font-semibold text-text-muted-light mb-1.5">
-                    Upload or Link PDF
-                  </label>
-                  <div class="flex gap-2">
-                    <div class="relative flex-1">
-                      <input class="hidden" id="book-pdf-1" type="file" />
-                      <label
-                        class="flex items-center justify-center gap-2 h-10 px-3 rounded-lg border border-dashed border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-muted-light hover:text-primary hover:border-primary cursor-pointer transition-colors w-full"
-                        htmlFor="book-pdf-1"
-                      >
-                        <span class="material-symbols-outlined text-lg">
-                          <MdOutlineUploadFile className="text-primary" />
-                        </span>
-                        <span class="text-sm truncate text-slate-500">Choose File</span>
-                      </label>
-                    </div>
-                    <div class="relative w-10">
-                      <button
-                        class="flex items-center justify-center size-10 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-muted-light hover:text-primary hover:border-primary transition-colors hover:cursor-pointer"
-                        title="Link URL"
-                        type="button"
-                      >
-                        <span class="material-symbols-outlined text-lg">
-                          <RiSwap3Line className="text-primary" />
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div> */}
-
-                {/* <div class="pt-4 border-t border-border-light dark:border-border-dark border-dashed">
-                  <div class="flex gap-3">
-                    <div class="relative flex-1">
-                      <input class="hidden" id="assess-file-1" type="file" />
-                      <label
-                        class="flex items-center justify-center gap-2 h-10 px-3 rounded-lg border border-dashed border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-muted-light hover:text-primary hover:border-primary hover:bg-primary/5 cursor-pointer transition-all w-full group"
-                        htmlFor="assess-file-1"
-                      >
-                        <span class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">
-                          upload_file
-                        </span>
-                        <span class="text-sm font-medium">
-                          Upload Assessment PDF
-                        </span>
-                      </label>
-                    </div>
-                    <div class="relative w-12">
-                      <button
-                        class="flex items-center justify-center size-10 w-full rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-muted-light hover:text-primary hover:border-primary hover:bg-primary/5 transition-all"
-                        title="Link URL"
-                        type="button"
-                      >
-                        <span class="material-symbols-outlined text-lg">
-                          link
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div> */}
-              </div>
+  <div className="space-y-6">
+    {assessments.map((a) => (
+      <div key={a.id} className="group flex gap-4 items-end bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark animate-in fade-in slide-in-from-top-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
+          {/* Type */}
+          <div className="col-span-1">
+            <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">Type</label>
+            <div className="relative">
+            <select 
+  className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark appearance-none cursor-pointer"
+  value={a.type} // Connects to the state
+  onChange={(e) => handleAssessmentChange(a.id, 'type', e.target.value)} // Updates the state
+>
+  <option value="Termtest-1">Termtest-1</option>
+  <option value="Termtest-2">Termtest-2</option>
+  <option value="Midterm-1">Midterm-1</option>
+  <option value="Midterm-2">Midterm-2</option>
+  <option value="Final">Final</option>
+  <option value="Project">Project</option>
+  <option value="Presentation">Presentation</option>
+</select>
+              <IoIosArrowDown className="absolute right-3 top-4 pointer-events-none text-text-muted-light" />
             </div>
           </div>
+          
+          {/* Mark */}
+          <div className="col-span-1">
+            <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">Mark</label>
+            <input
+              className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
+              placeholder="e.g. 30"
+              type="number"
+              value={a.mark}
+              onChange={(e) => handleAssessmentChange(a.mark, 'mark', e.target.value)}
+            />
+          </div>
+
+          {/* Date */}
+          <div className="col-span-1">
+            <CustomDatePicker label="Date" />
+          </div>
+
+          {/* Link */}
+          <div className="col-span-1">
+            <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">PDF Link</label>
+            <div className="relative">
+              <FiLink className="absolute left-3 top-4 text-primary" />
+              <input
+                className="w-full h-12 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
+                placeholder="https://..."
+                value={a.link}
+                onChange={(e) => handleAssessmentChange(a.id, 'link', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Button */}
+        <button
+          onClick={() => removeAssessment(a.id)}
+          className={`material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors ${assessments.length === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+          title="Remove Assessment"
+        >
+          <MdDeleteOutline size={26} />
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
 
           <button
             className=" px-6 py-4 rounded-lg bg-primary hover:bg-primary-dark text-white dark:text-background-dark font-bold shadow-sm shadow-primary/30 transition-all transform active:scale-95 w-full flex items-center justify-center gap-2 cursor-pointer my-5"
