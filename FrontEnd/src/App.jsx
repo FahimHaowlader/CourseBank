@@ -9,7 +9,7 @@ import CheckPage from './Pages/CheckPage.jsx'
 import CoursePage from './Pages/CoursePage.jsx'
 import CourseDetailsPage from './Pages/CourseDetailsPage.jsx'
 import LoginPage from './Pages/LoginPage.jsx'
-import ModeratorCoursePage from './Pages/ModeratorCoursePage.jsx'
+import ContributorCoursePage from './Pages/ContributorCoursePage.jsx'
 import CourseDetailsEditPage from './Pages/CourseDetailsEditPage.jsx'
 import AddCoursePage from './Pages/AddCoursePage.jsx'
 import AdminPage from './Pages/AdminPage.jsx'
@@ -26,7 +26,7 @@ function App() {
     { path:'/courses', element: <CoursePage /> },
     { path:'/course/:id', element: <CourseDetailsPage /> },
     { path:'/login', element: <LoginPage /> },
-    { path:'/my-courses', element: <ModeratorCoursePage /> },
+    { path:'/my-courses', element: <ContributorCoursePage /> },
     { path:'/edit', element: <CourseDetailsEditPage /> },
     { path:'/add-course', element: <AddCoursePage /> },
     { path:'/admin', element: <AdminPage /> },

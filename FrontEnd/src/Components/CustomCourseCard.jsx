@@ -4,12 +4,20 @@ import { LuCalendarDays } from "react-icons/lu";
 import { IoArrowForwardSharp } from "react-icons/io5";
 import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
+import { Link } from 'react-router';
 
+import { MdDelete } from "react-icons/md";
+import { IoMdCheckmarkCircle } from "react-icons/io";
+import { BsExclamationCircleFill } from "react-icons/bs";
+import { MdRefresh } from "react-icons/md";
 
 import SemesterDisplay from './semesterTransformer';
+import CourseDeleteConformation from './CourseDeleteConformation';
 
 
-const CustomCourseCard = ({Course}) => {
+const CustomCourseCard = ({Course,setModal}) => {
+
+
   return (
     <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
            <div className="p-5 flex flex-col flex-1">
@@ -76,31 +84,36 @@ const CustomCourseCard = ({Course}) => {
             </button>
           </div> */}
            <div className="p-5 pt-0 flex items-center justify-between">
-              <button className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
+              <Link className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer"
+              //  onClick={() => window.location.href = `/course/${Course?.id}`} 
+              to={`/my-course/${Course?._id}`}
+              >
               View Details
               <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
                 <IoArrowForwardSharp size={18} />
               </span>
-            </button>
+            </Link>
               <div className="flex items-center gap-2">
-                <button
+                <Link
                   className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 hover:bg-primary/20 dark:bg-gray-800 dark:text-primary dark:hover:bg-gray-700"
                   title="Edit Course"
+                  to={`/my-course/${Course?._id}`}
+
                 >
                   <span className="material-symbols-outlined text-[20px]">
                     <FiEdit/>
                   </span>
-                </button>
+                </Link>
                 <button
                   className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-slate-200 text-slate-600 transition-colors duration-300 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                  title="Delete Course"
+                  title="Delete Course" onClick={() => setModal({openModal: true, id: Course?._id, title : Course?.title, status:'confirm'})}
                 >
                   <span className="material-symbols-outlined text-[20px]">
                    < MdDeleteOutline size={24}/>
                   </span>
                 </button>
               </div>
-            </div>
+            </div> 
         </article>
   )
 }
