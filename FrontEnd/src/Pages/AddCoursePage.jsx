@@ -1,6 +1,5 @@
 import React from "react";
-import { useState } from "react";
-
+import { useState, useRef, useEffect } from "react";
 
 import { TbIdBadge2 } from "react-icons/tb";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -23,6 +22,7 @@ import { MdOutlineAssignment } from "react-icons/md";
 import { MdOutlineAssessment } from "react-icons/md";
 import { FaRegSave } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
+
 
 
 import CustomDatePicker from "../Components/CustomDatePicker";
@@ -95,24 +95,33 @@ const handleTaskChange = (id, field, value) => {
 };
 
 const [assessments, setAssessments] = useState([
-  { id: Date.now(), type: "Termtest-1", mark: "", date: "", link: "" }
-]);
+    { id: Date.now(), type: "Termtest-1", mark: "", date: new Date(), link: "" }
+  ]);
+  const [activeId, setActiveId] = useState(null);
+  const containerRef = useRef(null);
 
-const addAssessment = () => {
-  setAssessments([{ id: Date.now(), type: "Termtest-1", mark: "", date: "", link: "" }, ...assessments]);
-};
+  // Close when clicking outside the entire section
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setActiveId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-const removeAssessment = (id) => {
-  if (assessments.length > 1) {
-    setAssessments(assessments.filter((a) => a.id !== id));
-  }
-};
+  const addAssessment = () => {
+    setAssessments([{ id: Date.now(), type: "Termtest-1", mark: "", date: new Date(), link: "" }, ...assessments]);
+  };
 
-const handleAssessmentChange = (id, field, value) => {
-  setAssessments(assessments.map(a => 
-    a.id === id ? { ...a, [field]: value } : a
-  ));
-};
+  const removeAssessment = (id) => {
+    if (assessments.length > 1) setAssessments(assessments.filter((a) => a.id !== id));
+  };
+
+  const handleAssessmentChange = (id, field, value) => {
+    setAssessments(assessments.map(a => a.id === id ? { ...a, [field]: value } : a));
+  };
 
 
   return (
@@ -712,7 +721,11 @@ const handleAssessmentChange = (id, field, value) => {
 </div>
 
           {/* Assessment upload */}
-         <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
+
+          <div 
+  ref={containerRef} 
+  className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full"
+>
   <div className="flex items-center justify-between mb-6">
     <div className="flex items-center gap-2">
       <div className="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
@@ -722,84 +735,98 @@ const handleAssessmentChange = (id, field, value) => {
         Assessment
       </h3>
     </div>
-    <button
-      onClick={addAssessment}
-      className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors uppercase tracking-wide cursor-pointer hover:underline"
+    
+    {/* Explicitly use type="button" to prevent form submission/page reload */}
+    <button 
       type="button"
+      onClick={(e) => {
+        e.preventDefault(); // Stop any parent form events
+        addAssessment();
+      }}
+      className="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1 uppercase tracking-wide cursor-pointer hover:underline"
     >
       <AiOutlinePlus className="text-sm" /> More
     </button>
   </div>
 
-  <div className="space-y-6">
-    {assessments.map((a) => (
-      <div key={a.id} className="group flex gap-4 items-end bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark animate-in fade-in slide-in-from-top-2">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-          {/* Type */}
-          <div className="col-span-1">
-            <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">Type</label>
-            <div className="relative">
-            <select 
-  className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark appearance-none cursor-pointer"
-  value={a.type} // Connects to the state
-  onChange={(e) => handleAssessmentChange(a.id, 'type', e.target.value)} // Updates the state
->
-  <option value="Termtest-1">Termtest-1</option>
-  <option value="Termtest-2">Termtest-2</option>
-  <option value="Midterm-1">Midterm-1</option>
-  <option value="Midterm-2">Midterm-2</option>
-  <option value="Final">Final</option>
-  <option value="Project">Project</option>
-  <option value="Presentation">Presentation</option>
-</select>
-              <IoIosArrowDown className="absolute right-3 top-4 pointer-events-none text-text-muted-light" />
+ <div className="space-y-6">
+        {assessments.map((a, index) => (
+          <div 
+            key={a.id} 
+            // Z-Index Stack ensures top rows are always above bottom rows
+            style={{ zIndex: assessments.length - index }} 
+            className="group relative flex gap-4 items-end bg-background-light dark:bg-background-dark/30 p-4 rounded-lg border border-border-light dark:border-border-dark"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
+              {/* Type Select */}
+              <div className="col-span-1">
+                <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">Type</label>
+                <div className="relative">
+                  <select 
+                    className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark appearance-none cursor-pointer"
+                    value={a.type}
+                    onChange={(e) => handleAssessmentChange(a.id, 'type', e.target.value)}
+                  >
+                    <option value="Termtest-1">Termtest-1</option>
+                    <option value="Termtest-2">Termtest-2</option>
+                    <option value="Midterm-1">Midterm-1</option>
+                    <option value="Final">Final</option>
+                    <option value="Project">Project</option>
+                  </select>
+                  <IoIosArrowDown className="absolute right-3 top-4 pointer-events-none text-text-muted-light" />
+                </div>
+              </div>
+
+              {/* Mark Input */}
+              <div className="col-span-1">
+                <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">Mark</label>
+                <input
+                  type="number"
+                  className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
+                  placeholder="e.g. 30"
+                  value={a.mark}
+                  onChange={(e) => handleAssessmentChange(a.id, 'mark', e.target.value)}
+                />
+              </div>
+
+              {/* Date Picker */}
+              <div className="col-span-1">
+                <CustomDatePicker 
+                  label="Date"
+                  isOpen={activeId === a.id}
+                  onToggle={() => setActiveId(activeId === a.id ? null : a.id)}
+                  selectedDate={a.date}
+                  onDateChange={(d) => handleAssessmentChange(a.id, 'date', d)}
+                />
+              </div>
+
+              {/* Link Input */}
+              <div className="col-span-1">
+                <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">PDF Link</label>
+                <div className="relative">
+                  <FiLink className="absolute left-3 top-4 text-primary" />
+                  <input
+                    className="w-full h-12 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
+                    placeholder="https://..."
+                    value={a.link}
+                    onChange={(e) => handleAssessmentChange(a.id, 'link', e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          
-          {/* Mark */}
-          <div className="col-span-1">
-            <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">Mark</label>
-            <input
-              className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
-              placeholder="e.g. 30"
-              type="number"
-              value={a.mark}
-              onChange={(e) => handleAssessmentChange(a.mark, 'mark', e.target.value)}
-            />
-          </div>
 
-          {/* Date */}
-          <div className="col-span-1">
-            <CustomDatePicker label="Date" />
+            {/* Delete Button */}
+            <button
+              onClick={() => removeAssessment(a.id)}
+              className={`material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors ${assessments.length === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+            >
+              <MdDeleteOutline size={26} />
+            </button>
           </div>
-
-          {/* Link */}
-          <div className="col-span-1">
-            <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">PDF Link</label>
-            <div className="relative">
-              <FiLink className="absolute left-3 top-4 text-primary" />
-              <input
-                className="w-full h-12 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
-                placeholder="https://..."
-                value={a.link}
-                onChange={(e) => handleAssessmentChange(a.id, 'link', e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Delete Button */}
-        <button
-          onClick={() => removeAssessment(a.id)}
-          className={`material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors ${assessments.length === 1 ? 'opacity-0 pointer-events-none' : ''}`}
-          title="Remove Assessment"
-        >
-          <MdDeleteOutline size={26} />
-        </button>
+        ))}
       </div>
-    ))}
-  </div>
 </div>
+        
 
           <button
             className=" px-6 py-4 rounded-lg bg-primary hover:bg-primary-dark text-white dark:text-background-dark font-bold shadow-sm shadow-primary/30 transition-all transform active:scale-95 w-full flex items-center justify-center gap-2 cursor-pointer my-5"

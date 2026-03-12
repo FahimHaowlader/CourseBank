@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const CustomDatePicker = ({label}) => {
+const CustomDatePicker = ({ label, onChange }) => {
   const today = new Date();
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(today);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const containerRef = useRef(null);
 
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  // Helper: Get days in month
   const getDaysInMonth = (month, year) => {
     const date = new Date(year, month, 1);
     const daysArray = [];
@@ -24,124 +26,70 @@ const CustomDatePicker = ({label}) => {
   const handleSelectDate = (date) => {
     setSelectedDate(date);
     setOpen(false);
+    if (onChange) onChange(date); // Pass date to parent
   };
 
-  const goToPreviousMonth = (e) => {
-    e.stopPropagation(); // prevent modal from closing
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
-  };
+  // Close when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
-  const goToNextMonth = (e) => {
-    e.stopPropagation(); // prevent modal from closing
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
-
-  // Format as DD/MM/YYYY
+  const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+  
   const formattedDate = `${String(selectedDate.getDate()).padStart(2, "0")}/${String(
     selectedDate.getMonth() + 1
   ).padStart(2, "0")}/${selectedDate.getFullYear()}`;
 
-  const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-
   return (
-    <div className="col-span-1 relative z-20">
+    <div className="col-span-1 relative z-20" ref={containerRef}>
       <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
         {label}
       </label>
 
-      {/* INPUT BUTTON */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full h-12 px-[13px]  rounded-lg text-left
-          bg-white dark:bg-background-dark
-          border border-border-light dark:border-border-dark
-          text-text-main dark:text-white text-sm
-          focus:border-primary transition-all
-          flex items-center justify-between"
+        className="w-full h-12 px-3 rounded-lg text-left bg-white dark:bg-background-dark border border-border-light dark:border-border-dark text-text-main dark:text-white text-sm focus:border-primary transition-all flex items-center justify-between"
       >
         {formattedDate}
-        <IoIosArrowDown size={20} className="text-text-secondary font-semibold" />
+        <IoIosArrowDown size={20} />
       </button>
 
-      {/* CALENDAR MODAL */}
       {open && (
-        <div
-          className="absolute mt-2 w-72 rounded-xl p-4
-          bg-white dark:bg-background-dark
-          border border-border-light dark:border-border-dark
-          shadow-xl"
-          onClick={(e) => e.stopPropagation()} // prevent click inside modal from closing
-        >
-          {/* Header */}
+        <div className="absolute mt-2 w-72 rounded-xl p-4 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark shadow-xl z-50">
           <div className="flex items-center justify-between mb-4">
-            <button
-              type="button"
-              onClick={goToPreviousMonth}
-              className="p-1 hover:bg-primary/10 rounded"
-            >
-              <FaChevronLeft className="text-text-main dark:text-white" />
+            <button type="button" onClick={() => setCurrentMonth(prev => prev === 0 ? 11 : prev - 1)} className="p-1 hover:bg-primary/10 rounded">
+              <FaChevronLeft />
             </button>
-
-            <span className="font-semibold text-text-main dark:text-white">
-              {new Date(currentYear, currentMonth).toLocaleString("default", {
-                month: "long",
-              })}{" "}
-              {currentYear}
-            </span>
-
-            <button
-              type="button"
-              onClick={goToNextMonth}
-              className="p-1 hover:bg-primary/10 rounded"
-            >
-              <FaChevronRight className="text-text-main dark:text-white" />
+            <span className="font-semibold">{new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })} {currentYear}</span>
+            <button type="button" onClick={() => setCurrentMonth(prev => prev === 11 ? 0 : prev + 1)} className="p-1 hover:bg-primary/10 rounded">
+              <FaChevronRight />
             </button>
           </div>
 
-          {/* Days */}
           <div className="grid grid-cols-7 text-xs text-text-secondary mb-2">
-            {days.map((d) => (
-              <div key={d} className="text-center">
-                {d}
-              </div>
-            ))}
+            {days.map(d => <div key={d} className="text-center">{d}</div>)}
           </div>
 
-          {/* Dates */}
           <div className="grid grid-cols-7 gap-1">
-            {daysInMonth.map((dateObj) => {
-              const isSelected =
-                selectedDate.toDateString() === dateObj.toDateString();
-
-              return (
-                <button
-                  type="button"
-                  key={dateObj.getTime()}
-                  onClick={() => handleSelectDate(dateObj)}
-                  className={`h-9 w-9 rounded-lg text-sm
-                    flex items-center justify-center
-                    transition
-                    ${
-                      isSelected
-                        ? "bg-primary text-white"
-                        : "hover:bg-primary/10 text-text-main dark:text-white"
-                    }`}
-                >
-                  {dateObj.getDate()}
-                </button>
-              );
-            })}
+            {daysInMonth.map((dateObj) => (
+              <button
+                type="button"
+                key={dateObj.getTime()}
+                onClick={() => handleSelectDate(dateObj)}
+                className={`h-9 w-9 rounded-lg text-sm flex items-center justify-center ${
+                  selectedDate.toDateString() === dateObj.toDateString() ? "bg-primary text-white" : "hover:bg-primary/10"
+                }`}
+              >
+                {dateObj.getDate()}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -150,4 +98,3 @@ const CustomDatePicker = ({label}) => {
 };
 
 export default CustomDatePicker;
-
