@@ -30,7 +30,7 @@ const UpdateHandbook = ({ handbookModal, setHandbookModal }) => {
             <button onClick={handleClose} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"><IoMdClose size={26} /></button>
           </div>
           
-          <div className="p-8 pt-6">
+          <div className="p-8 pt-5">
             <label className="block text-sm font-semibold text-slate-500 dark:text-gray-400 mb-2">Course Handbook</label>
             <input
               className="w-full h-11 pl-4 pr-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-teal-500 outline-none text-sm text-slate-900 dark:text-white"

@@ -10,81 +10,149 @@ import { MdOutlineAssignment } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { FiEdit2 } from "react-icons/fi";
 
-
-
-
 import AddElement from "../Components/AddElement";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
 import UpdateInstructorInfo from "../Components/UpdateInstructorInfo";
 import UpdateDescription from "../Components/UpdateDescription";
 import UpdateHandbook from "../Components/UpdateHandbook";
+import AddMaterial from "../Components/AddMaterial";
+import AddBook from "../Components/AddBook";
+import AddTask from "../Components/AddTask";
+import AddAssessment from "../Components/AddAssessment";
 
 const CourseDetailsEditPage = () => {
+  const [infoModal, setInfoModal] = useState({
+    openModal: false,
+  });
 
+  const [instructorModal, setInstructorModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-  const [infoModal,setInfoModal] = useState({
-    openModal:false,
-  })
+  const [descriptionModal, setDescriptionModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-  const [instructorModal,setInstructorModal] = useState({
-    openModal:false,
-    status: ""
-  })
+  const [handbookModal, setHandbookModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-  const [descriptionModal,setDescriptionModal] = useState({
-  openModal:false,
-    status: ""
-  })
+  const [materialModal, setMaterialModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-  const [handbookModal,setHandbookModal] = useState({
-  openModal:false,
-    status: ""
-  })
+  const [bookModal, setBookModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-  
-   const handleUpdateInfo = () => {
-    console.log("hello")
-  setInfoModal((prev) => ({
-    ...prev,
-    openModal: true,
-    status: "update",
-  }));
-  console.log(infoModal)
-};
- 
+  const [taskModal, setTaskModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-const handleUpdateInstructorInfo = () => {
-  setInstructorModal((prev) => ({
-    ...prev,
-    openModal: true,
-    status: "update",
-  }));
-}
+  const [deleteModal, setDeleteModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
+  const [assessmentModal, setAssessmentModal] = useState({
+    openModal: false,
+    status: "",
+  });
 
-const handleUpdateDescription = () =>{
-   setDescriptionModal((prev) => ({
-    ...prev,
-    openModal: true,
-    status: "update",
-  }));
-}
+  const handleUpdateInfo = () => {
+    console.log("hello");
+    setInfoModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+    console.log(infoModal);
+  };
 
-const handleUpdateHandbook = ()  => {
-setHandbookModal((prev) => ({
-    ...prev,
-    openModal: true,
-    status: "update",
-  }));
-}
+  const handleUpdateInstructorInfo = () => {
+    setInstructorModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleUpdateDescription = () => {
+    setDescriptionModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleUpdateHandbook = () => {
+    setHandbookModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleUpdateMaterial = () => {
+    console.log("material");
+    setMaterialModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleUpdateBook = () => {
+    setBookModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleUpdateTask = () => {
+    setTaskModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleUpdateAssessment = () => {
+    setAssessmentModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+  };
+
+  const handleDeleteElement = () => {
+      setDeleteModal((prev) => ({
+      ...prev,
+      openModal: true,
+      status: "update",
+    }));
+   
+  };
+
+  const handleDelete = () =>{
+    // Implement course deletion logic here
+     // Implement course deletion logic here
+    alert("Course deleted successfully!");
+  }
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         <header className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-           
-           {/* basic Info */}
+            {/* basic Info */}
             <div className="flex-1">
               <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
                 Introduction to Computer Science
@@ -117,7 +185,7 @@ setHandbookModal((prev) => ({
                   </span>
                   Undergraduate
                 </div>
-               
+
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
@@ -138,38 +206,45 @@ setHandbookModal((prev) => ({
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5" 
-              onClick={handleUpdateInfo}
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <button
+                className="flex w-full lg:w-auto  cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+                onClick={handleUpdateInfo}
               >
                 <span className="material-symbols-outlined ">
                   <FiEdit2 size={20} />
                 </span>
                 Edit
               </button>
-              <UpdateCourseInfo infoModal={infoModal} setInfoModal={setInfoModal}/>
+              <UpdateCourseInfo
+                infoModal={infoModal}
+                setInfoModal={setInfoModal}
+              />
             </div>
+         
           </div>
         </header>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-3 flex flex-col gap-8">
             <section>
-
-                        <div className="flex items-center justify-between pr-10 mb-2">
+              <div className="flex items-center justify-between pr-10 mb-2">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white ">
                   Instructor Info
                 </h2>
-                <div className= "flex flex-col sm:items-center material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
-                onClick={handleUpdateInstructorInfo}
+                <div
+                  className="flex flex-col sm:items-center material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={handleUpdateInstructorInfo}
                 >
                   <FiEdit2 size={22} />
                 </div>
-                <UpdateInstructorInfo instructorModal={instructorModal} setInstructorModal={setInstructorModal}/>
+                <UpdateInstructorInfo
+                  instructorModal={instructorModal}
+                  setInstructorModal={setInstructorModal}
+                />
               </div>
 
-                         <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-
-                           {/* <div className="flex items-center gap-4">
+              <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                {/* <div className="flex items-center gap-4">
 
                               <img
 
@@ -181,56 +256,35 @@ setHandbookModal((prev) => ({
 
                              /> */}
 
-                             <div className="flex flex-col sm:items-center">
+                <div className="flex flex-col sm:items-center">
+                  <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white capitalize">
+                    {/* {course.instructorName}  */}
+                    hello
+                  </h3>
 
-                               <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white capitalize">
+                  <p className="text-slate-500 text-center dark:text-slate-400 text-sm">
+                    {/* {DepartmentMap[course.instructorDepartment] ? "Department of " + DepartmentMap[course.instructorDepartment] : "Unknown Department"} */}{" "}
+                    cse
+                  </p>
+                </div>
 
-                                 {/* {course.instructorName}  */}
+                {/* </div>  */}
 
-                                 hello
+                <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm">
+                  <div className="flex flex-col text-center sm:text-right">
+                    <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
+                      Course Start
+                    </span>
 
-                               </h3>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {/* {new Date(course.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')} */}
+                      1//09/2024
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-                               <p className="text-slate-500 text-center dark:text-slate-400 text-sm">
-
-           
-
-                                 {/* {DepartmentMap[course.instructorDepartment] ? "Department of " + DepartmentMap[course.instructorDepartment] : "Unknown Department"} */} cse
-
-                               </p>
-
-                             </div>
-
-                        {/* </div>  */}
-
-                           <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm">
-
-                             <div className="flex flex-col text-center sm:text-right">
-
-                               <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
-
-                                 Course Start
-
-                               </span>
-
-                               <span className="font-medium text-slate-800 dark:text-slate-200">
-
-                                 {/* {new Date(course.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')} */}
-
-                                 1//09/2024
-
-                               </span>
-
-                             </div>
-
-                            
-
-                           </div>
-
-                         </div>
-
-                       </section>
-        
             <section>
               <div className="flex  items-center justify-between pr-10 mb-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -238,12 +292,16 @@ setHandbookModal((prev) => ({
                 </h2>
                 {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
 
-                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
-                onClick={handleUpdateDescription}
+                <div
+                  className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={handleUpdateDescription}
                 >
                   <FiEdit2 size={22} />
                 </div>
-                <UpdateDescription descriptionModal={descriptionModal} setDescriptionModal={setDescriptionModal}/>
+                <UpdateDescription
+                  descriptionModal={descriptionModal}
+                  setDescriptionModal={setDescriptionModal}
+                />
               </div>
               <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
                 <p className="mb-4">
@@ -281,9 +339,9 @@ setHandbookModal((prev) => ({
               {/* <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                    Course Description
                  </h2> */}
-              {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
+            {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
 
-              {/* <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+            {/* <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
                 <FiEdit2 size={22} />
               </div> 
             </div> */}
@@ -304,15 +362,19 @@ setHandbookModal((prev) => ({
                   </p>
                 </div>
               </div>
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
-              onClick={handleUpdateHandbook}
+              <button
+                className="flex w-full sm:w-auto  cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+                onClick={handleUpdateHandbook}
               >
                 <span className="material-symbols-outlined ">
                   <FiEdit2 size={20} />
                 </span>
                 Edit
               </button>
-              <UpdateHandbook handbookModal={handbookModal} setHandbookModal={setHandbookModal}/>
+              <UpdateHandbook
+                handbookModal={handbookModal}
+                setHandbookModal={setHandbookModal}
+              />
             </div>
             <section>
               <div className="flex items-center justify-between mb-4">
@@ -387,7 +449,13 @@ setHandbookModal((prev) => ({
                     <MdDeleteOutline size={26} />
                   </button>
                 </div>
-                <AddElement />
+                <div onClick={handleUpdateMaterial}>
+                  <AddElement />
+                </div>
+                <AddMaterial
+                  materialModal={materialModal}
+                  setMaterialModal={setMaterialModal}
+                />
                 {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                      <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -499,7 +567,10 @@ setHandbookModal((prev) => ({
                     <MdDeleteOutline size={26} />
                   </button>
                 </div>
-                <AddElement />
+                <div onClick={handleUpdateBook}>
+                  <AddElement />
+                  <AddBook bookModal={bookModal} setBookModal={setBookModal} />
+                </div>
                 {/* <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
                      <div className="flex items-start gap-4">
                        <div className="w-12 h-16 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
@@ -651,7 +722,13 @@ setHandbookModal((prev) => ({
                        download
                      </span>
                    </div> */}
-                  <AddElement />
+                  <div onClick={handleUpdateTask}>
+                    <AddElement />
+                    <AddTask
+                      taskModal={taskModal}
+                      setTaskModal={setTaskModal}
+                    />
+                  </div>
                 </div>
               </section>
             </div>
@@ -723,7 +800,9 @@ setHandbookModal((prev) => ({
                       <MdDeleteOutline size={26} />
                     </button>
                   </div>
+                  <div onClick={handleUpdateAssessment}>
                   <AddElement />
+                  </div>
                 </div>
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
@@ -768,8 +847,14 @@ setHandbookModal((prev) => ({
                       <MdDeleteOutline size={26} />
                     </button>
                   </div>
+                  <div onClick={handleUpdateAssessment}>
                   <AddElement />
-                </div>
+                  </div>
+                <AddAssessment
+                  assessmentModal={assessmentModal}
+                  setAssessmentModal={setAssessmentModal}
+                  />
+                  </div>
               </div>
             </section>
           </div>

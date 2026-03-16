@@ -750,10 +750,10 @@ const handleAssessmentDateChange = (id, date) => {
                       </div>
                     </div>
 
-                    {/* PDF Link */}
+                    {/* Resource Link */}
                     <div className="w-full">
                       <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                        PDF Link
+                        Resource Link
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-2.5 text-primary">
@@ -838,10 +838,10 @@ const handleAssessmentDateChange = (id, date) => {
                     </div>
                   </div>
 
-                  {/* PDF Link */}
+                  {/* Resource Link */}
                   <div className="w-full md:w-1/3">
                     <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                      PDF Link
+                      Resource Link
                     </label>
                     <div className="relative flex-1">
                       <input
@@ -887,7 +887,7 @@ const handleAssessmentDateChange = (id, date) => {
                 </span>
               </div>
               <h3 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">
-                Full Hand Note Book PDF Link
+                Full Hand Note Book Resource Link
               </h3>
             </div>
 
@@ -960,10 +960,10 @@ const handleAssessmentDateChange = (id, date) => {
                     </div>
                   </div>
 
-                  {/* PDF Link */}
+                  {/* Resource Link */}
                   <div className="w-full md:w-1/3">
                     <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5">
-                      PDF Link
+                      Resource Link
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-2.5 text-primary text-lg">
@@ -1102,7 +1102,7 @@ const handleAssessmentDateChange = (id, date) => {
         {/* Link Input */}
         <div className="col-span-1">
           <label className="block text-sm font-semibold text-text-secondary dark:text-gray-400 mb-1.5 pl-1">
-            PDF Link
+            Resource Link
           </label>
           <div className="relative">
             <FiLink className="absolute left-3 top-4 text-primary" />
