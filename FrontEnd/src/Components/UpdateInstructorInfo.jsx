@@ -297,7 +297,7 @@ const UpdateInstructorInfo = ({ instructorModal, setInstructorModal }) => {
         ></div>
 
         {/* Modal Panel - Changed 'inline-block' to 'flex flex-col' for stability */}
-        <div className="relative bg-white dark:bg-slate-800 rounded-2xl text-left shadow-2xl transform transition-all sm:my-8 sm:max-w-lg w-full border border-slate-200 dark:border-slate-700 overflow-visible">
+        <div className="relative bg-white dark:bg-slate-800 rounded-2xl text-left shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:min-w-2xl md:min-w-3xl w-full border border-slate-200 dark:border-slate-700 overflow-visible">
           
           {/* Header */}
           <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-slate-100 dark:border-slate-700 rounded-t-2xl">
@@ -333,7 +333,7 @@ const UpdateInstructorInfo = ({ instructorModal, setInstructorModal }) => {
                 />
               </div>
             </label>
-
+            
             {/* Department Component */}
             <div className="w-full">
                <Department />

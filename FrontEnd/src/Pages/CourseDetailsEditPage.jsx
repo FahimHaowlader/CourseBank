@@ -16,6 +16,8 @@ import { FiEdit2 } from "react-icons/fi";
 import AddElement from "../Components/AddElement";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
 import UpdateInstructorInfo from "../Components/UpdateInstructorInfo";
+import UpdateDescription from "../Components/UpdateDescription";
+import UpdateHandbook from "../Components/UpdateHandbook";
 
 const CourseDetailsEditPage = () => {
 
@@ -26,6 +28,16 @@ const CourseDetailsEditPage = () => {
 
   const [instructorModal,setInstructorModal] = useState({
     openModal:false,
+    status: ""
+  })
+
+  const [descriptionModal,setDescriptionModal] = useState({
+  openModal:false,
+    status: ""
+  })
+
+  const [handbookModal,setHandbookModal] = useState({
+  openModal:false,
     status: ""
   })
 
@@ -43,6 +55,23 @@ const CourseDetailsEditPage = () => {
 
 const handleUpdateInstructorInfo = () => {
   setInstructorModal((prev) => ({
+    ...prev,
+    openModal: true,
+    status: "update",
+  }));
+}
+
+
+const handleUpdateDescription = () =>{
+   setDescriptionModal((prev) => ({
+    ...prev,
+    openModal: true,
+    status: "update",
+  }));
+}
+
+const handleUpdateHandbook = ()  => {
+setHandbookModal((prev) => ({
     ...prev,
     openModal: true,
     status: "update",
@@ -125,45 +154,83 @@ const handleUpdateInstructorInfo = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-3 flex flex-col gap-8">
             <section>
-              <div className="flex items-center justify-between pr-10 mb-2">
+
+                        <div className="flex items-center justify-between pr-10 mb-2">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white ">
                   Instructor Info
                 </h2>
-                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                <div className= "flex flex-col sm:items-center material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
                 onClick={handleUpdateInstructorInfo}
                 >
                   <FiEdit2 size={22} />
                 </div>
                 <UpdateInstructorInfo instructorModal={instructorModal} setInstructorModal={setInstructorModal}/>
               </div>
-              <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  {/* <img
-                    alt="Dr. Sarah Jenkins"
-                    className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD916ur3Kw62VYw88YBsrNnkZ6ke42kDz0jYaHhQAqaXLhIwRuvwEuUrxicp0CetW2aGZFuonbY0jz1MWz_-C1ryyMAKpPuvGjiHTRYi8MB-RGQB4wRr3z3cTnpcGWLbst8PDjjg6VtLQ1XKoI_74KHsEISGlxppCAYWrT_5_-aXRldEBw0EGSlF5c3Ds3T6hRfCrZR1HxJwKbLxFSInIrkWZDsP2zdM_Otno_7_MgQBUtu73AyDbRWGpBCc0tr8oB5rGEK2EzfdLgP"
-                  /> */}
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Dr. Sarah Jenkins
-                    </h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">
-                      School of Computing
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm">
-                  <div className="flex flex-col text-center sm:text-right">
-                    <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
-                      Course Start
-                    </span>
-                    <span className="font-medium text-slate-800 dark:text-slate-200">
-                      15th January 2024
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
+
+                         <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+
+                           {/* <div className="flex items-center gap-4">
+
+                              <img
+
+                               alt={course.instructorName}
+
+                               className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
+
+                               src={course.instructorImage.imageURL}
+
+                             /> */}
+
+                             <div className="flex flex-col sm:items-center">
+
+                               <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white capitalize">
+
+                                 {/* {course.instructorName}  */}
+
+                                 hello
+
+                               </h3>
+
+                               <p className="text-slate-500 text-center dark:text-slate-400 text-sm">
+
+           
+
+                                 {/* {DepartmentMap[course.instructorDepartment] ? "Department of " + DepartmentMap[course.instructorDepartment] : "Unknown Department"} */} cse
+
+                               </p>
+
+                             </div>
+
+                        {/* </div>  */}
+
+                           <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm">
+
+                             <div className="flex flex-col text-center sm:text-right">
+
+                               <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
+
+                                 Course Start
+
+                               </span>
+
+                               <span className="font-medium text-slate-800 dark:text-slate-200">
+
+                                 {/* {new Date(course.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')} */}
+
+                                 1//09/2024
+
+                               </span>
+
+                             </div>
+
+                            
+
+                           </div>
+
+                         </div>
+
+                       </section>
+        
             <section>
               <div className="flex  items-center justify-between pr-10 mb-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -171,9 +238,12 @@ const handleUpdateInstructorInfo = () => {
                 </h2>
                 {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
 
-                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                onClick={handleUpdateDescription}
+                >
                   <FiEdit2 size={22} />
                 </div>
+                <UpdateDescription descriptionModal={descriptionModal} setDescriptionModal={setDescriptionModal}/>
               </div>
               <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
                 <p className="mb-4">
@@ -234,12 +304,15 @@ const handleUpdateInstructorInfo = () => {
                   </p>
                 </div>
               </div>
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+              onClick={handleUpdateHandbook}
+              >
                 <span className="material-symbols-outlined ">
                   <FiEdit2 size={20} />
                 </span>
                 Edit
               </button>
+              <UpdateHandbook handbookModal={handbookModal} setHandbookModal={setHandbookModal}/>
             </div>
             <section>
               <div className="flex items-center justify-between mb-4">
