@@ -1,6 +1,6 @@
 import { IoIosArrowDown } from "react-icons/io";
 
-const Department = ({ value, onChange }) => {
+const Department = ({ value, onChange,defaultText }) => {
   return (
     <label className="flex flex-col gap-1.5 w-full md:col-span-2">
       <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
@@ -13,7 +13,7 @@ const Department = ({ value, onChange }) => {
           value={value}
           onChange={onChange}
         >
-          <option value="">All Departments</option>
+          <option value="">{defaultText}</option>
           
           <optgroup label="Applied Sciences & Technology">
             <option value="arc">Architecture</option>

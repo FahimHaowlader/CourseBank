@@ -296,7 +296,7 @@ const CoursePage = () => {
                 />
               </div>
             </label>
-            <Department value={filters.department} onChange={handleFilterChange} />
+            <Department value={filters.department} onChange={handleFilterChange} defaultText={"All Departments"} />
             {/* <label className="flex flex-col gap-1.5 w-full md:col-span-2">
               <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
                 Department

@@ -32,15 +32,29 @@ const AddCoursePage = () => {
   const [formData, setFormData] = useState({
     title: "",
     courseCode: "",
-    startDate: "",
+    startDate: new Date().toISOString(),
     format: "", 
     type: "",
     credits: "",
     description: "",
-    handbook: "",
     instructorName: "",
     instructorDepartment: "",
   });
+
+  const [handbook,setHandbook] = useState("")
+
+  const checkMissingFields = (data) => {
+  let allFilled = true;
+
+  Object.keys(data).forEach((key) => {
+    if (!data[key] || data[key].toString().trim() === "") {
+      console.log("Missing field:", key); // log missing field
+      allFilled = false;
+    }
+  });
+
+  return allFilled;
+};
 
     const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,37 +66,31 @@ const AddCoursePage = () => {
   };
 
   const handleDateChange = (date) => {  
-    setFormData({ ...formData, startDate: date });  
+    setFormData({ ...formData, startDate: new Date(date).toISOString() });  
   };
 
-  // const [title, setTitle] = useState("");
-  // const [courseCode, setCourseCode] = useState("");
-  // const [startDate, setStartDate] = useState('');
-  // const [format, setFormat] = useState("");
-  // const [type, setType] = useState("");
-  // const [credits, setCredits] = useState("");
-  // const [description, setDescription] = useState(""); 
-  // const [handbook, setHandbook] = useState("");
-  // const [instructorName,setInstructorName] = useState("");
-  // const [instructorDepartment,setInstructorDepartment] = useState("");
-
-  
  const handleSubmit = (e) => {
     e.preventDefault(); // prevent page reload
     console.log(formData); // all form data here
+
+    const validAssessments = cleanAssessments();
+    const validTasks = cleanTasks();
+    const validMaterials = cleanMaterials();
+    const validBooks = cleanBooks();  
+
     console.log("Books:", books);
     console.log("Materials:", materials);
     console.log("Tasks:", tasks);
-    console.log("Assessments:", assessments);
+    console.log("Assessments:", validAssessments);
   };
 
   const [books, setBooks] = useState([
-    { id: Date.now(), name: "", author: "", link: "" },
+    { id: Date.now(), title: "", authorName: "", fileUrl: "" },
   ]);
 
   // Add a new row at the TOP
   const addMoreBooks = () => {
-    setBooks([{ id: Date.now(), name: "", author: "", link: "" }, ...books]);
+    setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }, ...books]);
   };
 
   // Remove a specific row
@@ -101,12 +109,27 @@ const AddCoursePage = () => {
     );
   };
 
+  const cleanBooks = () => {
+  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+
+  const cleanedBooks = books.filter(
+    (b) =>
+      b.title?.trim() &&
+      b.authorName?.trim() &&
+      b.fileUrl?.trim() &&
+      urlRegex.test(b.fileUrl)
+  );
+
+  setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }]);
+  return cleanedBooks;
+};
+
   const [materials, setMaterials] = useState([
-    { id: Date.now(), name: "", link: "" },
+    { id: Date.now(), name: "", fileUrl: "" },
   ]);
 
   const addMaterial = () => {
-    setMaterials([{ id: Date.now(), name: "", link: "" }, ...materials]);
+    setMaterials([{ id: Date.now(), name: "", fileUrl: "" }, ...materials]);
   };
 
   const removeMaterial = (id) => {
@@ -121,10 +144,25 @@ const AddCoursePage = () => {
     );
   };
 
-  const [tasks, setTasks] = useState([{ id: Date.now(), name: "", link: "" }]);
+  const cleanMaterials = () => {
+  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+
+  const cleanedMaterials = materials.filter(
+    (m) =>
+      m.name?.trim() &&          // name exists
+      m.fileUrl?.trim() &&       // fileUrl exists
+      urlRegex.test(m.fileUrl)   // valid URL
+  );
+
+  setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
+  return cleanedMaterials;
+};
+
+
+  const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
 
   const addTask = () => {
-    setTasks([{ id: Date.now(), name: "", link: "" }, ...tasks]);
+    setTasks([{ id: Date.now(), name: "", fileUrl: "" }, ...tasks]);
   };
 
   const removeTask = (id) => {
@@ -137,19 +175,34 @@ const AddCoursePage = () => {
     setTasks(tasks.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
   };
 
-  const [assessments, setAssessments] = useState([
+  const cleanTasks = () => {
+  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+
+  const cleanedTasks = tasks.filter(
+    (t) =>
+      t.name?.trim() &&           // name exists
+      t.fileUrl?.trim() &&        // link exists
+      urlRegex.test(t.fileUrl)    // valid URL
+  );
+
+  setTasks([{ id: Date.now(), name: "", fileUrl: "" }]);
+  return cleanedTasks;
+};
+
+   const [assessments, setAssessments] = useState([
     {
       id: Date.now(),
       type: "Termtest-1",
       mark: "",
       date: new Date(),
-      link: "",
+      fileUrl: "",
     },
   ]);
+
   const [activeId, setActiveId] = useState(null);
   const containerRef = useRef(null);
 
-  // Close when clicking outside the entire section
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -157,32 +210,82 @@ const AddCoursePage = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Add new assessment
   const addAssessment = () => {
+    setAssessments((prev) => [
+      {
+        id: Date.now(),
+        type: "Termtest-1",
+        mark: "",
+        date: new Date(),
+        fileUrl: "",
+      },
+      ...prev,
+    ]);
+  };
+
+  // Remove assessment
+  const removeAssessment = (id) => {
+    setAssessments((prev) =>
+      prev.length > 1 ? prev.filter((a) => a.id !== id) : prev
+    );
+  };
+
+  // Update field (type, mark, date, fileUrl)
+  const handleAssessmentChange = (id, field, value) => {
+    setAssessments((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, [field]: value } : a))
+    );
+  };
+
+  // Handler for CustomDatePicker for assessments
+const handleAssessmentDateChange = (id, date) => {
+  setAssessments(prev =>
+    prev.map(a =>
+      a.id === id
+        ? { ...a, date: new Date(date).toISOString() } // store as ISO
+        : a
+    )
+  );
+};
+
+  // Clean assessments before sending
+  const cleanAssessments = () => {
+    const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+
+    const cleaned = assessments
+      .map((a) => ({
+        ...a,
+        mark: Number(a.mark),                  // convert mark to number  
+      }))
+      .filter(
+        (a) =>
+          a.type?.trim() &&                   // type exists
+          !isNaN(a.mark) &&                   // mark is a number
+          a.date &&                            // date exists
+          a.fileUrl?.trim() &&                 // fileUrl exists
+          urlRegex.test(a.fileUrl)             // fileUrl is valid URL
+      );
+
+    // Reset UI
     setAssessments([
       {
         id: Date.now(),
         type: "Termtest-1",
         mark: "",
         date: new Date(),
-        link: "",
+        fileUrl: "",
       },
-      ...assessments,
     ]);
+
+    return cleaned;
   };
 
-  const removeAssessment = (id) => {
-    if (assessments.length > 1)
-      setAssessments(assessments.filter((a) => a.id !== id));
-  };
-
-  const handleAssessmentChange = (id, field, value) => {
-    setAssessments(
-      assessments.map((a) => (a.id === id ? { ...a, [field]: value } : a)),
-    );
-  };
+  
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display antialiased text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col transition-colors duration-200">
@@ -226,6 +329,7 @@ const AddCoursePage = () => {
                       value={formData.title}
                       onChange={handleChange}
                       className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
+                      required
                     />
                   </div>
                 </label>
@@ -246,6 +350,7 @@ const AddCoursePage = () => {
                       name="courseCode"
                       value={formData.courseCode}
                       onChange={handleChange}
+                      required
                     />
                   </div>
                 </label>
@@ -346,8 +451,9 @@ const AddCoursePage = () => {
                     name="type"
                     value={formData.type}
                     onChange={handleChange}
+                    required
                     >
-                       
+                       <option value="">Select Type</option>
                     <option value={"core"}>Core</option>
                     <option value="lab">Lab</option>
                     <option value="project">Project</option>  
@@ -368,7 +474,9 @@ const AddCoursePage = () => {
                     name="credits"
                     value={formData.credits}
                     onChange={handleChange}
+                    required
                     >
+                    <option value="">Select Credit</option>
                    <option value="1">1 Credits</option>
                     <option value="2">2 Credits</option>
                     <option value="3">3 Credits</option>
@@ -392,7 +500,9 @@ const AddCoursePage = () => {
                     name="format"
                     value={formData.format}
                     onChange={handleChange}
+                    required
                     >
+                     <option value="">Select Format</option>
                      <option value="major">Major</option>
                     <option value="non-major">Non-Major</option>
                     <option value="elective">Elective</option>
@@ -517,6 +627,7 @@ const AddCoursePage = () => {
                       value={formData.instructorName}
                       onChange={handleChange}
                       className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
+                      required 
                     />
                   </div>
                 </label>
@@ -539,7 +650,7 @@ const AddCoursePage = () => {
                     </span>
                   </div>
                 </label> */}
-                <Department value={formData.instructorDepartment} onChange={handleDepartmentChange} />
+                <Department value={formData.instructorDepartment} onChange={handleDepartmentChange} defaultText={"Select Department"} />
               </div>
             </div>
           </div>
@@ -613,6 +724,7 @@ const AddCoursePage = () => {
                           onChange={(e) =>
                             handleBookChange(book.id, "name", e.target.value)
                           }
+                          
                         />
                       </div>
                     </div>
@@ -633,6 +745,7 @@ const AddCoursePage = () => {
                           onChange={(e) =>
                             handleBookChange(book.id, "author", e.target.value)
                           }
+                          
                         />
                       </div>
                     </div>
@@ -653,6 +766,8 @@ const AddCoursePage = () => {
                           onChange={(e) =>
                             handleBookChange(book.id, "link", e.target.value)
                           }
+                          type="url"
+                          
                         />
                       </div>
                     </div>
@@ -718,6 +833,7 @@ const AddCoursePage = () => {
                         onChange={(e) =>
                           handleMaterialChange(m.id, "name", e.target.value)
                         }
+                        
                       />
                     </div>
                   </div>
@@ -735,6 +851,8 @@ const AddCoursePage = () => {
                         onChange={(e) =>
                           handleMaterialChange(m.id, "link", e.target.value)
                         }
+                        type="url"
+                    
                       />
                       <span className="absolute left-3 top-2.5 text-primary text-lg">
                         <FiLink />
@@ -780,10 +898,11 @@ const AddCoursePage = () => {
                     <input
                       className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
                       placeholder="e.g. https://example.com/book.pdf"
-                      type="text"
+                      type="url"
                       name="handbook"
-                      value={formData.handbook}
-                      onChange={handleChange}
+                      value={handbook}
+                      onChange={(e) => setHandbook(e.target)}
+                      
                     />
                     <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
                       <FiLink className="text-primary" />
@@ -836,6 +955,7 @@ const AddCoursePage = () => {
                         onChange={(e) =>
                           handleTaskChange(t.id, "name", e.target.value)
                         }
+                    
                       />
                     </div>
                   </div>
@@ -856,6 +976,8 @@ const AddCoursePage = () => {
                         onChange={(e) =>
                           handleTaskChange(t.id, "link", e.target.value)
                         }
+                        type="url"
+                     
                       />
                     </div>
                   </div>
@@ -930,7 +1052,12 @@ const AddCoursePage = () => {
             >
               <option value="Termtest-1">Termtest-1</option>
               <option value="Termtest-2">Termtest-2</option>
+              <option value="Termtest-3">Termtest-3</option>
               <option value="Midterm-1">Midterm-1</option>
+              <option value="Midterm-2">Midterm-2</option>
+              <option value="Midterm-3">Midterm-3</option>
+              <option value="Quiz-1">Quiz-1</option>
+              <option value="Quiz-2">Quiz-2</option>
               <option value="Final">Final</option>
               <option value="Project">Project</option>
             </select>
@@ -948,6 +1075,8 @@ const AddCoursePage = () => {
             className="w-full h-12 px-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
             placeholder="e.g. 30"
             value={a.mark}
+            min={1}
+            max={100}
             onChange={(e) =>
               handleAssessmentChange(a.id, "mark", e.target.value)
             }
@@ -966,6 +1095,7 @@ const AddCoursePage = () => {
             onDateChange={(d) =>
               handleAssessmentChange(a.id, "date", d)
             }
+             onChange={(date) => handleAssessmentDateChange(a.id, date)}
           />
         </div>
 
@@ -979,10 +1109,12 @@ const AddCoursePage = () => {
             <input
               className="w-full h-12 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
               placeholder="https://..."
-              value={a.link}
+              value={a.fileUrl}
               onChange={(e) =>
-                handleAssessmentChange(a.id, "link", e.target.value)
+                handleAssessmentChange(a.id, "fileUrl", e.target.value)
               }
+              typq="url"
+           
             />
           </div>
         </div>

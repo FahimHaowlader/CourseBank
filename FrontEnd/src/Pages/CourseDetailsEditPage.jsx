@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { GrShareOption } from "react-icons/gr";
 import { LuNotebook } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
@@ -9,14 +9,39 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { MdOutlineAssignment } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { FiEdit2 } from "react-icons/fi";
+
+
+
+
 import AddElement from "../Components/AddElement";
+import UpdateCourseInfo from "../Components/UpdateCourseInfo";
 
 const CourseDetailsEditPage = () => {
+
+
+  const [infoModal,setInfoModal] = useState({
+    openModal:false,
+  })
+
+  
+   const handleUpdateInfo = () => {
+    console.log("hello")
+  setInfoModal((prev) => ({
+    ...prev,
+    openModal: true,
+    status: "update",
+  }));
+  console.log(infoModal)
+};
+ 
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         <header className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+           
+           {/* basic Info */}
             <div className="flex-1">
               <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
                 Introduction to Computer Science
@@ -71,12 +96,15 @@ const CourseDetailsEditPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5" 
+              onClick={handleUpdateInfo}
+              >
                 <span className="material-symbols-outlined ">
                   <FiEdit2 size={20} />
                 </span>
                 Edit
               </button>
+              <UpdateCourseInfo infoModal={infoModal} setInfoModal={setInfoModal}/>
             </div>
           </div>
         </header>
