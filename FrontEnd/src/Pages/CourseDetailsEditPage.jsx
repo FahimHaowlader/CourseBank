@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+
+
 import { GrShareOption } from "react-icons/gr";
 import { LuNotebook } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
@@ -19,6 +21,7 @@ import AddMaterial from "../Components/AddMaterial";
 import AddBook from "../Components/AddBook";
 import AddTask from "../Components/AddTask";
 import AddAssessment from "../Components/AddAssessment";
+import DeleteElement from "../Components/DeleteElement";
 
 const CourseDetailsEditPage = () => {
   const [infoModal, setInfoModal] = useState({
@@ -136,14 +139,15 @@ const CourseDetailsEditPage = () => {
       setDeleteModal((prev) => ({
       ...prev,
       openModal: true,
-      status: "update",
+      status: "delete",
     }));
    
   };
 
-  const handleDelete = () =>{
+  const handleDelete = (e) =>{
     // Implement course deletion logic here
      // Implement course deletion logic here
+     console.log(e)
     alert("Course deleted successfully!");
   }
 
@@ -405,7 +409,9 @@ const CourseDetailsEditPage = () => {
                       </p>
                     </div>
                   </div>
-                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
+                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                    onClick={handleDeleteElement}
+                    >
                     <MdDeleteOutline size={26} />
                   </button>
                 </div>
@@ -456,6 +462,7 @@ const CourseDetailsEditPage = () => {
                   materialModal={materialModal}
                   setMaterialModal={setMaterialModal}
                 />
+                <DeleteElement deleteModal={deleteModal} setDeleteModal={setDeleteModal} handleDelete={handleDelete} itemName={"item-38"}/>
                 {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                      <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
