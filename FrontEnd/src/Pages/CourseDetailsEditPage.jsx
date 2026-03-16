@@ -15,12 +15,18 @@ import { FiEdit2 } from "react-icons/fi";
 
 import AddElement from "../Components/AddElement";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
+import UpdateInstructorInfo from "../Components/UpdateInstructorInfo";
 
 const CourseDetailsEditPage = () => {
 
 
   const [infoModal,setInfoModal] = useState({
     openModal:false,
+  })
+
+  const [instructorModal,setInstructorModal] = useState({
+    openModal:false,
+    status: ""
   })
 
   
@@ -34,6 +40,14 @@ const CourseDetailsEditPage = () => {
   console.log(infoModal)
 };
  
+
+const handleUpdateInstructorInfo = () => {
+  setInstructorModal((prev) => ({
+    ...prev,
+    openModal: true,
+    status: "update",
+  }));
+}
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
@@ -115,9 +129,12 @@ const CourseDetailsEditPage = () => {
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white ">
                   Instructor Info
                 </h2>
-                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                onClick={handleUpdateInstructorInfo}
+                >
                   <FiEdit2 size={22} />
                 </div>
+                <UpdateInstructorInfo instructorModal={instructorModal} setInstructorModal={setInstructorModal}/>
               </div>
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
