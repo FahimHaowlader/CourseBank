@@ -57,7 +57,7 @@ const CheckPage = () => {
       {/* <SemesterDisplay code={11} />
 <SemesterDisplay code={50} />  */}
 {/* <CourseDetailsSkeleton /> */}
-<UpdateCourseInfo infoModal={{openModal:true}}/>
+{/* <UpdateCourseInfo infoModal={{openModal:true}}/> */}
   {/* <Pagination page={3} setPage={(p) => console.log(p)} totalDocs={244} /> */}
   {/* <Skeleton /> */}
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
@@ -83,6 +83,8 @@ const CheckPage = () => {
           <MdOutlineFileDownload size={26} />
         </span>
       </div> */}
+
+      <h1>hello world</h1>
     </div>
   );
 };

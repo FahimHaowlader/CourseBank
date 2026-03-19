@@ -4,7 +4,10 @@ import { MdOutlinePersonSearch, MdRefresh } from "react-icons/md";
 import { LuLink } from "react-icons/lu";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
-const AddMaterial = ({ materialModal, setMaterialModal }) => {
+import { useCourse } from '../Contexts/Course.Context';
+
+const AddMaterial = () => {
+  const { handleUpdateInfo, materialModal, setMaterialModal } = useCourse();
   const handleClose = () => setMaterialModal({ ...materialModal, openModal: false });
   const handleSuccess = () => setMaterialModal({ openModal: true, status: "success" });
   const handleRetry = () => setMaterialModal({ openModal: true, status: "update" });

@@ -3,7 +3,11 @@ import { IoMdClose, IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
 
-const UpdateHandbook = ({ handbookModal, setHandbookModal }) => {
+
+import { useCourse } from '../Contexts/Course.Context';
+
+const UpdateHandbook = () => {
+  const { handleUpdateInfo, handbookModal, setHandbookModal } = useCourse();
   const handleClose = () => setHandbookModal({ openModal: false, status: "update" });
   const handleUpdate = () => setHandbookModal({ openModal: true, status: "success" });
   const handleRetry = () => setHandbookModal({ openModal: true, status: "update" });

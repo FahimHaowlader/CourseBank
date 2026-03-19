@@ -5,8 +5,9 @@ import { BsExclamationCircleFill } from "react-icons/bs";
 import { LuLink } from "react-icons/lu";
 
 import CustomDatePicker from "./CustomDatePicker";
-
-const AddAssessment = ({ assessmentModal, setAssessmentModal,  }) => {
+import { useCourse } from '../Contexts/Course.Context';
+const AddAssessment = () => {
+  const { handleUpdateInfo, assessmentModal, setAssessmentModal } = useCourse();
   // Local state for form fields
   const [formData, setFormData] = useState({
     type: "Termtest-1",

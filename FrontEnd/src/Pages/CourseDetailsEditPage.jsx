@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-
 import { GrShareOption } from "react-icons/gr";
 import { LuNotebook } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
@@ -12,6 +11,8 @@ import { MdOutlineAssignment } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { FiEdit2 } from "react-icons/fi";
 
+
+
 import AddElement from "../Components/AddElement";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
 import UpdateInstructorInfo from "../Components/UpdateInstructorInfo";
@@ -22,134 +23,169 @@ import AddBook from "../Components/AddBook";
 import AddTask from "../Components/AddTask";
 import AddAssessment from "../Components/AddAssessment";
 import DeleteElement from "../Components/DeleteElement";
+import SemesterDisplay from "../Components/semesterTransformer";
+import { useCourse } from "../Contexts/Course.Context";
 
 const CourseDetailsEditPage = () => {
-  const [infoModal, setInfoModal] = useState({
-    openModal: false,
-  });
 
-  const [instructorModal, setInstructorModal] = useState({
-    openModal: false,
-    status: "",
-  });
+    const { 
+      courses, 
+        isLoading, 
+        addCourse, 
+        infoModal,
+        setInfoModal,
+        instructorModal,
+        setInstructorModal,
+        descriptionModal,
+        setDescriptionModal,
+        handbookModal,
+        setHandbookModal,
+        materialModal,
+        setMaterialModal,
+        bookModal,
+        setBookModal,
+        taskModal,
+        setTaskModal,
+        deleteModal,
+        setDeleteModal,
+        assessmentModal,
+        setAssessmentModal,
+         handleUpdateInfo,
+        handleUpdateInstructorInfo,
+        handleUpdateDescription,
+        handleUpdateHandbook,
+        handleUpdateMaterial,
+        handleUpdateBook,
+        handleUpdateTask,
+        handleUpdateAssessment,
+        handleDeleteElement,
+        handleDelete
+    } = useCourse();
 
-  const [descriptionModal, setDescriptionModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [infoModal, setInfoModal] = useState({
+  //   openModal: false,
+  // });
 
-  const [handbookModal, setHandbookModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [instructorModal, setInstructorModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const [materialModal, setMaterialModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [descriptionModal, setDescriptionModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const [bookModal, setBookModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [handbookModal, setHandbookModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const [taskModal, setTaskModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [materialModal, setMaterialModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const [deleteModal, setDeleteModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [bookModal, setBookModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const [assessmentModal, setAssessmentModal] = useState({
-    openModal: false,
-    status: "",
-  });
+  // const [taskModal, setTaskModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const handleUpdateInfo = () => {
-    console.log("hello");
-    setInfoModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-    console.log(infoModal);
-  };
+  // const [deleteModal, setDeleteModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const handleUpdateInstructorInfo = () => {
-    setInstructorModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+  // const [assessmentModal, setAssessmentModal] = useState({
+  //   openModal: false,
+  //   status: "",
+  // });
 
-  const handleUpdateDescription = () => {
-    setDescriptionModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+//   const handleUpdateInfo = () => {
+//     console.log("hello");
+//     setInfoModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//     console.log(infoModal);
+//   };
 
-  const handleUpdateHandbook = () => {
-    setHandbookModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+//   const handleUpdateInstructorInfo = () => {
+//     setInstructorModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
 
-  const handleUpdateMaterial = () => {
-    console.log("material");
-    setMaterialModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+//   const handleUpdateDescription = () => {
+//     setDescriptionModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
 
-  const handleUpdateBook = () => {
-    setBookModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+//   const handleUpdateHandbook = () => {
+//     setHandbookModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
 
-  const handleUpdateTask = () => {
-    setTaskModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+//   const handleUpdateMaterial = () => {
+//     console.log("material");
+//     setMaterialModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
 
-  const handleUpdateAssessment = () => {
-    setAssessmentModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "update",
-    }));
-  };
+//   const handleUpdateBook = () => {
+//     setBookModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
 
-  const handleDeleteElement = () => {
-      setDeleteModal((prev) => ({
-      ...prev,
-      openModal: true,
-      status: "delete",
-    }));
+//   const handleUpdateTask = () => {
+//     setTaskModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
+
+//   const handleUpdateAssessment = () => {
+//     setAssessmentModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "update",
+//     }));
+//   };
+
+//   const handleDeleteElement = () => {
+//       setDeleteModal((prev) => ({
+//       ...prev,
+//       openModal: true,
+//       status: "delete",
+//     }));
    
-  };
+//   };
 
-  const handleDelete = (e) =>{
-    // Implement course deletion logic here
-     // Implement course deletion logic here
-     console.log(e)
-    alert("Course deleted successfully!");
-  }
+//  const handleDelete = (itemName) => {
+//       console.log("deleting", itemName);
+//       // Simulate deletion process
+//  }
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
@@ -161,53 +197,55 @@ const CourseDetailsEditPage = () => {
               <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
                 Introduction to Computer Science
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-5">
+              <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">
                 Department of Engineering • School of Computing
               </p>
+               <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
+               selection:text-gray-600 dark:selection:text-gray-300 mb-6" >{"EDEEEEE"}</p>
               <div className="flex flex-wrap gap-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   3 Credits
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   Undergraduate
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
+                    <GrShareOption />
+                  </span> */}
+                  Undergraduate
+                </div>
+                {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span>
                   Undergraduate
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  Undergraduate
-                </div>
+                </div> */}
 
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
+                  </span> */}
                   Undergraduate
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
-                  </span>
-                  In-Person
+                  </span> */}
+                  <SemesterDisplay code={11}/>
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span>
                   Mon/Wed 10:00 AM
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
@@ -220,10 +258,7 @@ const CourseDetailsEditPage = () => {
                 </span>
                 Edit
               </button>
-              <UpdateCourseInfo
-                infoModal={infoModal}
-                setInfoModal={setInfoModal}
-              />
+              <UpdateCourseInfo/>
             </div>
          
           </div>
@@ -866,7 +901,22 @@ const CourseDetailsEditPage = () => {
             </section>
           </div>
         </div>
+        <div className="mt-12 sm:mt-10">
+                    <button
+                  type="submit"
+                    className=" px-6 py-4 rounded-lg bg-red-500 hover:bg-red-600 text-white dark:text-background-dark font-bold shadow-sm shadow-primary/30 transition-all transform active:scale-95 w-full flex items-center justify-center gap-2 cursor-pointer my-5"
+                 
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      <MdDeleteOutline size={26}/>
+                       
+                    </span>
+                    Delete Course
+                  </button>
+        </div>
+         
       </main>
+
       {/* <footer className="bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark py-12">
            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
              <div className="flex items-center gap-2 text-primary font-bold text-lg">

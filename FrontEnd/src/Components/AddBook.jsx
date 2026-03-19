@@ -4,7 +4,11 @@ import { MdOutlinePersonSearch, MdRefresh } from "react-icons/md";
 import { LuLink, LuUser } from "react-icons/lu";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
-const AddBook = ({ bookModal, setBookModal }) => {
+
+import { useCourse } from '../Contexts/Course.Context';
+
+const AddBook = () => {
+  const { handleUpdateInfo, bookModal, setBookModal } = useCourse();
   // Explicitly resetting status to prevent state conflicts
   const handleClose = (e) => {
     if (e) e.stopPropagation();

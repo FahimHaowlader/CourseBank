@@ -1,16 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { IoMdClose, IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
+import { useCourse } from '../Contexts/Course.Context';
 
-const UpdateDescription = ({ descriptionModal, setDescriptionModal }) => {
+const UpdateDescription = () => {
+  const { 
+    course, 
+    descriptionModal, 
+    setDescriptionModal 
+  } = useCourse();
+
+  // 1. Local state to hold the text you are typing
+  const [description, setDescription] = useState("");
+
+  // 2. Sync local state with course data ONLY when the modal opens
+  useEffect(() => {
+    if (descriptionModal.openModal && descriptionModal.status === "update") {
+      setDescription(course?.description || "");
+    }
+  }, [descriptionModal.openModal, course]);
+
   const handleClose = () => setDescriptionModal({ openModal: false, status: "update" });
-  const handleUpdate = () => setDescriptionModal({ openModal: true, status: "success" });
+  
+  const handleUpdate = (e) => {
+    // If this were a form, we'd use e.preventDefault()
+    console.log("Saving to Database:", description);
+    
+    // Switch to success view
+    setDescriptionModal({ openModal: true, status: "success" });
+  };
+
   const handleRetry = () => setDescriptionModal({ openModal: true, status: "update" });
 
   if (!descriptionModal.openModal) return null;
 
-  // Updated to match the UpdateCourseInfo dimensions: sm:max-w-lg w-full md:min-w-3xl
+  // Design-consistent Wrapper
   const ModalWrapper = ({ children }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={handleClose}></div>
@@ -31,15 +56,35 @@ const UpdateDescription = ({ descriptionModal, setDescriptionModal }) => {
               <IoMdClose size={26} />
             </button>
           </div>
+          
           <div className="p-6">
             <textarea
+              // value + onChange allows you to type freely
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-teal-500 outline-none transition-all text-sm h-60 resize-none text-slate-900 dark:text-white"
-              placeholder="Provide a detailed overview of the course objectives, topics covered, and expected learning outcomes..."
+              placeholder="Provide a detailed overview of the course objectives..."
             ></textarea>
+            
+            {/* Optional: Character counter to show state is working */}
+            <div className="text-right text-xs text-slate-400 mt-2">
+              {description.length} characters
+            </div>
           </div>
+
           <div className="px-6 py-4 bg-slate-50 dark:bg-slate-700/30 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700">
-            <button onClick={handleClose} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Cancel</button>
-            <button onClick={handleUpdate} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 transition-colors cursor-pointer">Update</button>
+            <button 
+              onClick={handleClose} 
+              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleUpdate} 
+              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 transition-colors cursor-pointer"
+            >
+              Update
+            </button>
           </div>
         </ModalWrapper>
       )}

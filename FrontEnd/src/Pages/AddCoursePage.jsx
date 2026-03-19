@@ -516,88 +516,7 @@ const handleAssessmentDateChange = (id, date) => {
             </div>
           </div>
 
-          {/** instructor info with photo */}
-          {/* <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
-            <div class="flex items-center gap-2 mb-6">
-              <div class="bg-primary/10 p-2 rounded-lg text-primary-dark/90 dark:text-primary">
-                <span class="material-symbols-outlined">
-                  <MdOutlinePersonOutline size={24} />
-                </span>
-              </div>
-              <h3 class="text-lg font-bold text-text-main-light dark:text-text-main-dark">
-                Instructor Details
-              </h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-              <div class="col-span-1 h-full">
-                <label class="block text-text-main-light dark:text-text-main-dark text-md font-semibold mb-2">
-                  Instructor Photo
-                </label>
-                <div class="bg-background-light dark:bg-background-dark/30 border-2 border-border-light dark:border-border-dark hover:border-primary transition-all rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer group relative shadow-sm h-60">
-                  <input
-                    class="absolute inset-0 opacity-0 cursor-pointer z-10"
-                    title="Upload Instructor Photo"
-                    type="file"
-                  />
-                  <div class="size-24 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <span class="material-symbols-outlined text-5xl text-primary">
-                      <RiCameraAiLine />
-                    </span>
-                  </div>
-                  <span class="text-base font-semibold text-text-main-light dark:text-text-main-dark">
-                    Upload Photo
-                  </span>
-                  <span class="text-sm text-text-muted-light mt-1">
-                    JPG or PNG, max 2MB
-                  </span>
-                </div>
-              </div>
-              <div class="col-span-1 md:col-span-2 h-full flex flex-col">
-                <label class="block text-text-main-light dark:text-text-main-dark text-md font-semibold mb-2">
-                  Personal Information
-                </label>
-                <div class="bg-background-light dark:bg-background-dark/30 rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm h-60 flex flex-col justify-center gap-6">
-                  <div>
-                    <label className="flex flex-col gap-1.5 w-full ">
-                      <span className="text-sm font-semibold text-text-secondary dark:text-gray-400 ">
-                        Course Title
-                      </span>
-                      <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
-                        <span className="absolute left-3 text-text-secondary material-symbols-outlined  text-[20px]">
-                          <MdOutlinePersonOutline />
-                        </span>
-                        <input
-                          placeholder="e.g. Dr. John Doe / Prof. Jane Smith"
-                          type="text"
-                          className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
-                        />
-                      </div>
-                    </label>
-                  </div>
-                  <div>
-                    <label className="flex flex-col gap-1.5 w-full md:col-span-2">
-                      <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                        Department
-                      </span>
-                      <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                        <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                          
-                          <option>Computer Science</option>
-                          <option>Arts &amp; Design</option>
-                          <option>Physics</option>
-                          <option>Mathematics</option>
-                          <option>Business</option>
-                        </select>
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                          <IoIosArrowDown />
-                        </span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
+         
 
           <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full">
             <div className="flex items-center gap-2 mb-6">
@@ -633,23 +552,7 @@ const handleAssessmentDateChange = (id, date) => {
                 </label>
               </div>
               <div>
-                {/* <label className="flex flex-col gap-1.5 w-full md:col-span-2">
-                  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Department
-                  </span>
-                  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                      <option>Computer Science</option>
-                      <option>Arts &amp; Design</option>
-                      <option>Physics</option>
-                      <option>Mathematics</option>
-                      <option>Business</option>
-                    </select>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                      <IoIosArrowDown />
-                    </span>
-                  </div>
-                </label> */}
+               
                 <Department value={formData.instructorDepartment} onChange={handleDepartmentChange} defaultText={"Select Department"} />
               </div>
             </div>

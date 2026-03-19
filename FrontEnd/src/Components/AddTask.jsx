@@ -4,7 +4,10 @@ import { MdOutlinePersonSearch, MdRefresh } from "react-icons/md";
 import { LuLink } from "react-icons/lu";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
-const AddTask = ({ taskModal, setTaskModal }) => {
+import { useCourse } from '../Contexts/Course.Context';
+
+const AddTask = () => {
+  const { handleUpdateInfo, taskModal, setTaskModal } = useCourse();
   const handleClose = (e) => {
     if (e) e.stopPropagation();
     setTaskModal({ openModal: false, status: "update" });

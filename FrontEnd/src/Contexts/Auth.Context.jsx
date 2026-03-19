@@ -42,7 +42,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await axios.post(`${API_BASE_URL}/login`, { userId, password },{ withCredentials: true });
-      setUser(response.data.user);
+      setUser(response.data.data.user);
+      console.log("Login successful for:", response.data.data.user);
+
       setLoading(false);
       return response.data.user;
     } catch (err) {

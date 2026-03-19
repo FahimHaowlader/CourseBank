@@ -15,7 +15,7 @@ import CustomCourseCard from "../Components/CustomCourseCard";
 import { AiOutlinePlus } from "react-icons/ai";
 import GmailTableClearConditional from "../Components/SelectAbleTable";
 
-const AllModeratorPage = () => {
+const AllContributorPage = () => {
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
@@ -347,4 +347,4 @@ const AllModeratorPage = () => {
   );
 };
 
-export default AllModeratorPage;
+export default AllContributorPage;

@@ -9,8 +9,11 @@ import {IoMdCheckmarkCircle} from "react-icons/io";
 
 import CustomDatePicker from './CustomDatePicker';
 import Department from './Department';
+import { useCourse } from '../Contexts/Course.Context';
 
-const UpdateInstructorInfo = ({ instructorModal, setInstructorModal }) => {
+    const UpdateInstructorInfo = () => {
+
+  const { handleUpdateInfo, instructorModal, setInstructorModal } = useCourse();
   // Close modal handler
   const handleClose = () => setInstructorModal(false);
   const handleUpdate = () => {

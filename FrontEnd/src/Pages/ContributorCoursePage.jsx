@@ -176,7 +176,7 @@ const ContributorCoursePage = () => {
       <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"></div>
       <div className="relative w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-left shadow-2xl transition-all border border-border-light dark:border-border-dark">
         <div className="flex flex-col items-center gap-8 text-center">
-          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400">
+          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400">
             <span className="material-symbols-outlined text-[56px]">
               <MdDelete />
             </span>
@@ -202,7 +202,7 @@ const ContributorCoursePage = () => {
              >
                Cancel
              </button>
-             <button className="flex w-full items-center justify-center rounded-xl bg-orange-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-orange-600 focus:outline-none  focus:ring-orange-500/50 transition-colors cursor-pointer"
+             <button className="flex w-full items-center justify-center rounded-xl bg-red-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-red-600 focus:outline-none  focus:ring-red-500/50 transition-colors cursor-pointer"
                onClick={() => confirmDeleteCourse(modal.id)}
              >
                 <span className="material-symbols-outlined pr-1">

@@ -132,7 +132,7 @@ const CourseDetailsPage = () => {
             
             <div className="flex-1">
           <h1 className="text-3xl sm:text-4xl mb-2 text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-extrabold 
-               selection:text-gray-600 dark:selection:text-gray-300">
+               selection:text-gray-600 dark:selection:text-gray-300 ">
                   {course.title.charAt(0).toUpperCase() + course.title.slice(1) }
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-1 ">
@@ -149,7 +149,7 @@ const CourseDetailsPage = () => {
                   </span> */}
                    {course.degree.charAt(0).toUpperCase() + course.degree.slice(1)}
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span> */}
