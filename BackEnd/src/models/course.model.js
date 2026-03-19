@@ -10,7 +10,7 @@ const courseSchema = new mongoose.Schema(
     courseCode: {
       type: String,
       required: true,
-      unique: true,
+      uppercase: true,
     },
     department: {
       type: String,
@@ -37,7 +37,7 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: [1, "Semester must be at least 1est year 1est semester"],
-      max: [10, "Semester cannot exceed 5th year 2nd semester"],
+      max: [62, "Semester cannot exceed 6th year 2nd semester"],
     },
     description: {
       type: String,
@@ -51,7 +51,7 @@ const courseSchema = new mongoose.Schema(
       max: [10, "Credits cannot exceed 10"],
     },
 
-    category: {
+    format: {
       type: String,
       required: true,
       lowercase: true,
@@ -101,6 +101,10 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
           },
+          id:{
+            type: Number,
+            required: true, 
+          },  
           authorName: {
             // Add this field
             type: String,
@@ -135,6 +139,10 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
           },
+          id:{
+            type: Number,
+            required: true,
+          },
           fileUrl: {
             type: String,
             required: [true, "Material URL is required"],
@@ -147,6 +155,7 @@ const courseSchema = new mongoose.Schema(
                 "The URL must be a valid PDF document link for materials",
             },
           },
+        
           // publicId: {
           //   type: String,
           //   required: [true, "Public ID is required for material management"],
@@ -164,6 +173,10 @@ const courseSchema = new mongoose.Schema(
           name: {
             type: String,
             required: true,
+          },
+          id:{
+            type: Number,
+            required: true, 
           },
           fileUrl: {
             type: String,
@@ -190,20 +203,32 @@ const courseSchema = new mongoose.Schema(
     assessments: {
       type: [
         {
-          name: {
+          type: {
             type: String,
             required: true,
             enum: [
               "Midterm-1",
               "Midterm-2",
+              "Midterm-3",
               "Termtest-1",
               "Termtest-2",
+              "Termtest-3",
               "Quiz-1",
               "Quiz-2",
               "Final",
               "Project",
             ],
           },
+          id:{
+            type: Number,
+            required: true, 
+          },
+          mark: {
+            type: Number,
+            required: true,
+            min: [0, "Marks cannot be negative"],
+            max: [100, "Marks cannot exceed 100"],
+          },  
           fileUrl: {
             type: String,
             required: [true, "Assessment URL is required"],
@@ -217,6 +242,11 @@ const courseSchema = new mongoose.Schema(
                 "The URL must be a valid PDF document link for assessments",
             },
           },
+          date: {
+            type: Date,
+            required: true,
+            set: (value) => new Date(value),
+          }, 
           // publicId: {
           //   type: String,
           //   required: [true, "Public ID is required for assesment management"],
@@ -228,8 +258,7 @@ const courseSchema = new mongoose.Schema(
       // required: [true, 'At least one assesment is required']
     },
     handbook: {
-      fileUrl: {
-        type: String,
+       type: String,
         required: [true, "Handbook URL is required"],
         validate: {
           validator: function (v) {
@@ -239,17 +268,26 @@ const courseSchema = new mongoose.Schema(
           message: "The URL must be a valid PDF document link for handbook",
         },
       },
-        // publicId: {
-        //   type: String,
-        //   required: [true, "Public ID is required for handbook management"],
-        //   select: false,
-        // },
-    },
+       
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       select: false,
+    },
+
+    Checked :{
+      type: Boolean,
+      default: false,
+    },
+    checkedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      select: false,
+    },
+    problem: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "./controllers/course.controller.js";
 
 
-import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch } from "./controllers/user.controller.js";
+import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch } from "./controllers/user.controller.js";
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
 import {upload} from "./middlewares/multer.middleware.js";
@@ -19,6 +19,8 @@ router.route('/').get((req, res) => res.send('Api verson 1 is running'));
 
 {/** helper route */}
 router.route('/login').post(userLogin);
+
+router.route('/refresh').get(verifyJwt, handleRefresh); // New route for token refresh and user info retrieval
 
 router.route('/upload/image').post(verifyJwt, upload.single('image') , uploadImage);
 

@@ -102,6 +102,10 @@ const userLogin = asyncHandler(async (req, res) => {
     throw new apiError(401, "Invalid userId or password");
   }
 
+  if(!user.access) {
+    throw new apiError(403, "Your account does not have access");
+  }
+
   // Generate access token
   const accessToken = user.generateAccessToken();
 
@@ -115,9 +119,9 @@ const userLogin = asyncHandler(async (req, res) => {
 
   // Optional: return minimal user info
   const userInfo = {
+    _id: user._id,
     userId: user.userId,
     role: user.role,
-    access: user.access,
   };
 
   res.status(200).json(
@@ -200,6 +204,29 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
   );
 });
 
+// This handler only runs if verifyJwt passes (Next() was called)
+ const handleRefresh = asyncHandler(async (req, res) => {
+    try {
+        // req.user was attached by your verifyJwt middleware
+        const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
+
+        if (!user.access) {
+            return res.status(403).json({ message: "Your account does not have access" });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {_id:user._id, userId: user.userId, role: user.role,  },
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error" });
+    }
+});
 
 
-export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch };
+
+export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, handleRefresh };
