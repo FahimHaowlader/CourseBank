@@ -213,6 +213,18 @@ const createCourse = asyncHandler(async (req, res) => {
   
   
  const { title, courseCode, startingDate, instructorName, type, format,department,semester,degree } = data;
+
+
+if (userRole !== "admin") {
+    const duplicateCourse = await Course.findOne({ 
+  courseCode: courseCode.trim(), 
+  createdBy: Id 
+});
+
+if (duplicateCourse) {
+  throw new apiError(409, `You have already created a course with the code ${courseCode}.`);
+}
+}
 //  console.log("Required Fields:", { title, courseCode, startingDate, instructorName, type, format , handbook});
   if (!title || !courseCode  || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
     throw new apiError(400, "All required course fields must be provided");
