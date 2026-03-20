@@ -94,6 +94,13 @@ const userLogin = asyncHandler(async (req, res) => {
     throw new apiError(400, "Please provide userId and password");
   }
 
+  if(userId.length !== 10 && userId.length !== 11) {
+    throw new apiError(400, "userId must be either 10 or 11 characters long");
+  }
+  if(password.length < 6) {
+    throw new apiError(400, "userId and password must be at least 6 characters long");
+  } 
+
   // Find user by userId
   const user = await User.findOne({ userId }).select("+password");
   if (!user) {
@@ -111,21 +118,26 @@ const userLogin = asyncHandler(async (req, res) => {
     throw new apiError(401, "Invalid userId or password");
   }
 
-  if(!user.access) {
-    throw new apiError(403, "Your account does not have access");
-  }
-
   // Generate access token
   const accessToken = user.generateAccessToken();
 
   // Set token in secure HTTP-only cookie
   res.cookie("accessToken", accessToken, {
     httpOnly: true,      // Cannot be accessed by JS (prevents XSS)
-    secure: process.env.NODE_ENV === "production", // Only HTTPS in prod
-    sameSite: "Strict", 
+    // secure: process.env.NODE_ENV === "production", // Only HTTPS in prod
+    secure: false, // Only HTTPS in prod
+    sameSite: "lax", 
     path : "/", // CSRF protection
     maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day in milliseconds
   });
+
+  // Set token in secure HTTP-only cookie for production
+  // res.cookie("accessToken", accessToken, {
+  //   httpOnly: true,      // Cannot be accessed by JS (prevents XSS)
+  //   secure: process.env.NODE_ENV === "production", // Only HTTPS in prod
+  //   sameSite: "Strict",  // CSRF protection
+  //   maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day in milliseconds
+  // });
 
   // Optional: return minimal user info
   const userInfo = {
@@ -221,16 +233,21 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
         const user = req.user;
 
         if (!user) {
-            return res.status(401).json({ message: "User not found" });
+            // return res.status(401).json({ message: "User not found" });
+             throw new apiError(401, "User not found"); 
         }
 
         if (!user.access) {
-            return res.status(403).json({ message: "Your account does not have access" });
+            throw new apiError(403, "Your account does not have access");
         }
-
+        const userIfo = {
+          _id: user._id,
+          userId: user.userId,
+          role: user.role,
+        };
         res.status(200).json({
             success: true,
-            data: {_id:user._id, userId: user.userId, role: user.role,  },
+            data: { user:userIfo },
         });
     } catch (error) {
         res.status(500).json({ message: "Server Error" });
