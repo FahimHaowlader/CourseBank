@@ -131,7 +131,7 @@ const CoursePage = () => {
           "https://coursebank.onrender.com/api/v1/users-all-course",
           { parameters: filters, sort, page },
         );
-
+        // console.log("Sorting Response:", filters); // Check the structure of the response
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
@@ -158,7 +158,7 @@ const CoursePage = () => {
           "https://coursebank.onrender.com/api/v1/users-all-course",
           { parameters: filters, sort,page},
         );
-
+        
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
@@ -374,10 +374,10 @@ const CoursePage = () => {
                     onChange={handleFilterChange}
                   >
                     <option value="">All Degrees</option>
-                    <option value="bachelor">Bachelor</option>
-                    <option value="master">Master</option>
+                    <option value="bachelors">Bachelor</option>
+                    <option value="masters">Master</option>
                     <option value="phd">PhD</option>
-                    <option value="associate">Associate</option>
+                    
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />
@@ -395,12 +395,12 @@ const CoursePage = () => {
                     value={filters.year}
                     onChange={handleFilterChangeIntoNumber}
                   >
-                    <option value="">All Years</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
+                   <option value="">All Years</option>
+{years.map((year) => (
+  <option key={year} value={(year)}>
+    {year}
+  </option>
+))}
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                     <IoIosArrowDown />

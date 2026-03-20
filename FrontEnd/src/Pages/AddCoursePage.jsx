@@ -1,5 +1,7 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
+
 
 import { TbIdBadge2 } from "react-icons/tb";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -22,24 +24,44 @@ import { MdOutlineAssignment } from "react-icons/md";
 import { MdOutlineAssessment } from "react-icons/md";
 import { FaRegSave } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
+import { MdRefresh } from "react-icons/md";
+import {IoMdCheckmarkCircle} from "react-icons/io";
+import {BsExclamationCircleFill} from "react-icons/bs";
+
 
 import CustomDatePicker from "../Components/CustomDatePicker";
 import Department from "../Components/Department";
 import { getDeptName } from "../Components/DepartmentMap";
+import { useAuth } from "../Contexts/Auth.Context";
+import PrivateApi from "../Hooks/PrivateApi";
+import { parseUserId } from "../const";
 
 const AddCoursePage = () => {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [modalStatus, setModalStatus] = useState(null); 
+  const userInfo = parseUserId(user?.userId );
+
 
   const [formData, setFormData] = useState({
     title: "",
     courseCode: "",
-    startDate: new Date().toISOString(),
+    startingDate: new Date().toISOString(),
     format: "", 
+    department: userInfo?.dept,
+    semester : userInfo?.semester,
+    degree: userInfo?.degree,
     type: "",
     credits: "",
     description: "",
     instructorName: "",
     instructorDepartment: "",
   });
+
+
+  // console.log("Parsed User Info:", userInfo); // { dept: "cse", degree: "bachelors", semester: 11, year: 2023 }
+
 
   const [handbook,setHandbook] = useState("")
 
@@ -60,29 +82,56 @@ const AddCoursePage = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleDepartmentChange = (e) => {
+  const handleInstructorDepartmentChange = (e) => {
     const { value } = e.target;
     setFormData({ ...formData, instructorDepartment: value });
+  };
+  const handleDepartmentChange = (e) => {
+    const { value } = e.target;
+    setFormData({ ...formData, department: value });
   };
 
   const handleDateChange = (date) => {  
     setFormData({ ...formData, startDate: new Date(date).toISOString() });  
   };
 
- const handleSubmit = (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault(); // prevent page reload
-    console.log(formData); // all form data here
+    // console.log(formData); // all form data here
 
     const validAssessments = cleanAssessments();
     const validTasks = cleanTasks();
     const validMaterials = cleanMaterials();
     const validBooks = cleanBooks();  
 
-    console.log("Books:", books);
-    console.log("Materials:", materials);
-    console.log("Tasks:", tasks);
-    console.log("Assessments:", validAssessments);
-  };
+    // console.log("Books:", validBooks);
+    // console.log("Materials:", validMaterials);
+    // console.log("Tasks:", validTasks);
+    // console.log("Assessments:", validAssessments);
+    let courseData;
+    if (handbook && handbook.trim() !== "")  {
+    courseData = { ...formData,handbook, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }
+    } else {;  
+     courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
+    }
+    // console.log("Course Data:", courseData);
+ 
+
+    try {
+      setLoading(true);
+      // Replace with your API endpoint
+      const response = await PrivateApi.post("/create-course", courseData);
+      console.log("Course created successfully:", response.data);
+      setModalStatus('success');
+      // Optionally, reset form or redirect user
+    } catch (error) {
+      setModalStatus('error');
+      console.error("Error creating course:", error.response?.data || error.message);
+    }
+    finally {
+      setLoading(false);
+    }
+ };
 
   const [books, setBooks] = useState([
     { id: Date.now(), title: "", authorName: "", fileUrl: "" },
@@ -159,7 +208,7 @@ const AddCoursePage = () => {
 };
 
 
-  const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
+const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
 
   const addTask = () => {
     setTasks([{ id: Date.now(), name: "", fileUrl: "" }, ...tasks]);
@@ -187,6 +236,38 @@ const AddCoursePage = () => {
 
   setTasks([{ id: Date.now(), name: "", fileUrl: "" }]);
   return cleanedTasks;
+};
+
+const handleCancel = () => {  
+  // Reset form data
+  setFormData({
+    title: "",
+    courseCode: "",
+    startingDate: new Date().toISOString(),
+    format: "",
+    department: userInfo?.dept,
+    semester : userInfo?.semester,
+    degree: userInfo?.degree,
+    type: "",
+    credits: "",
+    description: "",
+    instructorName: "",
+    instructorDepartment: "",
+  });
+  setHandbook("");
+  setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }]);
+  setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
+  setTasks([{ id: Date.now(), name: "", fileUrl: "" }]);
+  setAssessments([
+    {
+      id: Date.now(),
+      type: "Termtest-1",
+      mark: "",
+      date: new Date(),
+      fileUrl: "",
+    },
+  ]);
+  setModalStatus(null); // Close modal
 };
 
    const [assessments, setAssessments] = useState([
@@ -288,6 +369,7 @@ const handleAssessmentDateChange = (id, date) => {
   
 
   return (
+    <> 
     <div className="bg-background-light dark:bg-background-dark font-display antialiased text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col transition-colors duration-200">
       <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 pt-5">
         <div className="mb-5">
@@ -356,28 +438,31 @@ const handleAssessmentDateChange = (id, date) => {
                 </label>
               </div>
               <div className="col-span-1">
-                <label className="flex flex-col gap-1.5 w-full md:col-span-2">
+                {/* <label className="flex flex-col gap-1.5 w-full md:col-span-2">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
                     Department
                   </span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
                     <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed"
-                    value="cse"
-                    disabled
+                    value={formData.department}
+                    // disabled={user.role !== "admin"|| user.role !== "moderator"}
+
                     >
                       {/* <option value="">All Departments</option>
                       <option>Computer Science</option>
                       <option>Arts &amp; Design</option>
                       <option>Physics</option>
-                      <option>Mathematics</option> */}
-                      <option >{getDeptName('cse')}</option>
+                      <option>Mathematics</option> 
+                      {/* <option >{getDeptName('cse')}</option> 
+                    <Department value={formData.department} onChange={handleDepartmentChange} defaultText={"Select Department"}  required={true} />
                       
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                       <IoIosArrowDown />
                     </span>
                   </div>
-                </label>
+                </label> */}
+                <Department value={formData.department} onChange={handleDepartmentChange} defaultText={"Select Department"}  required={true} disabled={user?.role !== "admin" && user?.role !=="moderator" } />
               </div>
 
               <div className="col-span-1">
@@ -390,14 +475,16 @@ const handleAssessmentDateChange = (id, date) => {
     <select
       className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed opacity-70"
       name="degree"
-      value="master"
-      disabled
+      value={formData.degree}
+      onChange={handleChange}
+      disabled={user?.role !== "admin" }
+      required
     >
-      <option value="">All Degrees</option>
-      <option value="bachelor">Bachelor</option>
-      <option value="master">Master</option>
+      <option value="">Select Degrees</option>
+      <option value="bachelors">Bachelor</option>
+      <option value="masters">Master</option>
       <option value="phd">PhD</option>
-      <option value="associate">Associate</option>
+
     </select>
 
     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary text-[20px]">
@@ -416,10 +503,12 @@ const handleAssessmentDateChange = (id, date) => {
     <select
       className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed opacity-70"
       name="semester"
-      value="41"
-      disabled
+      value={formData.semester}
+      onChange={handleChange}
+      disabled={user?.role !== "admin" }
+      required
     >
-      <option value="">All Semesters</option>
+      <option value="">Select Semester</option>
       <option value="11">Frist Year 1est Semester</option>
       <option value="12">Frist Year 2nd Semester</option>
       <option value="21">Second Year 1est Semester</option>
@@ -553,7 +642,7 @@ const handleAssessmentDateChange = (id, date) => {
               </div>
               <div>
                
-                <Department value={formData.instructorDepartment} onChange={handleDepartmentChange} defaultText={"Select Department"} />
+                <Department value={formData.instructorDepartment} onChange={handleInstructorDepartmentChange} defaultText={"Select Department"}  required={true} />
               </div>
             </div>
           </div>
@@ -804,7 +893,7 @@ const handleAssessmentDateChange = (id, date) => {
                       type="url"
                       name="handbook"
                       value={handbook}
-                      onChange={(e) => setHandbook(e.target)}
+                      onChange={(e) => setHandbook(e.target.value)}
                       
                     />
                     <span className="material-symbols-outlined text-lg absolute left-3 top-2.5 text-text-muted-light">
@@ -903,7 +992,6 @@ const handleAssessmentDateChange = (id, date) => {
           </div>
 
           {/* Assessment upload */}
-
           <div
             ref={containerRef}
             className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 md:p-8 w-full"
@@ -1042,19 +1130,109 @@ const handleAssessmentDateChange = (id, date) => {
 </div>
           </div>
 
-          <button
-          type="submit"
-            className=" px-6 py-4 rounded-lg bg-primary hover:bg-primary-dark text-white dark:text-background-dark font-bold shadow-sm shadow-primary/30 transition-all transform active:scale-95 w-full flex items-center justify-center gap-2 cursor-pointer my-5"
-         
-          >
-            <span className="material-symbols-outlined text-lg">
-              <FaRegSave />
-            </span>
-            Save Course
-          </button>
+         <button
+  type="submit"
+  disabled={loading} // 👈 Prevents double-submitting
+  className={`px-6 py-4 rounded-lg bg-primary hover:bg-primary-dark text-white dark:text-background-dark font-bold shadow-sm shadow-primary/30 transition-all transform active:scale-95 w-full flex items-center justify-center gap-2 my-5 ${
+    loading ? "cursor-not-allowed opacity-80" : "cursor-pointer"
+  }`}
+>
+  {loading ? (
+    <>
+      {/* This is the loading circle (Spinner) */}
+      <svg
+        className="animate-spin h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <span>Processing...</span>
+    </>
+  ) : (
+    <>
+      <span className="flex items-center justify-center text-lg">
+        <FaRegSave />
+      </span>
+      Save Course
+    </>
+  )}
+</button>
         </form>
       </main>
     </div>
+
+        {modalStatus === "success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/20">
+    <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 shadow-2xl border border-border-light dark:border-border-dark animate-in fade-in zoom-in duration-300">
+      <div className="flex flex-col items-center gap-8 text-center">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/20 text-teal-600">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Successfully Created!</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            The new course has been added to the CourseBank.
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/my-courses')} // Redirect to list or the new course
+          className="w-full rounded-xl bg-teal-600 py-4 text-xl font-semibold text-white hover:bg-teal-700 transition-colors cursor-pointer"
+        >
+          Go To Your Courses
+        </button>
+      </div>
+    </div>
+  </div>
+)} 
+
+{modalStatus === "error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/30">
+    <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8 text-center">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            We couldn't save the course. This might be a duplicate course code or a connection issue.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row w-full gap-4 mt-4">
+          <button 
+            onClick={handleCancel}
+            className="w-full py-4 text-xl font-semibold rounded-xl border border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={() => setModalStatus(null)} // Closes modal to allow edit
+            className="w-full flex items-center justify-center gap-2 bg-orange-500 py-4 text-xl font-semibold text-white rounded-xl hover:bg-orange-600 transition-colors"
+          >
+            <MdRefresh size={24} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+    </>
   );
 };
 
