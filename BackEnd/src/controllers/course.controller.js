@@ -198,27 +198,33 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
 
 const createCourse = asyncHandler(async (req, res) => {
   const Id = req.user._id;
-  const {courseData} = req.body;
-  console.log("Course Data:", courseData);
+  const data = req.body;
+
+  // console.log("Course Data:", data);
+
 
   if (!Id) {
     throw new apiError(401, "Unauthorized");
   }
 
-  // Validate required fields
-  if(!courseData){
+  if (!data || Object.keys(data).length === 0) {
     throw new apiError(400, "Course data is required");
   }
- 
- const { title, courseCode, department, staringDate, instructorName, degree, semester, type, category } = courseData;
-  if (!title || !courseCode || !department || !staringDate || !instructorName || !degree || !semester || !type || !category) {
+  
+  
+ const { title, courseCode, startingDate, instructorName, type, format,department,semester,degree } = data;
+//  console.log("Required Fields:", { title, courseCode, startingDate, instructorName, type, format , handbook});
+  if (!title || !courseCode  || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
     throw new apiError(400, "All required course fields must be provided");
   }
 
+  const year = new Date(startingDate).getFullYear();
+
   try {
     const newCourse = new Course({
-      ...courseData,
-      createdBy: Id
+      ...data,
+      year,
+      createdBy: Id,
     });
 
     await newCourse.save();
@@ -228,7 +234,8 @@ const createCourse = asyncHandler(async (req, res) => {
       if (err.code === 11000 && err.keyValue.courseCode) {
           throw new apiError(400, `Course with code ${err.keyValue.courseCode} already exists`);
         }
-        throw new apiError(500, "Error creating course");
+        // throw new apiError(500, "Error creating course");
+        throw new apiError(500, err.message || "Error creating course");
     }
 });
 

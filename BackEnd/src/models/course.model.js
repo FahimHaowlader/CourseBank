@@ -10,14 +10,14 @@ const courseSchema = new mongoose.Schema(
     courseCode: {
       type: String,
       required: true,
-      uppercase: true,
+      lowercase: true,
     },
     department: {
       type: String,
       required: true,
       lowercase: true,
     },
-    staringDate: {
+    startingDate: {
       type: Date,
       required: true,
       set: (value) => new Date(value),
@@ -29,10 +29,10 @@ const courseSchema = new mongoose.Schema(
       enum: ["bachelors", "masters", "phd"],
     },
 
-    // year: {
-    //   type: Number,
-    //   required: true,
-    // },
+    year: {
+      type: Number,
+      required: true,
+    },
     semester: {
       type: Number,
       required: true,
@@ -259,7 +259,6 @@ const courseSchema = new mongoose.Schema(
     },
     handbook: {
        type: String,
-        required: [true, "Handbook URL is required"],
         validate: {
           validator: function (v) {
             // Use .test() for a single string
@@ -275,6 +274,7 @@ const courseSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
+    
 
     Checked :{
       type: Boolean,
