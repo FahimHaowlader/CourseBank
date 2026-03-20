@@ -11,10 +11,7 @@ const AxiosInterceptor = ({ children }) => {
             (config) => {
                 // Add a custom header or log "Hello"
                 console.log("Hello! Request is being sent to:", config.url);
-                
-                // Example: Adding a custom header named 'X-Greeting'
-                config.headers['X-Greeting'] = 'Hello-From-React';
-                
+                             
                 return config;
             },
             (error) => {

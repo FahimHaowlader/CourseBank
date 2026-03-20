@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { useLocation } from "react-router";
 
-// 1. Create the context
 const AuthContext = createContext(null);
 
-// 2. Export the hook
+// 1. Custom hook for easy access
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -13,52 +13,67 @@ export const useAuth = () => {
   return context;
 };
 
-// 3. Export the Provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start as true to prevent premature redirects
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'https://coursebank.onrender.com/api/v1';
-  // axios.defaults.withCredentials = true;
+  const API_BASE_URL = 'http://localhost:5100/api/v1';
 
+  // Helper to sync session on refresh
   useEffect(() => {
-    // const checkSession = async () => {
-    //   try {
-    //     const response = await axios.get(`${API_BASE_URL}/me`);
-    //     if (response.data) setUser(response.data);
-    //   } catch (err) {
-    //     setUser(null);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // checkSession();
-  }, []);
+    const syncSession = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_BASE_URL}/refresh`, { 
+          withCredentials: true 
+        }); 
+
+        if (response.data?.data?.user) {
+          // This updates the 'user' state for the next render
+          setUser(response.data.data.user);
+          
+        }
+      } catch (err) {
+        // console.error("Session sync failed:", err.message);
+        setUser(null);
+      } finally {
+        // Stop loading only after we know if the user exists or not
+        setLoading(false); 
+      }
+    };
+
+    syncSession();
+  }, []); // Empty array ensures this runs ONCE per page refresh
+
+useEffect(() => {
+  // Ignore the login page so we don't save it as a "previous" destination
+  if (location.pathname !== "/login" && location.pathname !== "/signup") {
+    console.log("Saving full path:", location.pathname);
+    sessionStorage.setItem("prevPath", location.pathname);
+  }
+}, [location]);
 
   const loginWithUserIdAndPassword = async (userId, password) => {
-    // console.log("Attempting login for:", userId);
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, { userId, password },{ withCredentials: true });
-      setUser(response.data.data.user);
-      console.log("Login successful for:", response.data.data.user);
-
+      const response = await axios.post(`${API_BASE_URL}/login`, { userId, password }, { withCredentials: true });
+      const userData = response.data?.data?.user;
+      setUser(userData);
       setLoading(false);
-      return response.data.user;
+      return userData;
     } catch (err) {
-      // console.error("Login error:", err.response?.data?.message || err.message);
       setLoading(false);
       const msg = err.response?.data?.message || "Login failed";
       setError(msg);
-      
+      throw err; // Throw so the login page can handle local UI logic
     }
   };
 
   const logOut = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/logout`);
+      await axios.post(`${API_BASE_URL}/logout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
       console.error("Logout failed", err);
@@ -73,7 +88,6 @@ export const AuthProvider = ({ children }) => {
     logOut,
     error,
     setError,
-    
   };
 
   return (
@@ -82,5 +96,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-// Use Named Exports for everything to keep Vite happy

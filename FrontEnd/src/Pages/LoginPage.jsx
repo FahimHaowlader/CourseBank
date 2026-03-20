@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { MdLock, MdOutlinePersonOutline } from "react-icons/md";
 import { IoMdKey } from "react-icons/io";
 import { TbEye, TbEyeClosed } from "react-icons/tb";
@@ -7,21 +7,38 @@ import axios from "axios";
 import { useLocation,useNavigate } from "react-router";
 
 const LoginPage = () => {
+  const {loginWithUserIdAndPassword, error, setError,loading,setLoading,user} = useAuth();
    const location = useLocation();
    const navigate = useNavigate();
-   const from = location.state?.from?.pathname || "/courses";
-  //  console.log("Redirecting to:", from);
+   const from = location.state?.from?.pathname || "/"; // Default to home page if no previous location
+// 1. Check if they were trying to go to a specific URL before login
+// const from = location.state?.from?.pathname || 
+//   (user?.role === "admin" 
+//     ? "/admin-dashboard" 
+//     : user?.role === "moderator" 
+//       ? "/moderator-dashboard" 
+//       : user?.role === "contributor" 
+//         ? "/contributor-dashboard" // 👈 Add your contributor route here
+//         : "/courses"); // Default for students/guests  //  console.log("Redirecting to:", from);
+  const prevPath = sessionStorage.getItem("prevPath") || "/";
 
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const {loginWithUserIdAndPassword, error, setError,loading,setLoading} = useAuth();
 
+useEffect(() => {
+    if (user) {
+      // Use { replace: true } so the user can't go "back" to the login page
+      navigate(prevPath, { replace: true });
+      console.log("User already logged in, redirecting to:", location.state?.from?.pathname);
+    }
+  }, [user, navigate, from]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     
     const userid = e.target.userid.value;
     const password = e.target.password.value;
-
+ 
+    
     // 1. Validation Logic
     if (!userid || !password) {
       setError("Please enter both User ID and password.");

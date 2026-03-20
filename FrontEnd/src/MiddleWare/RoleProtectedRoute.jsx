@@ -5,6 +5,8 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loading } = useAuth(); // Get user and loading state from context
     const location = useLocation();
 
+ 
+
     // 1. While the API is checking if the user is logged in, show a loader
     if (loading) {
         return (
@@ -33,7 +35,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
 
     if (!isAllowed) {
         // User is logged in but doesn't have permission for this specific route
-        return <Navigate to="/unauthorized" replace />;
+        return <Navigate to="/" replace />;
     }
 
     // 4. Everything matches! Render the protected component

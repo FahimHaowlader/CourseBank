@@ -41,12 +41,20 @@ function App() {
       path: "/edit/:id",
       element: (
         <CourseProvider>
-          {" "}
           <CourseDetailsEditPage />
         </CourseProvider>
       ),
     },
-    { path: "/add-course", element: <AddCoursePage /> },
+
+    {
+      path: "/add-course",
+      element: (
+        <RoleProtectedRoute allowedRoles={["user", "moderator", "admin"]}>
+          <AddCoursePage />
+        </RoleProtectedRoute>
+      ),
+    },
+
     { path: "/admin", element: <AdminPage /> },
     { path: "/all", element: <AllCoursePage /> },
     { path: "/contributors", element: <AllContributorPage /> },
