@@ -274,7 +274,7 @@ const courseSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
-    
+
 
     Checked :{
       type: Boolean,
@@ -294,5 +294,22 @@ const courseSchema = new mongoose.Schema(
 );
 
 const Course = mongoose.model("Course", courseSchema);
+
+courseSchema.pre('save', function(next) {
+  // If the document is new, we don't need to check the lock
+  if (this.isNew) return next();
+
+  const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+  const currentTime = new Date().getTime();
+  const courseStartTime = new Date(this.staringDate).getTime();
+
+  // Check if current date is 1 year past the starting date
+  if (currentTime - courseStartTime > oneYearInMs) {
+    const error = new Error("This course is over 1 year old and is now locked for editing.");
+    return next(error);
+  }
+
+  next();
+});
 
 export default Course;
