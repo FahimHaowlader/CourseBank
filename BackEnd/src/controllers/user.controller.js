@@ -23,6 +23,15 @@ const createUser = asyncHandler(async (req, res) => {
       throw new apiError(400, "Please provide all required fields");
     }
 
+    if(userId.length !== 10 && userId.length !== 11) {
+      throw new apiError(400, "userId must be either 10 or 11  characters long");
+    }
+      if(password.length < 6) {
+        throw new apiError(400, "userId and password must be at least 6 characters long");
+      }
+
+
+
     // Check if user already exists
     const existingUser = await User.findOne({ userId });
     if (existingUser) {
@@ -113,7 +122,8 @@ const userLogin = asyncHandler(async (req, res) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,      // Cannot be accessed by JS (prevents XSS)
     secure: process.env.NODE_ENV === "production", // Only HTTPS in prod
-    sameSite: "Strict",  // CSRF protection
+    sameSite: "Strict", 
+    path : "/", // CSRF protection
     maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day in milliseconds
   });
 
