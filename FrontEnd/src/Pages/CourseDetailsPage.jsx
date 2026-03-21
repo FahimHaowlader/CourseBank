@@ -21,11 +21,14 @@ import NoCourse from "../Components/NoCourse";
 import NoElement from "../Components/NoElement";
 import SemesterDisplay from "../Components/semesterTransformer";
 import { DepartmentMap } from "../Components/DepartmentMap";
+import PublicApi  from "../Hooks/PublicApi.jsx";
 
 const CourseDetailsPage = () => {
   const [course, setCourse] =useState(null);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
+  // console.log("Course ID from URL:", id); 
+
   
    useEffect(() => {
     // 1. Try scrolling the window
@@ -42,7 +45,7 @@ const CourseDetailsPage = () => {
     const fetchCourse = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://coursebank.onrender.com/api/v1/course-details/${id}`);
+        const response = await PublicApi.get(`/course-details/${id}`);
         setCourse(response.data.data);
       } catch (error) {
         console.error("Error fetching course data:", error);
@@ -52,76 +55,13 @@ const CourseDetailsPage = () => {
     };
     fetchCourse();
     
-    // setTimeout(() => {  
-    //   setCourse({
-    //     "instructorImage": {
-    //         "imageURL": "https://example.com/ludwig.jpg"
-    //     },
-    //     "handbook": {
-    //         "fileUrl": "https://edu.com/music-handbook.pdf"
-    //     },
-    //     "_id": "6957c3679ad2a10d20c2cdfc",
-    //     "title": "classical music theory classical music theory classical music theory classical music theory",
-    //     "courseCode": "MUS101",
-    //     "department": "music",
-    //     "staringDate": "2025-02-01T00:00:00.000Z",
-    //     "degree": "bachelors",
-    //     "semester": 1,
-    //     "description": "Notation, harmony, and rhythm.",
-    //     "credits": 2,
-    //     "category": "non-major",
-    //     "type": "core",
-    //     "instructorName": "ludwig van beethoven",
-    //     "instructorDepartment": "music",
-    //     "books": [
-    //         {
-    //             "_id": "6958373c971f79c164d2fe0a",
-    //             "title": "Tonal Harmony",
-    //             "authorName": "Kostka",
-    //             "fileUrl": "https://edu.com/music.pdf"
-    //         }
-    //     ],
-    //     "materials": [
-    //         {
-    //             "_id": "6958373c971f79c164d2fe0b",
-    //             "name": "Scale Sheets",
-    //             "fileUrl": "https://edu.com/scales.pdf"
-    //         },
-    //         {
-    //             "_id": "6958373c971f79c164d2fe0b",
-    //             "name": "Scale Sheets",
-    //             "fileUrl": "https://edu.com/scales.pdf"
-    //         },
-    //     ],
-    //     "tasks": [
-    //         {
-    //             "_id": "6958373c971f79c164d2fe0c",
-    //             "name": "Composition 1",
-    //             "fileUrl": "https://edu.com/comp.pdf"
-    //         }
-    //     ],
-    //      "assessments": [
-    //         {
-    //             "_id": "6958373c971f79c164d2fe0c",
-    //             "name": "midterm",
-    //             "fileUrl": "https://edu.com/comp.pdf"
-    //         },
-    //         {
-    //             "_id": "6958373c971f79c164d2fe0c",
-    //             "name": "final",
-    //             "fileUrl": "https://edu.com/comp.pdf"
-    //         }
-
-    //     ]
-    // });
-    // }, 2000); // Simulate a 2-second delay
   }, []);
 
 
   if (loading){
     return <CourseDetailsSkeleton />;
   }
-
+// console.log("Course data after loading:", course);
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       { course  && (
@@ -133,7 +73,7 @@ const CourseDetailsPage = () => {
             <div className="flex-1">
           <h1 className="text-3xl sm:text-4xl mb-2 text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-extrabold 
                selection:text-gray-600 dark:selection:text-gray-300 ">
-                  {course.title.charAt(0).toUpperCase() + course.title.slice(1) }
+                  {course.title ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1) : ""}
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-1 ">
                {DepartmentMap[course.department] ? "Department of " + DepartmentMap[course.department] : "Unknown Department"}
@@ -147,19 +87,19 @@ const CourseDetailsPage = () => {
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span> */}
-                   {course.degree.charAt(0).toUpperCase() + course.degree.slice(1)}
+                   {course?.degree ? course?.degree?.charAt(0).toUpperCase() + course.degree.slice(1) : ""}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span> */}
-                  {course.type.charAt(0).toUpperCase() + course.type.slice(1)}
+                  {course?.type ? course?.type?.charAt(0).toUpperCase() + course.type.slice(1) : "" }
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span> */}
-                  {course.category.charAt(0).toUpperCase() + course.category.slice(1)}
+                  {course?.format ? course.format : ""}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
@@ -216,7 +156,7 @@ const CourseDetailsPage = () => {
                       Course Start
                     </span>
                     <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {new Date(course.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+                      {new Date(course.startingDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
                     </span>
                   </div>
                  
@@ -395,7 +335,7 @@ const CourseDetailsPage = () => {
                     Term Test Questions
                   </h3>
                   {
-                    course.assessments?.filter((assessment) => assessment.name !== 'final').length === 0 ? (<NoElement title={"term test question"} />)  : ( course.assessments?.filter((assessment) => assessment.name !== 'final').map((assessment) => (
+                    course.assessments?.filter((assessment) => assessment.type !== 'final').length === 0 ? (<NoElement title={"term test question"} />)  : ( course.assessments?.filter((assessment) => assessment.name !== 'final').map((assessment) => (
                       <div key={assessment._id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
@@ -403,14 +343,14 @@ const CourseDetailsPage = () => {
                       </span>
                       <div>
                          <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
-                            {assessment.name}
+                            {assessment.type}
                         </p>
                         <div className="flex items-center gap-2"  >
                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                          1/1/1
+                          {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                             50 mark
+                          {assessment.mark} mark
                         </p>
                         
                         </div>
@@ -432,7 +372,7 @@ const CourseDetailsPage = () => {
                     Final Exam Questions
                   </h3>
                   { 
-                    course.assessments?.filter((assessment) => assessment.name === 'final').length === 0 ? (<NoElement title={"final question"} />)  : ( course.assessments?.filter((assessment) => assessment.name === 'final').map((assessment) => (
+                    course.assessments?.filter((assessment) => assessment.type === 'final').length === 0 ? (<NoElement title={"final question"} />)  : ( course.assessments?.filter((assessment) => assessment.name === 'final').map((assessment) => (
                       <div key={assessment._id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
@@ -440,10 +380,10 @@ const CourseDetailsPage = () => {
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
-                          {assessment.name}
+                          {assessment.type}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                          {assessment?.type} paper test
+                          {/* {assessment?.type} paper test */}
                         </p>
                       </div>
                     </div>

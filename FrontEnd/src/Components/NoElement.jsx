@@ -10,11 +10,11 @@ const NoElement = ({title}) => {
         </span>
       </div>
       <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
-        No {title} available at this time
+        No {title} available 
       </h3>
-      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
+      {/* <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
         Check back later for {title}
-      </p>
+      </p> */}
     </div>
   );
 };

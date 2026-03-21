@@ -224,7 +224,7 @@ const CoursePage = () => {
             Course Bank
           </h1>
           <p className="mt-2 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-1.5">
-            Search and explore courses by semester, teacher, and category to
+            Search and explore courses by semester, teacher, and format to
             plan your academic journey.
           </p>
         </header>

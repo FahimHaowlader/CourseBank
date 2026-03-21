@@ -306,37 +306,44 @@ const handleAssessmentDateChange = (id, date) => {
 };
 
   // Clean assessments before sending
-  const cleanAssessments = () => {
-    const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+const cleanAssessments = () => {
+  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
 
-    const cleaned = assessments
-      .map((a) => ({
-        ...a,
-        mark: Number(a.mark),                  // convert mark to number  
-      }))
-      .filter(
-        (a) =>
-          a.type?.trim() &&                   // type exists
-          !isNaN(a.mark) &&                   // mark is a number
-          a.date &&                            // date exists
-          a.fileUrl?.trim() &&                 // fileUrl exists
-          urlRegex.test(a.fileUrl)             // fileUrl is valid URL
+  // Convert the course starting date to a comparable number
+  const courseStartTimestamp = new Date(formData.startingDate).getTime();
+
+  const cleaned = assessments
+    .map((a) => ({
+      ...a,
+      mark: Number(a.mark),
+    }))
+    .filter((a) => {
+      const assessmentTimestamp = new Date(a.date).getTime();
+      
+      return (
+        a.type?.trim() &&
+        !isNaN(a.mark) &&
+        a.date &&
+        // LOGIC: Assessment must happen ON or AFTER the course starts
+        assessmentTimestamp >= courseStartTimestamp && 
+        a.fileUrl?.trim() &&
+        urlRegex.test(a.fileUrl)
       );
+    });
 
-    // Reset UI
-    setAssessments([
-      {
-        id: Date.now(),
-        type: "Termtest-1",
-        mark: "",
-        date: new Date(),
-        fileUrl: "",
-      },
-    ]);
+  // Reset UI for the next entry
+  setAssessments([
+    {
+      id: Date.now(),
+      type: "Termtest-1",
+      mark: "",
+      date: new Date(),
+      fileUrl: "",
+    },
+  ]);
 
-    return cleaned;
-  };
-
+  return cleaned;
+};
   
   const handleCancel = () => {  
   // Reset form data
@@ -482,7 +489,7 @@ const handleTryAgain = () => {
 
   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg transition-colors">
     <select
-      className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed opacity-70"
+      className={`w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm ${user?.role !== "admin" ? "cursor-not-allowed opacity-70":"cursor-pointer"} appearance-none  `}
       name="degree"
       value={formData.degree}
       onChange={handleChange}
@@ -510,7 +517,7 @@ const handleTryAgain = () => {
 
   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg transition-colors">
     <select
-      className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-not-allowed opacity-70"
+      className={`w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none ${user?.role !== "admin" ? "cursor-not-allowed opacity-70":"cursor-pointer"}  `}
       name="semester"
       value={formData.semester}
       onChange={handleChange}
@@ -1050,16 +1057,16 @@ const handleTryAgain = () => {
                 handleAssessmentChange(a.id, "type", e.target.value)
               }
             >
-              <option value="Termtest-1">Termtest-1</option>
-              <option value="Termtest-2">Termtest-2</option>
-              <option value="Termtest-3">Termtest-3</option>
-              <option value="Midterm-1">Midterm-1</option>
-              <option value="Midterm-2">Midterm-2</option>
-              <option value="Midterm-3">Midterm-3</option>
-              <option value="Quiz-1">Quiz-1</option>
-              <option value="Quiz-2">Quiz-2</option>
-              <option value="Final">Final</option>
-              <option value="Project">Project</option>
+              <option value="termtest-1">Termtest-1</option>
+              <option value="termtest-2">Termtest-2</option>
+              <option value="termtest-3">Termtest-3</option>
+              <option value="midterm-1">Midterm-1</option>
+              <option value="midterm-2">Midterm-2</option>
+              <option value="midterm-3">Midterm-3</option>
+              <option value="quiz-1">Quiz-1</option>
+              <option value="quiz-2">Quiz-2</option>
+              <option value="final">Final</option>
+              <option value="project">Project</option>
             </select>
             <IoIosArrowDown className="absolute right-3 top-4 pointer-events-none text-text-muted-light" />
           </div>

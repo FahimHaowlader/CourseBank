@@ -1,7 +1,5 @@
 import React from "react";
-import CustomCourseCard from "../Components/CustomCourseCard";
-import AddCourseCard from "../Components/AddCourseCard";
-import CourseDeleteConformation from "../Components/CourseDeleteConformation";
+
 import { GiCogLock } from "react-icons/gi";
 import { useState } from "react";
 import { IoMdCheckmarkCircle } from "react-icons/io";
@@ -11,72 +9,43 @@ import { MdDeleteOutline } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 
 
+import { useEffect } from "react";
+import { Link } from "react-router";
+import axios from "axios";
+
+
 // import DeleteConformation from "../Components/DeleteConformation";
+import CustomCourseCard from "../Components/CustomCourseCard";
+import AddCourseCard from "../Components/AddCourseCard";
+import CourseDeleteConformation from "../Components/CourseDeleteConformation";
+import { useAuth } from "../Contexts/Auth.Context.jsx";
+import PrivateApi from "../Hooks/PrivateApi.jsx";
 
 const ContributorCoursePage = () => {
-  const course = [
-    {
-        "instructorImage": {
-            "imageURL": "https://example.com/ludwig.jpg"
-        },
-        "handbook": {
-            "fileUrl": "https://edu.com/music-handbook.pdf"
-        },
-        "_id": "6957c3679ad2a10d20c2cdfc",
-        "title": "classical music theory classical music theory classical music theory classical music theory",
-        "courseCode": "MUS101",
-        "department": "music",
-        "staringDate": "2025-02-01T00:00:00.000Z",
-        "degree": "bachelors",
-        "semester": 1,
-        "description": "Notation, harmony, and rhythm.",
-        "credits": 2,
-        "category": "non-major",
-        "type": "core",
-        "instructorName": "ludwig van beethoven",
-        "instructorDepartment": "music",
-        "books": [
-            {
-                "_id": "6958373c971f79c164d2fe0a",
-                "title": "Tonal Harmony",
-                "authorName": "Kostka",
-                "fileUrl": "https://edu.com/music.pdf"
-            }
-        ],
-        "materials": [
-            {
-                "_id": "6958373c971f79c164d2fe0b",
-                "name": "Scale Sheets",
-                "fileUrl": "https://edu.com/scales.pdf"
-            },
-            {
-                "_id": "6958373c971f79c164d2fe0b",
-                "name": "Scale Sheets",
-                "fileUrl": "https://edu.com/scales.pdf"
-            },
-        ],
-        "tasks": [
-            {
-                "_id": "6958373c971f79c164d2fe0c",
-                "name": "Composition 1",
-                "fileUrl": "https://edu.com/comp.pdf"
-            }
-        ],
-         "assessments": [
-            {
-                "_id": "6958373c971f79c164d2fe0c",
-                "name": "midterm",
-                "fileUrl": "https://edu.com/comp.pdf"
-            },
-            {
-                "_id": "6958373c971f79c164d2fe0c",
-                "name": "final",
-                "fileUrl": "https://edu.com/comp.pdf"
-            }
+  const { user } = useAuth();
+  
 
-        ]
+  const [courses, setCourses] = useState([]);
+
+
+
+  useEffect(() => {
+    const fetchContributorCourses = async () => {
+      try {
+        const response = await PrivateApi.get(`/courses-by-creator/${user.userId}`);
+        console.log("Contributor's Courses:", response.data.data);
+        setCourses(response.data.data);
+        console.log("Courses state updated:", courses);
+      } catch (error) {
+        console.log("Error fetching contributor's courses:", error);
+      }
+    };
+
+    if (user) {
+      fetchContributorCourses();
     }
-  ]
+  }, [user]);
+
   const [modal, setModal] = useState({
     openModal: false,
     id: null,
@@ -150,18 +119,25 @@ const ContributorCoursePage = () => {
           </h2>
            <h3  className="mt-1 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-0.5">View, add, and manage all your courses in one place</h3>
             </div> */}
-         <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center mb-6 pl-1">
-            Showing{" "}
-            <span className="font-bold text-text-main dark:text-white">12</span>{" "}
-            courses
-          </div>
+       <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center mb-6 pl-1">
+  You have {" "}
+  <span className="font-bold text-text-main dark:text-white">
+    {courses.length}
+  </span>{" "}
+  {courses.length === 1 ? "course" : "courses"}
+</div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-           < CustomCourseCard Course={course[0]} setModal={setModal}/>
+           {/* < CustomCourseCard Course={courses[0]} setModal={setModal}/> */}
            {/* < CustomCourseCard Course={course[0]} setDeleteModalId={setDeleteModalId}/> */}
             
            {/* < CustomCourseCard/> */}
            {/* < CustomCourseCard/> */}
+           {
+            courses.map((course) => (
+              <CustomCourseCard key={course._id} Course={course} setModal={setModal}/>
+            ))
+           }
            < AddCourseCard/>
           
          </div>

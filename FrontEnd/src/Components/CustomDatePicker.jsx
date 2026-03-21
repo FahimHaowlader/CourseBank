@@ -55,7 +55,7 @@ const CustomDatePicker = ({ label, onChange }) => {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full h-12 px-3 rounded-lg text-left bg-white dark:bg-background-dark border border-border-light dark:border-border-dark text-text-main dark:text-white text-sm focus:border-primary transition-all flex items-center justify-between"
+        className="w-full h-12 px-3 rounded-lg text-left bg-white dark:bg-background-dark border border-border-light dark:border-border-dark text-text-main dark:text-white text-sm focus:border-primary transition-all flex items-center justify-between cursor-pointer"
       >
         {formattedDate}
         <IoIosArrowDown size={20} />

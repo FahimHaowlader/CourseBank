@@ -38,6 +38,14 @@ function App() {
     { path: "/login", element: <LoginPage /> },
     { path: "/my-courses", element: <ContributorCoursePage /> },
     {
+      path: "/my-course/:id",
+      element: (
+        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+          <CourseDetailsPage />
+        </RoleProtectedRoute>
+      ),  
+    },
+    {
       path: "/edit/:id",
       element: (
         <CourseProvider>
