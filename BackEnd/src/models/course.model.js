@@ -101,10 +101,10 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
           },
-          id:{
+          id: {
             type: Number,
-            required: true, 
-          },  
+            required: true,
+          },
           authorName: {
             // Add this field
             type: String,
@@ -118,8 +118,7 @@ const courseSchema = new mongoose.Schema(
                 // Use .test() for a single string
                 return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
               },
-              message:
-                "The URL must be a valid PDF document link for books",
+              message: "The URL must be a valid PDF document link for books",
             },
           },
           // publicId: {
@@ -139,7 +138,7 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
           },
-          id:{
+          id: {
             type: Number,
             required: true,
           },
@@ -155,7 +154,7 @@ const courseSchema = new mongoose.Schema(
                 "The URL must be a valid PDF document link for materials",
             },
           },
-        
+
           // publicId: {
           //   type: String,
           //   required: [true, "Public ID is required for material management"],
@@ -174,9 +173,9 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
           },
-          id:{
+          id: {
             type: Number,
-            required: true, 
+            required: true,
           },
           fileUrl: {
             type: String,
@@ -184,10 +183,9 @@ const courseSchema = new mongoose.Schema(
             validate: {
               validator: function (v) {
                 // Use .test() for a single string
-               return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
+                return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
               },
-              message:
-                "The URL must be a valid PDF document link for tasks",
+              message: "The URL must be a valid PDF document link for tasks",
             },
           },
           // publicId: {
@@ -219,24 +217,23 @@ const courseSchema = new mongoose.Schema(
               "Project",
             ],
           },
-          id:{
+          id: {
             type: Number,
-            required: true, 
+            required: true,
           },
           mark: {
             type: Number,
             required: true,
             min: [0, "Marks cannot be negative"],
             max: [100, "Marks cannot exceed 100"],
-          },  
+          },
           fileUrl: {
             type: String,
             required: [true, "Assessment URL is required"],
             validate: {
               validator: function (v) {
                 // Use .test() for a single string
-               return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
-
+                return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
               },
               message:
                 "The URL must be a valid PDF document link for assessments",
@@ -246,7 +243,7 @@ const courseSchema = new mongoose.Schema(
             type: Date,
             required: true,
             set: (value) => new Date(value),
-          }, 
+          },
           // publicId: {
           //   type: String,
           //   required: [true, "Public ID is required for assesment management"],
@@ -258,23 +255,22 @@ const courseSchema = new mongoose.Schema(
       // required: [true, 'At least one assesment is required']
     },
     handbook: {
-       type: String,
-        validate: {
-          validator: function (v) {
-            // Use .test() for a single string
-            return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
-          },
-          message: "The URL must be a valid PDF document link for handbook",
+      type: String,
+      validate: {
+        validator: function (v) {
+          // Use .test() for a single string
+          return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
         },
+        message: "The URL must be a valid PDF document link for handbook",
       },
-       
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       select: false,
     },
-
 
     status: {
       type: String,
@@ -285,42 +281,44 @@ const courseSchema = new mongoose.Schema(
     submittedAt: {
       type: Date,
     },
-   
+
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       select: false,
     },
-    moderatorFeedback: {
-    type: String,
-    trim: true
-  },
-  isEditedSinceFeedback: {
-      type: Boolean,
-      default: false
+    feedback: {
+      type: String,
+      trim: true,
     },
-      isLocked: {
+    isEditedSinceFeedback: {
       type: Boolean,
-      default: false
-      },
-
+      default: false,
+    },
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Course = mongoose.model("Course", courseSchema);
 
 courseSchema.pre('save', function(next) {
-  // If the document is new, we don't need to check the lock
+  // 1. If the document is new, allow it to save (no lock yet)
   if (this.isNew) return next();
 
+  // 2. Define the lock period (1 year in milliseconds)
   const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
-  const currentTime = new Date().getTime();
-  const courseStartTime = new Date(this.staringDate).getTime();
+  const currentTime = Date.now();
+  
+  // 3. Get the timestamp from when the course was first created
+  const creationTime = new Date(this.createdAt).getTime();
 
-  // Check if current date is 1 year past the starting date
-  if (currentTime - courseStartTime > oneYearInMs) {
-    const error = new Error("This course is over 1 year old and is now locked for editing.");
+  // 4. Compare current time vs creation time
+  if (currentTime - creationTime > oneYearInMs) {
+    const error = new Error("This course was created over 1 year ago and is now locked for editing.");
     return next(error);
   }
 
