@@ -37,6 +37,7 @@ import PrivateApi from "../Hooks/PrivateApi";
 import { parseUserId } from "../const";
 
 const AddCoursePage = () => {
+  const[errormessage,setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -127,6 +128,8 @@ const AddCoursePage = () => {
     } catch (error) {
       setModalStatus('error');
       console.error("Error creating course:", error.response?.data || error.message);
+      const msg = error.response?.data?.message || "An error occurred while creating the course.";
+      setErrorMessage(msg);
     }
     finally {
       setLoading(false);
@@ -238,38 +241,6 @@ const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
   return cleanedTasks;
 };
 
-const handleCancel = () => {  
-  // Reset form data
-  setFormData({
-    title: "",
-    courseCode: "",
-    startingDate: new Date().toISOString(),
-    format: "",
-    department: userInfo?.dept,
-    semester : userInfo?.semester,
-    degree: userInfo?.degree,
-    type: "",
-    credits: "",
-    description: "",
-    instructorName: "",
-    instructorDepartment: "",
-  });
-  setHandbook("");
-  setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }]);
-  setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
-  setTasks([{ id: Date.now(), name: "", fileUrl: "" }]);
-  setAssessments([
-    {
-      id: Date.now(),
-      type: "Termtest-1",
-      mark: "",
-      date: new Date(),
-      fileUrl: "",
-    },
-  ]);
-  setModalStatus(null); // Close modal
-};
-
    const [assessments, setAssessments] = useState([
     {
       id: Date.now(),
@@ -367,6 +338,44 @@ const handleAssessmentDateChange = (id, date) => {
   };
 
   
+  const handleCancel = () => {  
+  // Reset form data
+  setFormData({
+    title: "",
+    courseCode: "",
+    startingDate: new Date().toISOString(),
+    format: "",
+    department: userInfo?.dept,
+    semester : userInfo?.semester,
+    degree: userInfo?.degree,
+    type: "",
+    credits: "",
+    description: "",
+    instructorName: "",
+    instructorDepartment: "",
+  });
+  setHandbook("");
+  setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }]);
+  setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
+  setTasks([{ id: Date.now(), name: "", fileUrl: "" }]);
+  setAssessments([
+    {
+      id: Date.now(),
+      type: "Termtest-1",
+      mark: "",
+      date: new Date(),
+      fileUrl: "",
+    },
+  ]);
+  setModalStatus(null); // Close modal
+  setErrorMessage("");
+};
+
+const handleTryAgain = () => {  
+  setModalStatus(null); // Close modal
+  setErrorMessage("");
+};
+
 
   return (
     <> 
@@ -1209,7 +1218,7 @@ const handleAssessmentDateChange = (id, date) => {
         <div className="space-y-2">
           <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Failed</h3>
           <p className="text-xl text-text-secondary dark:text-gray-400">
-            We couldn't save the course. This might be a duplicate course code or a connection issue.
+            We couldn't save the course. {errorMessage}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row w-full gap-4 mt-4">
@@ -1220,7 +1229,7 @@ const handleAssessmentDateChange = (id, date) => {
             Cancel
           </button>
           <button 
-            onClick={() => setModalStatus(null)} // Closes modal to allow edit
+            onClick={handleTryAgain} // Closes modal to allow edit
             className="w-full flex items-center justify-center gap-2 bg-orange-500 py-4 text-xl font-semibold text-white rounded-xl hover:bg-orange-600 transition-colors"
           >
             <MdRefresh size={24} />
