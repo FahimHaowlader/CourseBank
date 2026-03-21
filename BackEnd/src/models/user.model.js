@@ -1,58 +1,91 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
-const userSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
-    lowercase: true,
-    unique: true,
-  },
-  access: {
-    type: Boolean,
-    default: true,
-  },
-  department: {
-    type: String,
-    required: true,
-    lowercase: true,
-    select : false,
-  },
-  year: {
-    type: Number,
-    required: true,
-        select : false,
+const userSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: String,
+      required: true,
+      lowercase: true,
+      unique: true,
+    },
+    access: {
+      type: Boolean,
+      default: true,
+    },
+    department: {
+      type: String,
+      required: true,
+      lowercase: true,
+      select: false,
+    },
+    year: {
+      type: Number,
+      required: true,
+      select: false,
+    },
+    semester: {
+      type: Number,
+      required: true,
+      min: [1, "Semester must be at least 1est year 1est semester"],
+      max: [62, "Semester cannot exceed 6th year 2nd semester"],
+      select: false,
+    },
+    degree: {
+      type: String,
+      required: true,
+      lowercase: true,
+      enum: ["bachelors", "masters", "phd"],
+      select: false,
+    },
+    email: {
+      type: String,
+      // required: true, {/* temporarily disabled for testing */}
+    },
+    password: {
+      type: String,
+      required: true,
+      lowercase: true,
+      select: false, // plain text password is not selectable
+    },
+    role: {
+      type: String,
+      enum: ["moderator", "contributor", "admin"],
+      default: "contributor",
+    },
+    contributionsCount: {
+      type: Number,
+      default: 0,
+    },
+    myCourses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
+    status: {
+      type: String,
+      enum: ["draft", "pending", "approved", "rejected"],
+      default: "draft",
+    },
+    SubmittedAt: {
+      type: Date,
+      set: (value) => new Date(value),
+    },
+    ReviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    feedback: {
+      type: String,
+      select: false,
+    },
 
   },
-  semester: {
-    type: Number,
-    required: true,
-        select : false,
+  { timestamps: true },
+);
 
-  },
-  degree: {
-    type: String,
-    required: true,
-    lowercase: true,
-    enum: ["bachelors", "masters", "phd"],
-    select : false,
-  },
-  email: {
-    type: String,
-    // required: true, {/* temporarily disabled for testing */}
-  },
-  password: {
-    type: String,
-    required: true,
-    lowercase: true,
-    select: false, // plain text password is not selectable
-  },
-  role: {
-    type: String,
-    enum: ["moderator", "instructor", "admin"],
-    default: "moderator",
-  },
-}, { timestamps: true });
+ 
 
 // Methods for plain text password
 userSchema.methods.isPasswordCorrect = function (password) {
@@ -67,7 +100,7 @@ userSchema.methods.generateAccessToken = function () {
       role: this.role,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
   );
 };
 
