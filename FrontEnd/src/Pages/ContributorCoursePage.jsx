@@ -165,7 +165,32 @@ const ContributorCoursePage = () => {
            < AddCourseCard/>
           
          </div>
+       <div className="mt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+  
+  {/* FEEDBACK SECTION - Now takes full width on mobile, and pushes button down */}
+  <div className="p-4 bg-amber-50 border-l-4 w-full border-amber-500 rounded-r-lg shadow-sm">
+    <div className="flex items-center mb-2">
+      <svg className="w-5 h-5 text-amber-600 mr-2 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" />
+      </svg>
+      <h3 className="text-sm font-bold uppercase tracking-wider text-amber-800">
+        Moderator's Feedback
+      </h3>
+    </div>
+    
+    <p className="text-amber-900 text-sm leading-relaxed">
+      The course description is well-written and provides a clear overview of the course content. However, consider adding more details about the assessment methods and grading criteria to give students a better understanding of how they will be evaluated.
+    </p>
+  </div>
 
+  {/* BUTTON SECTION - Aligns right on desktop, stays centered or left on mobile */}
+  <div className="flex justify-end w-full lg:w-auto">
+    <button className="bg-emerald-600 hover:cursor-pointer w-full lg:min-w-[280px] hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all transform hover:scale-105">
+      Finalize & Submit Account
+    </button>
+  </div>
+  
+</div>
                 {
                 modal.openModal && modal.status == "confirm" && <div
       aria-labelledby="modal-title"
