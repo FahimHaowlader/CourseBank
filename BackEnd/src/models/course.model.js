@@ -276,19 +276,34 @@ const courseSchema = new mongoose.Schema(
     },
 
 
-    Checked :{
-      type: Boolean,
-      default: false,
+    status: {
+      type: String,
+      enum: ["draft", "pending", "approved", "rejected"],
+      default: "draft",
     },
-    checkedBy: {
+
+    submittedAt: {
+      type: Date,
+    },
+   
+    reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       select: false,
     },
-    problem: {
+    moderatorFeedback: {
+    type: String,
+    trim: true
+  },
+  isEditedSinceFeedback: {
       type: Boolean,
-      default: false,
+      default: false
     },
+      isLocked: {
+      type: Boolean,
+      default: false
+      },
+
   },
   { timestamps: true }
 );
