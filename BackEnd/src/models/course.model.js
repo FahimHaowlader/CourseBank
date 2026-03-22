@@ -205,16 +205,16 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
             enum: [
-              "Midterm-1",
-              "Midterm-2",
-              "Midterm-3",
-              "Termtest-1",
-              "Termtest-2",
-              "Termtest-3",
-              "Quiz-1",
-              "Quiz-2",
-              "Final",
-              "Project",
+              "midterm-1",
+              "midterm-2",
+              "midterm-3",
+              "termtest-1",
+              "termtest-2",
+              "termtest-3",
+              "quiz-1",
+              "quiz-2",
+              "final",
+              "project",
             ],
           },
           id: {
@@ -280,6 +280,8 @@ const courseSchema = new mongoose.Schema(
 
     submittedAt: {
       type: Date,
+      set: (value) => new Date(value),
+      select: false,
     },
 
     reviewedBy: {
@@ -303,11 +305,18 @@ const courseSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Course = mongoose.model("Course", courseSchema);
+
 
 courseSchema.pre('save', function(next) {
   // 1. If the document is new, allow it to save (no lock yet)
-  if (this.isNew) return next();
+  if (this.isNew || this._is_admin_request === true) {
+    return next();
+  }
+
+  // Attach the admin flag to the document instance
+    // if (req.user.role === 'admin') {
+    //   course._is_admin_request = true;
+    // }
 
   // 2. Define the lock period (1 year in milliseconds)
   const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
@@ -324,5 +333,7 @@ courseSchema.pre('save', function(next) {
 
   next();
 });
+
+const Course = mongoose.model("Course", courseSchema);
 
 export default Course;

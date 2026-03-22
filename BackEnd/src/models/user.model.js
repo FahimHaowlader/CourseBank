@@ -80,6 +80,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
+    isEditedSinceFeedback: {
+      type: Boolean,
+      default: false,
+    },
 
   },
   { timestamps: true },

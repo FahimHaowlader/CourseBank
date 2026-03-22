@@ -30,7 +30,7 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
         $lte: new Date(year, 11, 31, 23, 59, 59),
       };
     } else if (
-      ["department", "degree", "type", "category", "semester"].includes(key)
+      ["department", "degree", "type", "format", "semester"].includes(key)
     ) {
       query[key] = value.toLowerCase();
     } else if (typeof value === "string") {
@@ -154,7 +154,7 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
   }
 
   const course = await Course.findById(courseId).select(
-    '+description +instructorDepartment +instructorImage +books +materials +tasks +assesments +handbook'
+    '+description +instructorDepartment +instructorImage +books +materials +tasks +assessments +handbook'
   );
 
   if (!course) {
@@ -163,6 +163,49 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
 
   res.status(200).json( new apiResponse(200, course, "Course details fetched successfully"));
 });
+
+// get full details for edit the course 
+
+const fullCourseDetailsForEdit = asyncHandler(async (req, res) => {
+
+  const courseId = req.params?.courseId;
+  const userId = req.user?._id;
+  const userRole = req.user?.role;
+
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
+
+  if (!courseId) {
+    throw new apiError(400, "Course ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID");
+  }
+
+  const course = await Course.findById(courseId).select(
+    '+description +instructorDepartment +instructorImage +createdBy +books +materials +tasks +assessments +handbook'
+  );
+
+  if (!course) {
+    throw new apiError(404, "Course not found");
+  }
+
+  // --- PERMISSION CHECK START ---
+  
+  const isOwner = course.createdBy.toString() === userId.toString();
+  const isAdmin = userRole === 'admin';
+
+  if (!isOwner && !isAdmin) {
+    throw new apiError(403, "You do not have permission to edit this course");
+  }
+
+  // --- PERMISSION CHECK END ---
+  res.status(200).json( new apiResponse(200, course, "Course details fetched successfully"));
+ 
+});
+
 
 // Controller(Moderators and admin)
 
@@ -179,10 +222,10 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
   let filter = {};
   // console.log("Role:", role);
 
-  if (role === "moderator") {
+  if (role === "contributor") {
     // Moderators can only see their own courses
     filter.createdBy = requesterId;
-  } else if (role === "admin") {
+  } else if (role === "admin" || role === "moderator") {
     // Admin sees courses of queryUserId if provided, otherwise their own courses
     filter.createdBy = queryUserId || requesterId;
   } else {
@@ -199,6 +242,7 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
 const createCourse = asyncHandler(async (req, res) => {
   const Id = req.user._id;
   const data = req.body;
+  const userRole = req.user?.role;
 
   // console.log("Course Data:", data);
 
@@ -215,7 +259,7 @@ const createCourse = asyncHandler(async (req, res) => {
  const { title, courseCode, startingDate, instructorName, type, format,department,semester,degree } = data;
 
 
-if (userRole !== "admin") {
+if (userRole !== "admin" && userRole !== "moderator") {
     const duplicateCourse = await Course.findOne({ 
   courseCode: courseCode.trim(), 
   createdBy: Id 
@@ -231,6 +275,8 @@ if (duplicateCourse) {
   }
 
   const year = new Date(startingDate).getFullYear();
+
+
 
   try {
     const newCourse = new Course({
@@ -847,4 +893,4 @@ const deleteCourse = asyncHandler(async (req, res) => {
 
 
 
-export { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse };
+export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse };
