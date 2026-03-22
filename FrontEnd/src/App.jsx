@@ -36,7 +36,22 @@ function App() {
     { path: "/courses", element: <CoursePage /> },
     { path: "/course/:id", element: <CourseDetailsPage /> },
     { path: "/login", element: <LoginPage /> },
-    { path: "/my-courses", element: <ContributorCoursePage /> },
+    { 
+      path: "/my-courses", 
+      element: <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+      <ContributorCoursePage />
+      </RoleProtectedRoute>
+     },
+     {
+      path: "/my-course/edit/:id",
+      element: (
+        <CourseProvider>
+        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+          <CourseDetailsEditPage />
+        </RoleProtectedRoute>
+        </CourseProvider>
+      ),
+     },
     {
       path: "/my-course/:id",
       element: (

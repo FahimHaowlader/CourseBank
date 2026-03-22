@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router';
+
+
+import PublicApi from '../Hooks/PublicApi';
 // 1. Create the Context
 const CourseContext = createContext();
+
 
 // 2. Create the Provider Component
 export const CourseProvider = ({ children }) => {
@@ -161,9 +165,10 @@ export const CourseProvider = ({ children }) => {
     const fetchCourse = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`https://coursebank.onrender.com/api/v1/course-details/${id}`);
+        const response = await PublicApi.get(`/course-details-for-edit/${id}`);
         setCourse(response.data.data);
-        console.log(response.data.data);
+        // console.log(response.data.data); 
+      
       } catch (error) {
         console.error("Error fetching course data:", error);
       } finally {

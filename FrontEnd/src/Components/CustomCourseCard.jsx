@@ -97,7 +97,7 @@ const CustomCourseCard = ({Course,setModal}) => {
                 <Link
                   className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 hover:bg-primary/20 dark:bg-gray-800 dark:text-primary dark:hover:bg-gray-700"
                   title="Edit Course"
-                  to={`/my-course/${Course?._id}`}
+                  to={`/my-course/edit/${Course?._id}`}
 
                 >
                   <span className="material-symbols-outlined text-[20px]">
