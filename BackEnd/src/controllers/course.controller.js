@@ -856,53 +856,47 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
 const deleteCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const userId = req.user?._id;
-  const role = req.user?.role;
+  const isAdmin = req.user?.role === "admin";
   const hasAccess = req.user?.access === true;
 
-  // 1. Validation
-  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
-    throw new apiError(400, "Invalid or missing Course ID");
-  }
-
-  // 2. Access Gate: Non-admins must have 'access: true'
-  if (role !== "admin" && !hasAccess) {
+  // 1. Account Access Check (Pre-DB)
+  if (!isAdmin && !hasAccess) {
     throw new apiError(403, "Your account access is restricted.");
   }
 
-  // 3. Define Query (Admins see all, others see only theirs)
+  // 2. Prepare the Atomic Query
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
   const query = { _id: courseId };
-  if (role !== "admin") {
+  if (!isAdmin) {
     query.createdBy = userId;
+    query.status = "draft";
+    query.createdAt = { $gt: oneYearAgo };
   }
 
-  // 4. Execution: Delete the course
+  // --- ATOMIC OPERATION: ONE DB CALL ---
   const deletedCourse = await Course.findOneAndDelete(query);
 
+  // 3. Error Diagnosis (Only runs if the ONE call above returned nothing)
   if (!deletedCourse) {
-    throw new apiError(404, "Course not found or you lack permission to delete it.");
+    const existing = await Course.findById(courseId); // Second call ONLY on failure
+    if (!existing) throw new apiError(404, "Course not found.");
+    
+    // Logic to explain WHY the one-call delete failed
+    if (existing.status !== "draft") throw new apiError(403, "Cannot delete non-draft courses.");
+    if (new Date(existing.createdAt) < oneYearAgo) throw new apiError(403, "Course is over 1 year old.");
+    throw new apiError(403, "Unauthorized deletion attempt.");
   }
 
-  // 5. Cleanup: Update the ORIGINAL CREATOR'S profile
-  // Using deletedCourse.createdBy handles both Admin and Owner deletions perfectly.
+  // 4. Cleanup User Stats
   const updatedUser = await User.findByIdAndUpdate(
-    deletedCourse.createdBy, 
-    {
-      $pull: { myCourses: deletedCourse._id },
-      $inc: { myCourseCount: -1 }
-    },
-    { new: true } 
+    deletedCourse.createdBy,
+    { $pull: { myCourses: deletedCourse._id }, $inc: { myCourseCount: -1 } },
+    { new: true }
   );
 
-  // 6. Final Response
-  res.status(200).json(
-    new apiResponse(
-      200, 
-      { updatedUserStats: updatedUser?.myCourseCount }, 
-      role === "admin" 
-        ? `Admin action: Course removed from Creator (${deletedCourse.createdBy})` 
-        : "Course deleted successfully."
-    )
-  );
+  res.status(200).json(new apiResponse(200, { updatedUser }, "Deleted successfully."));
 });
 
 
