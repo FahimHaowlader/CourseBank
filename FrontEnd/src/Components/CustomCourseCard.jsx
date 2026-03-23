@@ -42,8 +42,8 @@ const CustomCourseCard = ({Course,setModal}) => {
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                         {Course?.degree?.charAt(0).toUpperCase() + Course?.degree?.slice(1)}
                     </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
-                       {Course?.category?.charAt(0).toUpperCase() + Course?.category?.slice(1)}
+                    <div className="inline-flex capitalize items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+                       {Course?.format}
                     </div>
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                       {Course?.credits} Credits
@@ -71,7 +71,7 @@ const CustomCourseCard = ({Course,setModal}) => {
                       <span className="material-symbols-outlined text-[18px] opacity-70">
                         <LuCalendarDays />
                       </span>
-                  <span>{new Date(Course?.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')}</span>
+                  <span>{new Date(Course?.startingDate).toLocaleDateString('en-GB').replace(/\//g, '-')}</span>
                     </div>
                   </div>
                 </div>

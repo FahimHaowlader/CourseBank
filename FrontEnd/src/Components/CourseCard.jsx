@@ -6,7 +6,7 @@ import SemesterDisplay from "./semesterTransformer";
 import { Link } from "react-router";
 
 const CourseCard = ({Course}) => {
-  console.log(Course.instructorName);
+  // console.log(Course.instructorName);
   return (
     <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
       <div className="p-5 flex flex-col flex-1">
@@ -31,8 +31,8 @@ const CourseCard = ({Course}) => {
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                         {Course?.degree?.charAt(0).toUpperCase() + Course?.degree?.slice(1)}
                     </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
-                       {Course?.category?.charAt(0).toUpperCase() + Course?.category?.slice(1)}
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm capitalize">
+                       {Course?.format}
                     </div>
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                       {Course?.credits} Credits
@@ -60,7 +60,7 @@ const CourseCard = ({Course}) => {
                       <span className="material-symbols-outlined text-[18px] opacity-70">
                         <LuCalendarDays />
                       </span>
-                  <span>{new Date(Course?.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')}</span>
+                  <span>{new Date(Course?.startingDate).toLocaleDateString('en-GB').replace(/\//g, '-')}</span>
                     </div>
                   </div>
                 </div>

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router';
 
 
-import PublicApi from '../Hooks/PublicApi';
+import PrivateApi from '../Hooks/PrivateApi';
 // 1. Create the Context
 const CourseContext = createContext();
 
@@ -13,6 +13,7 @@ export const CourseProvider = ({ children }) => {
   const { id } = useParams();
   const [course, setCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
 
    const [infoModal, setInfoModal] = useState({
@@ -165,12 +166,13 @@ export const CourseProvider = ({ children }) => {
     const fetchCourse = async () => {
       try {
         setIsLoading(true);
-        const response = await PublicApi.get(`/course-details-for-edit/${id}`);
+        const response = await PrivateApi.get(`/course-details-for-edit/${id}`);
         setCourse(response.data.data);
         // console.log(response.data.data); 
       
       } catch (error) {
-        console.error("Error fetching course data:", error);
+        // console.log("Error fetching course data:", error);
+        setError("Failed to load course data. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -281,7 +283,8 @@ export const CourseProvider = ({ children }) => {
         handleUpdateTask,
         handleUpdateAssessment,
         handleDeleteElement,
-        handleDelete
+        handleDelete,
+          error,
       }}
     >
       {children}

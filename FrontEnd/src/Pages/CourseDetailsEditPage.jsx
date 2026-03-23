@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 
 import { GrShareOption } from "react-icons/gr";
 import { LuNotebook } from "react-icons/lu";
@@ -11,7 +11,7 @@ import { MdOutlineAssignment } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { FiEdit2 } from "react-icons/fi";
 
-
+import { Navigate, useNavigate } from "react-router";
 
 import AddElement from "../Components/AddElement";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
@@ -25,11 +25,14 @@ import AddAssessment from "../Components/AddAssessment";
 import DeleteElement from "../Components/DeleteElement";
 import SemesterDisplay from "../Components/semesterTransformer";
 import { useCourse } from "../Contexts/Course.Context";
+import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton.jsx";
+import { DepartmentMap } from "../Components/DepartmentMap";
 
 const CourseDetailsEditPage = () => {
-
+const navigate = useNavigate();
+const from = "/my-courses"; // Default to my courses page if no previous path
     const { 
-      courses, 
+      course, 
         isLoading, 
         addCourse, 
         infoModal,
@@ -56,10 +59,11 @@ const CourseDetailsEditPage = () => {
         handleUpdateHandbook,
         handleUpdateMaterial,
         handleUpdateBook,
-        handleUpdateTask,
+        handleUpdateTask, 
         handleUpdateAssessment,
         handleDeleteElement,
-        handleDelete
+        handleDelete,
+        error,
     } = useCourse();
 
   // const [infoModal, setInfoModal] = useState({
@@ -187,6 +191,28 @@ const CourseDetailsEditPage = () => {
 //       // Simulate deletion process
 //  }
 
+
+
+useEffect(() => {
+    // If an error exists and we are no longer loading, redirect
+    if (error && !isLoading) {
+      navigate(from, { 
+        replace: true, 
+        state: { message: typeof error === 'string' ? error : "Course error occurred" } 
+      });
+    }
+  }, [error, isLoading, navigate, from]);
+
+
+if (isLoading) {
+    return <div>
+      <CourseDetailsSkeleton />
+    </div>;
+  }
+
+
+
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
@@ -195,32 +221,43 @@ const CourseDetailsEditPage = () => {
             {/* basic Info */}
             <div className="flex-1">
               <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
-                Introduction to Computer Science
+                                  {course.title ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1) : ""}
+
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">
-                Department of Engineering • School of Computing
+                {DepartmentMap[course.department] ? "Department of " + DepartmentMap[course.department] : "Unknown Department"}
+                              
               </p>
                <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
-               selection:text-gray-600 dark:selection:text-gray-300 mb-6" >{"EDEEEEE"}</p>
+               selection:text-gray-600 dark:selection:text-gray-300 mb-6 uppercase" >{course.courseCode}</p>
               <div className="flex flex-wrap gap-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span> */}
-                  3 Credits
+                  {course.degree}
+                </div>
+
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
+                    <GrShareOption />
+                  </span> */}
+                  {course.type}
+                </div>
+                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
+                  {/* <span className="material-symbols-outlined text-primary text-lg">
+                    <GrShareOption />
+                  </span> */}
+                {course.format}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
                   </span> */}
-                  Undergraduate
+                  {course.credits} Credits
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  Undergraduate
-                </div>
+           
+                
                 {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
@@ -228,12 +265,7 @@ const CourseDetailsEditPage = () => {
                   Undergraduate
                 </div> */}
 
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  Undergraduate
-                </div>
+                
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
                   {/* <span className="material-symbols-outlined text-primary text-lg">
                     <GrShareOption />
@@ -297,13 +329,13 @@ const CourseDetailsEditPage = () => {
 
                 <div className="flex flex-col sm:items-center">
                   <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white capitalize">
-                    {/* {course.instructorName}  */}
-                    hello
+                    {course.instructorName} 
+                    
                   </h3>
 
                   <p className="text-slate-500 text-center dark:text-slate-400 text-sm">
-                    {/* {DepartmentMap[course.instructorDepartment] ? "Department of " + DepartmentMap[course.instructorDepartment] : "Unknown Department"} */}{" "}
-                    cse
+                    {DepartmentMap[course.instructorDepartment] ? "Department of " + DepartmentMap[course.instructorDepartment] : "Unknown Department"}  
+                  
                   </p>
                 </div>
 
@@ -316,8 +348,8 @@ const CourseDetailsEditPage = () => {
                     </span>
 
                     <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {/* {new Date(course.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')} */}
-                      1//09/2024
+                      {new Date(course.startingDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+                      {/* 1//09/2024 */}
                     </span>
                   </div>
                 </div>
@@ -343,34 +375,8 @@ const CourseDetailsEditPage = () => {
                 />
               </div>
               <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p className="mb-4">
-                  Algebra of matrices: Various types of matrices: operations of
-                  matrices: determinant of matrices: transpose and complex
-                  conjugate of matrices: special types of matrices: block
-                  matrices: adjoint und inverse of matrices: elementary row
-                  operations und echelon forms of matrices: rank of a matrix:
-                  System of lincar equations: Basic definitions, Linear
-                  equations. degenerated linear equations, leading unknowns of a
-                  non-degenerated linear equation, systems of linear equations
-                  and their solutions, equivalent systems. and related theorems:
-                  use of inverse matrix. rank. und echelon forms in solving
-                  systems of homogeneous and non-homogencous linear equations;
-                  LU decomposition and their application to solving the system
-                  of linear equations: Vector space: Basie definitions and
-                  examples: lincar combinations: spanning sets: subspaces:
-                  linear span: row and column spaces of matrices: linear
-                  dependence and independence of vectors: direct sum: basis and
-                  dimension of vector space: quotient space: solution space of a
-                  system of homogeneous linear equations: Linear
-                  transformations: kernel. image, rank. and nullity: matris
-                  representation: change of basis: similarity: bigenvalues and
-                  cigenvectors: Polynomials of matrices; characteristics of
-                  polynomials; characteristic equations: Cayloy-Hamilton
-                  theorem: cigenvalues and cigenvectors: diagonalization of
-                  matrices: Inner product space: Cauchy-Schwarz inequality:
-                  orthogonal vectors and orthonormal basis: Gram-Schmidt
-                  orthogonalization process and its application to QR
-                  decomposition: bilinear and quadratic forms.
+                <p className="mb-4 capitalize">
+                  {course.description}
                 </p>
               </div>
             </section>
@@ -428,7 +434,7 @@ const CourseDetailsEditPage = () => {
                    </a> */}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                       <span className="material-symbols-outlined">
@@ -449,7 +455,27 @@ const CourseDetailsEditPage = () => {
                     >
                     <MdDeleteOutline size={26} />
                   </button>
-                </div>
+                </div> */}
+                {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
+                      <span className="material-symbols-outlined">
+                        <FaRegFilePdf size={24} />
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
+                        Lecture Notes: Weeks 1-4
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        PDF • 2.4 MB • Updated yesterday
+                      </p>
+                    </div>
+                  </div>
+                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <MdDeleteOutline size={26} />
+                  </button>
+                </div> */}
                 <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
@@ -470,7 +496,10 @@ const CourseDetailsEditPage = () => {
                     <MdDeleteOutline size={26} />
                   </button>
                 </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
+
+                  {
+                   course.materials && course.materials.length > 0 && course.materials.map((material, index) => (
+                      <div key={course.id} className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
                       <span className="material-symbols-outlined">
@@ -489,7 +518,9 @@ const CourseDetailsEditPage = () => {
                   <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
                     <MdDeleteOutline size={26} />
                   </button>
-                </div>
+                </div>))} 
+                  
+
                 <div onClick={handleUpdateMaterial}>
                   <AddElement />
                 </div>

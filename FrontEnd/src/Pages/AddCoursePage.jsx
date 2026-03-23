@@ -92,6 +92,36 @@ const AddCoursePage = () => {
     setFormData({ ...formData, department: value });
   };
 
+  // Assume 'handbook' is a state string: const [handbook, setHandbook] = useState("");
+
+const isHandbookValid = () => {
+  // 1. If it's empty, we consider it "valid" (optional) OR "invalid" (required)
+  // Based on your prompt: if it exists, check it.
+  if (!handbook || handbook.trim() === "") {
+    console.warn("Handbook rejected: It is empty!");
+    return false;
+  }
+
+  const urlValue = handbook.trim();
+  
+  try {
+    const urlObj = new URL(urlValue);
+    
+    // 2. Must be a Google link
+    const isGoogle = urlObj.hostname.includes("google.com");
+    
+    if (!isGoogle) {
+      console.warn("Handbook rejected: Not a Google link");
+      return false;
+    }
+    
+    return true; // Valid URL and is Google
+  } catch (e) {
+    console.warn("Handbook rejected: Invalid URL format");
+    return false; // Not a valid URL structure
+  }
+};
+
   const handleDateChange = (date) => {  
     setFormData({ ...formData, startDate: new Date(date).toISOString() });  
   };
@@ -110,7 +140,9 @@ const AddCoursePage = () => {
     // console.log("Tasks:", validTasks);
     // console.log("Assessments:", validAssessments);
     let courseData;
-    if (handbook && handbook.trim() !== "")  {
+    const hasBook = isHandbookValid();
+
+    if (hasBook)  {
     courseData = { ...formData,handbook, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }
     } else {;  
      courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
@@ -121,6 +153,7 @@ const AddCoursePage = () => {
     try {
       setLoading(true);
       // Replace with your API endpoint
+      console.log("Sending course data to API:", courseData);
       const response = await PrivateApi.post("/create-course", courseData);
       console.log("Course created successfully:", response.data);
       setModalStatus('success');
@@ -161,20 +194,42 @@ const AddCoursePage = () => {
     );
   };
 
-  const cleanBooks = () => {
-  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+ const cleanBooks = () => {
+  const cleanedBooks = books.filter((b) => {
+    const titleValid = Boolean(b.title?.trim());
+    const authorValid = Boolean(b.authorName?.trim());
+    
+    // Safety check: Use 'link' or 'fileUrl' based on your data structure
+    const urlValue = (b.link || b.fileUrl || "").trim();
 
-  const cleanedBooks = books.filter(
-    (b) =>
-      b.title?.trim() &&
-      b.authorName?.trim() &&
-      b.fileUrl?.trim() &&
-      urlRegex.test(b.fileUrl)
-  );
+    let isValidGoogleUrl = false;
+    try {
+      // 1. Check for valid URL structure (requires http/https)
+      const urlObj = new URL(urlValue);
+      
+      // 2. Ensure it's a Google domain
+      isValidGoogleUrl = urlObj.hostname.includes("google.com");
+    } catch (e) {
+      isValidGoogleUrl = false;
+    }
 
-  setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }]);
+    return titleValid && authorValid && isValidGoogleUrl;
+  });
+
+  console.log("Cleaned Books:", cleanedBooks);
+
+  if (cleanedBooks.length === 0) {
+    // Reset UI: Using 'link' for consistency with your console log
+    setBooks([{ id: Date.now(), title: "", authorName: "", link: "" }]);
+    return [];
+  }
+
+  // Save the filtered array to state
+  setBooks(cleanedBooks);
+  
   return cleanedBooks;
 };
+
 
   const [materials, setMaterials] = useState([
     { id: Date.now(), name: "", fileUrl: "" },
@@ -196,20 +251,41 @@ const AddCoursePage = () => {
     );
   };
 
-  const cleanMaterials = () => {
-  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+ const cleanMaterials = () => {
+  const cleanedMaterials = materials.filter((m) => {
+    const nameValid = Boolean(m.name?.trim());
+    const urlValue = m.fileUrl?.trim() || "";
 
-  const cleanedMaterials = materials.filter(
-    (m) =>
-      m.name?.trim() &&          // name exists
-      m.fileUrl?.trim() &&       // fileUrl exists
-      urlRegex.test(m.fileUrl)   // valid URL
-  );
+    let isValidUrl = false;
+    let isGoogle = false;
 
-  setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
+    try {
+      // 1. Check if it's a valid URL structure
+      const url = new URL(urlValue);
+      isValidUrl = true;
+
+      // 2. Check if the hostname contains "google.com"
+      // This is safer than .includes() on the whole string
+      isGoogle = url.hostname.includes("google.com");
+    } catch (e) {
+      // If the URL constructor fails, it's not a valid URL
+      isValidUrl = false;
+    }
+
+    return nameValid && isValidUrl && isGoogle;
+  });
+
+  console.log("Cleaned Materials:", cleanedMaterials);
+
+  if (cleanedMaterials.length === 0) {
+    setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
+    return [];
+  }
+
+  // FIX: Use 'cleanedMaterials' (the array), NOT 'cleanMaterials' (the function)
+  setMaterials(cleanedMaterials);
   return cleanedMaterials;
 };
-
 
 const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
 
@@ -228,16 +304,37 @@ const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
   };
 
   const cleanTasks = () => {
-  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+  const cleanedTasks = tasks.filter((t) => {
+    const nameValid = Boolean(t.name?.trim());
+    
+    // Check both 'link' and 'fileUrl' to be safe, then trim
+    const urlValue = (t.link || t.fileUrl || "").trim();
 
-  const cleanedTasks = tasks.filter(
-    (t) =>
-      t.name?.trim() &&           // name exists
-      t.fileUrl?.trim() &&        // link exists
-      urlRegex.test(t.fileUrl)    // valid URL
-  );
+    let isValidGoogleUrl = false;
+    try {
+      // 1. Must be a technically valid URL structure
+      const urlObj = new URL(urlValue);
+      
+      // 2. Must contain google.com in the hostname
+      isValidGoogleUrl = urlObj.hostname.includes("google.com");
+    } catch (e) {
+      isValidGoogleUrl = false;
+    }
 
-  setTasks([{ id: Date.now(), name: "", fileUrl: "" }]);
+    return nameValid && isValidGoogleUrl;
+  });
+
+  console.log("Cleaned Tasks:", cleanedTasks);
+
+  if (cleanedTasks.length === 0) {
+    // Reset to one empty row using 'link' for consistency
+    setTasks([{ id: Date.now(), name: "", link: "" }]);
+    return [];
+  }
+
+  // Save the filtered array to state
+  setTasks(cleanedTasks);
+  
   return cleanedTasks;
 };
 
@@ -307,9 +404,9 @@ const handleAssessmentDateChange = (id, date) => {
 
   // Clean assessments before sending
 const cleanAssessments = () => {
-  const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+  // 1. Updated Regex to allow #, ?, and Google domains
+  const googleRegex = /^https?:\/\/[^\s]+$/i;
 
-  // Convert the course starting date to a comparable number
   const courseStartTimestamp = new Date(formData.startingDate).getTime();
 
   const cleaned = assessments
@@ -320,25 +417,38 @@ const cleanAssessments = () => {
     .filter((a) => {
       const assessmentTimestamp = new Date(a.date).getTime();
       
+      // IMPORTANT: Ensure 'a.link' matches the property name in your data
+      const urlValue = (a.link || a.fileUrl || "").trim();
+
+      let isValidGoogleUrl = false;
+      try {
+        const urlObj = new URL(urlValue);
+        // Requirement: Valid URL + Includes google.com
+        isValidGoogleUrl = urlObj.hostname.includes("google.com");
+      } catch (e) {
+        isValidGoogleUrl = false;
+      }
+
       return (
         a.type?.trim() &&
         !isNaN(a.mark) &&
         a.date &&
-        // LOGIC: Assessment must happen ON or AFTER the course starts
+        // Assessment date must be >= Course start date
         assessmentTimestamp >= courseStartTimestamp && 
-        a.fileUrl?.trim() &&
-        urlRegex.test(a.fileUrl)
+        isValidGoogleUrl
       );
     });
 
-  // Reset UI for the next entry
+  console.log("Cleaned Assessments:", cleaned);
+
+  // 2. Reset UI state (Consistency check: using 'link' here)
   setAssessments([
     {
       id: Date.now(),
       type: "Termtest-1",
       mark: "",
       date: new Date(),
-      fileUrl: "",
+      link: "", // Changed to 'link' to match your data object
     },
   ]);
 
@@ -728,9 +838,9 @@ const handleTryAgain = () => {
                         <input
                           className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
                           placeholder="e.g. Clean Code"
-                          value={book.name}
+                          value={book.title}
                           onChange={(e) =>
-                            handleBookChange(book.id, "name", e.target.value)
+                            handleBookChange(book.id, "title", e.target.value)
                           }
                           
                         />
@@ -749,9 +859,9 @@ const handleTryAgain = () => {
                         <input
                           className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
                           placeholder="e.g. Robert C. Martin"
-                          value={book.author}
+                          value={book.authorName}
                           onChange={(e) =>
-                            handleBookChange(book.id, "author", e.target.value)
+                            handleBookChange(book.id, "authorName", e.target.value)
                           }
                           
                         />
@@ -769,10 +879,10 @@ const handleTryAgain = () => {
                         </span>
                         <input
                           className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
-                          placeholder="https://example.com/book.pdf"
-                          value={book.link}
+                          placeholder="https://drive.google.com/..."
+                          value={book.fileUrl}
                           onChange={(e) =>
-                            handleBookChange(book.id, "link", e.target.value)
+                            handleBookChange(book.id, "fileUrl", e.target.value)
                           }
                           type="url"
                           
@@ -854,10 +964,10 @@ const handleTryAgain = () => {
                     <div className="relative flex-1">
                       <input
                         className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark"
-                        placeholder="https://example.com/file.pdf"
-                        value={m.link}
+                        placeholder="https://drive.google.com/..."
+                        value={m.fileUrl}
                         onChange={(e) =>
-                          handleMaterialChange(m.id, "link", e.target.value)
+                          handleMaterialChange(m.id, "fileUrl", e.target.value)
                         }
                         type="url"
                     
@@ -905,7 +1015,7 @@ const handleTryAgain = () => {
                   <div className="relative flex-1">
                     <input
                       className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light/60"
-                      placeholder="e.g. https://example.com/book.pdf"
+                      placeholder="e.g. https://drive.google.com/..."
                       type="url"
                       name="handbook"
                       value={handbook}
@@ -979,10 +1089,10 @@ const handleTryAgain = () => {
                       </span>
                       <input
                         className="w-full h-10 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-text-main-light dark:text-text-main-dark"
-                        placeholder="https://example.com/task.pdf"
-                        value={t.link}
+                        placeholder="https://drive.google.com/..."
+                        value={t.fileUrl}
                         onChange={(e) =>
-                          handleTaskChange(t.id, "link", e.target.value)
+                          handleTaskChange(t.id, "fileUrl", e.target.value)
                         }
                         type="url"
                      
@@ -1115,7 +1225,7 @@ const handleTryAgain = () => {
             <FiLink className="absolute left-3 top-4 text-primary" />
             <input
               className="w-full h-12 pl-9 pr-3 rounded-lg bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark outline-none text-sm text-text-main-light dark:text-text-main-dark"
-              placeholder="https://..."
+              placeholder="https://d..."
               value={a.fileUrl}
               onChange={(e) =>
                 handleAssessmentChange(a.id, "fileUrl", e.target.value)

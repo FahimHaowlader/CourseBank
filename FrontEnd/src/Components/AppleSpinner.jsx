@@ -1,15 +1,22 @@
 const AppleSpinner = () => (
-  <div className="relative w-5 h-5 animate-spin">
-    {[...Array(12)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute w-[2px] h-[5px] bg-current rounded-full left-1/2 top-0 origin-[0_10px]"
-        style={{
-          transform: `rotate(${i * 30}deg)`,
-          opacity: 1 - (i * 0.08),
-        }}
-      />
-    ))}
+  <div className="flex items-center justify-center">
+    {/* Container: 128px (w-32) */}
+    <div className="relative w-32 h-32 animate-spin">
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          // Blade: 8px wide, 32px tall
+          className="absolute w-[8px] h-[32px] bg-[#22c55e] rounded-full left-1/2 top-0"
+          style={{
+            // Origin is exactly half the container (64px)
+            transformOrigin: '4px 64px',
+            transform: `translateX(-50%) rotate(${i * 30}deg)`,
+            // Creates the smooth tapering opacity trail
+            opacity: 1 - (0.07 * i),
+          }}
+        />
+      ))}
+    </div>
   </div>
 );
 

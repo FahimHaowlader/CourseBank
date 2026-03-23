@@ -1,9 +1,12 @@
 import { Navigate, useLocation } from 'react-router';
 import { useAuth } from '../Contexts/Auth.Context.jsx';
 
+import AppleSpinner from '../Components/AppleSpinner.jsx';
+
 const RoleProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loading } = useAuth(); // Get user and loading state from context
     const location = useLocation();
+
 
  
 
@@ -11,7 +14,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p>Verifying session...</p>
+              <AppleSpinner />  
             </div>
         );
     }
