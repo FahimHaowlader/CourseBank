@@ -53,43 +53,49 @@ const userSchema = new mongoose.Schema(
       enum: ["moderator", "contributor", "admin"],
       default: "contributor",
     },
-    contributionsCount: {
+    approvedCourseCount: {
       type: Number,
       default: 0,
     },
-    myCourses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Course",
-      },
-    ],
+    myCourseCount: {
+      type: Number,
+      default: 0,
+    },
+    myCourses: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Course",
+        },
+      ],
+      select: false, // This now correctly applies to the field
+    },
     status: {
       type: String,
-      enum: ["draft", "pending", "approved", "rejected"],
-      default: "draft",
+      enum: ["active", "pending", "submitted"],
+      default: "pending",
     },
     SubmittedAt: {
       type: Date,
       set: (value) => new Date(value),
+      select: false,
     },
     ReviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      select: false,
     },
     feedback: {
       type: String,
-      select: false,
+      // select: false,
     },
-    isEditedSinceFeedback: {
-      type: Boolean,
-      default: false,
-    },
-
+    // isEditedSinceFeedback: {
+    //   type: Boolean,
+    //   default: false,
+    // },
   },
   { timestamps: true },
 );
-
- 
 
 // Methods for plain text password
 userSchema.methods.isPasswordCorrect = function (password) {

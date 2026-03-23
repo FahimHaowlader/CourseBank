@@ -274,7 +274,7 @@ const courseSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["draft", "pending", "approved", "rejected"],
+      enum: ["draft", "pending", "approved",],
       default: "draft",
     },
 
@@ -307,33 +307,37 @@ const courseSchema = new mongoose.Schema(
 
 
 
-courseSchema.pre('save', function(next) {
-  // 1. If the document is new, allow it to save (no lock yet)
-  if (this.isNew || this._is_admin_request === true) {
-    return next();
+
+/**
+ * REFACTORED ASYNC PRE-SAVE MIDDLEWARE
+ * (No 'next' argument = no 'next is not a function' error)
+ */
+courseSchema.pre('save', async function () {
+  // 1. Allow if it's a new document
+  if (this.isNew) {
+    return; // Returning simply moves to the next middleware
   }
 
-  // Attach the admin flag to the document instance
-    // if (req.user.role === 'admin') {
-    //   course._is_admin_request = true;
-    // }
+  // 2. Allow if the internal admin flag is set
+  // We check both the virtual and the internal property
+  if (this.isAdminRequest === true || this._isAdminRequest === true) {
+    return;
+  }
 
-  // 2. Define the lock period (1 year in milliseconds)
+  // 3. Check for the 1-year lock
   const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
   const currentTime = Date.now();
   
-  // 3. Get the timestamp from when the course was first created
-  const creationTime = new Date(this.createdAt).getTime();
+  // Ensure we have a valid creation date from timestamps
+  const creationTime = this.createdAt ? new Date(this.createdAt).getTime() : currentTime;
 
-  // 4. Compare current time vs creation time
   if (currentTime - creationTime > oneYearInMs) {
-    const error = new Error("This course was created over 1 year ago and is now locked for editing.");
-    return next(error);
+    const error = new Error("This course is over 1 year old and is locked. Only admins can modify archived records.");
+    error.name = "ValidationError"; 
+    // In async middleware, THROWING the error replaces next(error)
+    throw error; 
   }
-
-  next();
 });
-
 const Course = mongoose.model("Course", courseSchema);
 
 export default Course;

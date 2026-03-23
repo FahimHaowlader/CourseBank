@@ -240,14 +240,10 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
         if (!user.access) {
             throw new apiError(403, "Your account does not have access");
         }
-        const userIfo = {
-          _id: user._id,
-          userId: user.userId,
-          role: user.role,
-        };
+        
         res.status(200).json({
             success: true,
-            data: { user:userIfo },
+            data: { user },
         });
     } catch (error) {
         res.status(500).json({ message: "Server Error" });

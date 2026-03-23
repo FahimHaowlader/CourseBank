@@ -9,6 +9,7 @@ import { v4 as uuidv4, validate } from 'uuid';
 
 // model
 import Course from '../models/course.model.js';
+import User from '../models/user.model.js';
 
 // In-memory cache (shared across requests)
 const userQueryCache = {};
@@ -166,50 +167,67 @@ const fullCourseDetails = asyncHandler(async (req, res) => {
 
 // get full details for edit the course 
 
-const fullCourseDetailsForEdit = asyncHandler(async (req, res) => {
-
-  const courseId = req.params?.courseId;
+const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
+  const { courseId } = req.params;
   const userId = req.user?._id;
   const userRole = req.user?.role;
+  const hasAccess = req.user?.access === true;
 
-  if (!userId) {
-    throw new apiError(401, "Unauthorized");
-  }
-
-  if (!courseId) {
-    throw new apiError(400, "Course ID is required");
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+  // 1. Initial Validations
+  if (!userId) throw new apiError(401, "Unauthorized");
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
     throw new apiError(400, "Invalid Course ID");
   }
 
+  // 2. Fetch course with required hidden fields (Added status and createdAt)
   const course = await Course.findById(courseId).select(
-    '+description +instructorDepartment +instructorImage +createdBy +books +materials +tasks +assessments +handbook'
+    '+description +instructorDepartment +instructorImage +createdBy +books +materials +tasks +assessments +handbook +status +createdAt'
   );
 
   if (!course) {
     throw new apiError(404, "Course not found");
   }
 
-  // --- PERMISSION CHECK START ---
-  
+  // 3. Define Logic Flags
   const isOwner = course.createdBy.toString() === userId.toString();
   const isAdmin = userRole === 'admin';
+  
+  // Calculate if the course is older than 1 year
+  const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+  const isExpired = Date.now() - new Date(course.createdAt).getTime() > oneYearInMs;
 
-  if (!isOwner && !isAdmin) {
-    throw new apiError(403, "You do not have permission to edit this course");
+  // console.log("User Role:", isExpired);
+
+  // --- PERMISSION & LOCK LOGIC ---
+
+  // Rule 1: Identity & General Access
+  if (!isAdmin && !(isOwner && hasAccess)) {
+    throw new apiError(403, "You do not have permission to edit this course or your access is disabled.");
   }
 
-  // --- PERMISSION CHECK END ---
-  res.status(200).json( new apiResponse(200, course, "Course details fetched successfully"));
- 
+  // Rule 2: Time Lock (1 Year) - Only blocks non-admins
+  if (!isAdmin && isExpired) {
+    throw new apiError(403, "Course Locked: This record is over 1 year old and can only be modified by an Admin.");
+  }
+
+  // console.log("Course Status:", course.status);
+
+  // Rule 3: Status Lock (Pending/Approved) - Only blocks non-admins
+  // If status is NOT 'draft', contributors/moderators cannot edit
+  if (!isAdmin && course.status !== "draft") {
+    throw new apiError(403, `Course Locked: This course is currently '${course.status}' and cannot be edited.`);
+  }
+
+  // 4. Final Response
+  res.status(200).json(
+    new apiResponse(200, course, "Course details fetched successfully for editing")
+  );
 });
 
 
 // Controller(Moderators and admin)
 
-const getCourseByCreatorId = asyncHandler(async (req, res) => {
+const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
   const requesterId = req.user?._id;
   const role = req.user?.role;
   const { userId: queryUserId } = req.params;
@@ -239,62 +257,59 @@ const getCourseByCreatorId = asyncHandler(async (req, res) => {
   );
 });
 
-const createCourse = asyncHandler(async (req, res) => {
-  const Id = req.user._id;
-  const data = req.body;
+// --- CREATE COURSE ---
+const createCourse = asyncHandler(async (req, res,next) => {
+  const userId = req.user?._id;
   const userRole = req.user?.role;
+  const hasAccess = req.user?.access === true;
+  const data = req.body;
 
-  // console.log("Course Data:", data);
+  if (!userId) throw new apiError(401, "Unauthorized");
 
-
-  if (!Id) {
-    throw new apiError(401, "Unauthorized");
+  // 1. Access Check: Non-admins must have access: true
+  if (userRole !== "admin" && !hasAccess) {
+    throw new apiError(403, "Your account access is restricted. You cannot create courses.");
   }
 
   if (!data || Object.keys(data).length === 0) {
     throw new apiError(400, "Course data is required");
   }
-  
-  
- const { title, courseCode, startingDate, instructorName, type, format,department,semester,degree } = data;
 
+  const { title, courseCode, startingDate, instructorName, type, format, department, semester, degree } = data;
 
-if (userRole !== "admin" && userRole !== "moderator") {
-    const duplicateCourse = await Course.findOne({ 
-  courseCode: courseCode.trim(), 
-  createdBy: Id 
-});
+  // 2. Duplicate Check (Owner-based)
+  if (userRole !== "admin" && userRole !== "moderator") {
+    const duplicate = await Course.findOne({ 
+      courseCode: courseCode.trim(), 
+      createdBy: userId 
+    });
+    if (duplicate) throw new apiError(409, `You already created course ${courseCode}`);
+  }
 
-if (duplicateCourse) {
-  throw new apiError(409, `You have already created a course with the code ${courseCode}.`);
-}
-}
-//  console.log("Required Fields:", { title, courseCode, startingDate, instructorName, type, format , handbook});
-  if (!title || !courseCode  || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
+  // 3. Validation
+  if (!title || !courseCode || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
     throw new apiError(400, "All required course fields must be provided");
   }
 
   const year = new Date(startingDate).getFullYear();
 
-
-
   try {
-    const newCourse = new Course({
-      ...data,
-      year,
-      createdBy: Id,
+    const newCourse = new Course({ ...data, year, createdBy: userId });
+    const savedCourse = await newCourse.save();
+
+    // 4. Update User Profile Stats
+    await User.findByIdAndUpdate(userId, {
+      $push: { myCourses: savedCourse._id },
+      $inc: { myCourseCount: 1 }
     });
 
-    await newCourse.save();
-
-    res.status(200).json( new apiResponse(200, {}, "Course created successfully"));
+    res.status(201).json(new apiResponse(201, savedCourse, "Course created successfully"));
+    
   } catch (err) {
-      if (err.code === 11000 && err.keyValue.courseCode) {
-          throw new apiError(400, `Course with code ${err.keyValue.courseCode} already exists`);
-        }
-        // throw new apiError(500, "Error creating course");
-        throw new apiError(500, err.message || "Error creating course");
-    }
+    if (err.code === 11000) throw new apiError(400, "Course code already exists");
+    throw new apiError(500, err.message || "Error creating course");
+
+  }
 });
 
 const updateCourseInfo = asyncHandler(async (req, res) => {
@@ -842,51 +857,50 @@ const deleteCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
 
-  // Auth check
-  if (!userId) {
-    throw new apiError(401, "Unauthorized");
+  // 1. Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid or missing Course ID");
   }
 
-  // Course ID validation
-  if (!courseId) {
-    throw new apiError(400, "Course ID is required");
+  // 2. Access Gate: Non-admins must have 'access: true'
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Your account access is restricted.");
   }
 
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
-    throw new apiError(400, "Invalid Course ID");
-  }
-
-  // Role-based query
+  // 3. Define Query (Admins see all, others see only theirs)
   const query = { _id: courseId };
-
-  // Moderator → only own courses
-  if (role === "moderator") {
+  if (role !== "admin") {
     query.createdBy = userId;
   }
 
-  // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
-  }
-
-  // ONE DB CALL
+  // 4. Execution: Delete the course
   const deletedCourse = await Course.findOneAndDelete(query);
 
   if (!deletedCourse) {
-    throw new apiError(
-      403,
-      "Course not found or you are not authorized to delete it"
-    );
+    throw new apiError(404, "Course not found or you lack permission to delete it.");
   }
 
+  // 5. Cleanup: Update the ORIGINAL CREATOR'S profile
+  // Using deletedCourse.createdBy handles both Admin and Owner deletions perfectly.
+  const updatedUser = await User.findByIdAndUpdate(
+    deletedCourse.createdBy, 
+    {
+      $pull: { myCourses: deletedCourse._id },
+      $inc: { myCourseCount: -1 }
+    },
+    { new: true } 
+  );
+
+  // 6. Final Response
   res.status(200).json(
     new apiResponse(
-      200,
-      {},
-      role === "admin"
-        ? "Course deleted successfully by admin"
-        : "Course deleted successfully by moderator"
+      200, 
+      { updatedUserStats: updatedUser?.myCourseCount }, 
+      role === "admin" 
+        ? `Admin action: Course removed from Creator (${deletedCourse.createdBy})` 
+        : "Course deleted successfully."
     )
   );
 });
