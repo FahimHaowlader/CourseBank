@@ -8,7 +8,7 @@ const Department = ({ value, onChange,defaultText,required,disabled }) => {
       </span>
       <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
         <select
-          className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+          className={`w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none  ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
           name="department"
           value={value}
           onChange={onChange}
