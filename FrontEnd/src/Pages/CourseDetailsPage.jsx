@@ -341,11 +341,11 @@ const CourseDetailsPage = () => {
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
                         <IoDocumentTextOutline size={24} />
                       </span>
-                      <div>
+                      <div className="space-y-1">
                          <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
                             {assessment.type}
                         </p>
-                        <div className="flex items-center gap-2"  >
+                        <div className="flex items-center gap-5"  >
                           <p className="text-xs text-slate-500 dark:text-slate-400">
                           {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')}
                         </p>
@@ -378,13 +378,19 @@ const CourseDetailsPage = () => {
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
                         <IoDocumentTextOutline size={24} />
                       </span>
-                      <div>
+                      <div className="space-y-1">
                         <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
                           {assessment.type}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                          {/* {assessment?.type} paper test */}
+                        <div className="flex items-center gap-5"  >
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')}
                         </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                          {assessment.mark} mark
+                        </p>
+                        
+                        </div>
                       </div>
                     </div>
                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">

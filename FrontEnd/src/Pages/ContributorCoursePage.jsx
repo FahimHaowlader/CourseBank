@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+
+
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh, MdDeleteOutline, MdDelete } from "react-icons/md";
+import { IoCloudDoneOutline } from "react-icons/io5";
+
 import { useAuth } from "../Contexts/Auth.Context.jsx";
 import PrivateApi from "../Hooks/PrivateApi.jsx";
 import CustomCourseCard from "../Components/CustomCourseCard";
@@ -180,11 +184,21 @@ const closeModal = () => {
           
          
           <div className="flex justify-end w-full lg:w-auto">
-            <button className="bg-emerald-600 hover:cursor-pointer w-full lg:min-w-[280px] hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all transform hover:scale-105"
-            onClick={handleFinalizeClick}
-            >
-              Finalize & Submit Account
-            </button>
+                 <button 
+                className="w-full lg:min-w-[300px] px-6 py-4 rounded-xl 
+                           bg-emerald-600 hover:bg-emerald-700 
+                           text-emerald-50 font-bold 
+                           border border-emerald-500/20
+                           shadow-sm shadow-emerald-900/20 
+                           transition-all duration-200 
+                           transform active:scale-[0.97] 
+                           flex items-center justify-center gap-3 cursor-pointer"
+                onClick={handleFinalizeClick}
+              >
+                {/* Added an icon here to match the Delete button's visual weight */}
+                <span className="material-symbols-outlined "><IoCloudDoneOutline size={22}/></span>
+                <span className="tracking-tight">Finalize & Submit Account</span>
+              </button>
           </div>
           
         </div>

@@ -1,7 +1,7 @@
 const AppleSpinner = () => (
   <div className="flex items-center justify-center">
     {/* Container: 128px (w-32) */}
-    <div className="relative w-32 h-32 animate-spin">
+    <div className="relative w-24 h-24 animate-spin">
       {[...Array(12)].map((_, i) => (
         <div
           key={i}
