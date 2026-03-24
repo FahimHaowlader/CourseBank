@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       // required: true, {/* temporarily disabled for testing */}
+      select: false,
     },
     password: {
       type: String,
@@ -72,15 +73,15 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "pending", "submitted"],
-      default: "pending",
+      enum: ["active", "pending", "approved"],
+      default: "active",
     },
-    SubmittedAt: {
+    submittedAt: {
       type: Date,
       set: (value) => new Date(value),
       select: false,
     },
-    ReviewedBy: {
+    reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       select: false,

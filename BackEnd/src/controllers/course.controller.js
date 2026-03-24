@@ -231,10 +231,15 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
   const requesterId = req.user?._id;
   const role = req.user?.role;
   const { userId: queryUserId } = req.params;
+  const submittedAccount = req.user?.status === "approved";
 
   // Auth check
   if (!requesterId) {
     throw new apiError(401, "Unauthorized");
+  }
+
+  if (submittedAccount) {
+    throw new apiError(403, "Your account has been approved.");
   }
 
   let filter = {};
@@ -858,6 +863,19 @@ const deleteCourse = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const isAdmin = req.user?.role === "admin";
   const hasAccess = req.user?.access === true;
+
+  if (!courseId) {
+    throw new apiError(400, "missing Course ID");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Invalid Course ID format");
+  }
+
+
+  if (!userId) {
+    throw new apiError(401, "Unauthorized");
+  }
 
   // 1. Account Access Check (Pre-DB)
   if (!isAdmin && !hasAccess) {

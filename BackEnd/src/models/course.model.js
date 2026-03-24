@@ -255,15 +255,20 @@ const courseSchema = new mongoose.Schema(
       // required: [true, 'At least one assesment is required']
     },
     handbook: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          // Use .test() for a single string
-          return /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i.test(v);
-        },
-        message: "The URL must be a valid PDF document link for handbook",
-      },
+  type: String,
+  validate: {
+    validator: function (v) {
+      // 1. Ensure it starts with http/https
+      // 2. Ensure it contains "google.com"
+      // 3. Ensure no spaces
+      const isGoogle = v.includes("google.com");
+      const isValidUrl = /^(https?:\/\/)[^\s]+$/i.test(v);
+      
+      return isGoogle && isValidUrl;
     },
+    message: props => `${props.value} is not a valid Google Drive link for the handbook!`,
+  },
+},
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

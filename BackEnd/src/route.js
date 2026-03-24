@@ -2,7 +2,7 @@ import { Router } from "express";
 import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "./controllers/course.controller.js";
 
 
-import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch } from "./controllers/user.controller.js";
+import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
 import {upload} from "./middlewares/multer.middleware.js";
@@ -71,6 +71,10 @@ router.route('/update-user-info/:userId').patch(updateUserInfo);
 router.route('/delete-user/:userId').delete(deleteUser);
 
 router.route('/search-users').post( getAllUserSearch);
+
+router.route('/submit-account').post(requestForSubmitAccount);
+
+router.route('/cancel-account-submission').post(cancelAccountSubmission);
 
 
 

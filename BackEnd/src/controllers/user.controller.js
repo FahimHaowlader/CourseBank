@@ -102,24 +102,24 @@ const userLogin = asyncHandler(async (req, res) => {
   } 
 
   // Find user by userId
-  const user = await User.findOne({ userId }).select("+password");
-  if (!user) {
+  const dbUser = await User.findOne({ userId }).select("+password");
+  if (!dbUser) {
     throw new apiError(401, "Invalid userId or password");
   }
-  // console.log("User found:", user);
+  // console.log("User found:", dbUser);
   // Check if user has access
-  if (!user.access) {
+  if (!dbUser.access && dbUser.status === 'approved') {
     throw new apiError(403, "Your account does not have access");
   }
 
   // Check password
-  const isPasswordValid = await user.isPasswordCorrect(password);
+  const isPasswordValid = await dbUser.isPasswordCorrect(password);
   if (!isPasswordValid) {
     throw new apiError(401, "Invalid userId or password");
   }
 
   // Generate access token
-  const accessToken = user.generateAccessToken();
+  const accessToken = dbUser.generateAccessToken();
 
   // Set token in secure HTTP-only cookie
   res.cookie("accessToken", accessToken, {
@@ -141,9 +141,9 @@ const userLogin = asyncHandler(async (req, res) => {
 
   // Optional: return minimal user info
   const userInfo = {
-    _id: user._id,
-    userId: user.userId,
-    role: user.role,
+    _id: dbUser._id,
+    userId: dbUser.userId,
+    role: dbUser.role,
   };
 
   res.status(200).json(
@@ -237,7 +237,7 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
              throw new apiError(401, "User not found"); 
         }
 
-        if (!user.access) {
+        if (!user.access && user.status === 'approved') {
             throw new apiError(403, "Your account does not have access");
         }
         
@@ -250,6 +250,116 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
     }
 });
 
+const requestForSubmitAccount = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const user = req.user;
+
+  // 1. Standard Auth Guard
+  if (!userId) {
+    throw new apiError(401, "Authentication required");
+  }
+
+  // 2. NEW: Status Guard (Prevent re-submitting if already pending)
+  if (user.status !== 'active') {
+    throw new apiError(400, "Your account is already under review");
+  }
+
+  // 3. NEW: Access Guard (Prevent action if already restricted)
+  if (user.access === false) {
+    throw new apiError(400, "Account access is already restricted or submitted");
+  }
+
+  // 4. Logic: At least 3 approved courses
+  if (user.approvedCourseCount < 3) {
+    throw new apiError(400, "You need at least 3 approved courses to submit your account");
+  }
+
+  // 5. Logic: Clean Slate (All courses must be approved)
+  if (user.myCourseCount !== user.approvedCourseCount) {
+    throw new apiError(400, "All courses must be approved before submission");
+  }
+
+  // 6. Atomic Update
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: userId },
+    { 
+      $set: { 
+        access: false,
+        status: 'pending',
+        submittedAt: new Date(),
+        // Optional: clear any previous rejection messages
+      } 
+    },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new apiError(404, "User not found");
+  }
+
+  res.status(200).json(
+    new apiResponse(200, { }, "Account submitted successfully")
+  );
+});
+
+const cancelAccountSubmission = asyncHandler(async (req, res) => {
+  const requester = req.user;
+  let userId;
+  if(requester.role === 'admin' || requester.role === 'moderator') {
+    userId = req.body.userId; // Staff must provide target userId in body
+  }
+
+  // 1. Identity Guard
+  if (!requester?._id) {
+    throw new apiError(401, "Authentication required");
+  }
+
+  const isStaff = ["admin", "moderator"].includes(requester.role);
+
+  // 2. Resolve Target ID (Logic: Contributor is locked to self; Staff can use body)
+  const targetUserId = (isStaff && userId) ? userId : requester._id;
+  const isTargetingSelf = targetUserId.toString() === requester._id.toString();
+
+  // 3. Permission Guard
+  // Contributors must be 'pending' to cancel their own.
+  if (requester.role === 'contributor' && requester.status !== 'pending') {
+    throw new apiError(400, "Your account is not currently pending submission");
+  }
+
+  // Staff canceling SOMEONE ELSE'S request need 'access: true'
+  if (!isTargetingSelf && isStaff && requester.access !== true) {
+    throw new apiError(403, "Staff members require active access to manage other users");
+  }
+
+  // 4. Atomic Update
+  // We use $unset to remove the submittedAt field entirely
+  const updatedUser = await User.findOneAndUpdate(
+    { 
+      _id: targetUserId, 
+      status: 'pending' // Ensures the TARGET is actually pending
+    },
+    { 
+      $set: { 
+        access: true,
+        status: 'active'
+      },
+      $unset: { 
+        submittedAt: "" 
+      } 
+    },
+    { new: true }
+  );
+
+  // 5. Result Validation
+  if (!updatedUser) {
+    throw new apiError(400, "Operation failed: Target user not found or not in 'pending' state");
+  }
+
+  res.status(200).json(
+    new apiResponse(200, {}, "Account submission canceled successfully")
+  );
+});
 
 
-export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, handleRefresh };
+
+export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, handleRefresh,requestForSubmitAccount, cancelAccountSubmission };
