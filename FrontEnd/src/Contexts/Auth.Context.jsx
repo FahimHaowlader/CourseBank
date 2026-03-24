@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation } from "react-router";
+import PrivateApi from "../Hooks/PrivateApi";
 
 const AuthContext = createContext(null);
 
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     const syncSession = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/refresh`, { 
+        const response = await PrivateApi.get(`${API_BASE_URL}/refresh`, { 
           withCredentials: true 
         }); 
 
@@ -45,6 +46,22 @@ export const AuthProvider = ({ children }) => {
 
     syncSession();
   }, []); // Empty array ensures this runs ONCE per page refresh
+
+  // Inside your AuthProvider
+const refreshUser = async () => {
+  try {
+    // 1. Call the API to get the LATEST user data from DB
+    const response = await PrivateApi.get("/refresh",); // Ensure cookies are sent
+    
+    // 2. Update the React State with the fresh data
+    setUser(response.data.data.user); 
+    
+    return response.data.user;
+  } catch (error) {
+    console.error("Failed to sync user data", error);
+  }
+};
+
 
 useEffect(() => {
   // Ignore the login page so we don't save it as a "previous" destination
@@ -88,6 +105,7 @@ useEffect(() => {
     logOut,
     error,
     setError,
+    refreshUser, // Expose the refresh function to components that need it
   };
 
   return (

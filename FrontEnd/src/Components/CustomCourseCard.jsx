@@ -2,7 +2,6 @@ import React from 'react'
 import { MdOutlinePersonOutline } from "react-icons/md";
 import { LuCalendarDays } from "react-icons/lu";
 import { IoArrowForwardSharp } from "react-icons/io5";
-import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { Link } from 'react-router';
 
@@ -10,6 +9,8 @@ import { MdDelete } from "react-icons/md";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
+import { FiEdit, FiCheck } from 'react-icons/fi'; 
+
 
 import SemesterDisplay from './semesterTransformer';
 import CourseDeleteConformation from './CourseDeleteConformation';
@@ -93,7 +94,9 @@ const CustomCourseCard = ({Course,setModal}) => {
                 <IoArrowForwardSharp size={18} />
               </span>
             </Link>
-              <div className="flex items-center gap-2">
+            {
+              Course?.status !== 'approved' && (
+                <div className="flex items-center gap-2">
                 <Link
                   className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 hover:bg-primary/20 dark:bg-gray-800 dark:text-primary dark:hover:bg-gray-700"
                   title="Edit Course"
@@ -112,7 +115,34 @@ const CustomCourseCard = ({Course,setModal}) => {
                    < MdDeleteOutline size={24}/>
                   </span>
                 </button>
-              </div>
+              </div>)
+            }
+
+{Course?.status === 'approved' && (
+  <div className="flex items-center">
+    <div className="relative group overflow-hidden px-2.5 h-8 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-50/50 text-emerald-700 transition-all duration-500 hover:shadow-md hover:shadow-emerald-500/10 dark:bg-emerald-500/5 dark:text-emerald-400 dark:border-emerald-500/30 cursor-default">
+      
+      {/* Animated Glow Background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 via-emerald-400/10 to-emerald-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+
+      {/* Smaller Indicator Dot */}
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+      </span>
+
+      {/* Compact Text Label */}
+      <span className="text-[12px] font-bold tracking-widest uppercase">
+        Approved
+      </span>
+
+      {/* Tiny Checkmark Circle */}
+      {/* <div className="flex items-center justify-center bg-emerald-500 text-white rounded-full p-[1px] shadow-sm">
+        <FiCheck size={10} strokeWidth={5} />
+      </div> */}
+    </div>
+  </div>
+)}         
             </div> 
         </article>
   )

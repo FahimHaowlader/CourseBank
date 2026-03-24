@@ -72,7 +72,7 @@ function App() {
     {
       path: "/add-course",
       element: (
-        <RoleProtectedRoute allowedRoles={["user", "moderator", "admin"]}>
+        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
           <AddCoursePage />
         </RoleProtectedRoute>
       ),
