@@ -11,9 +11,9 @@ import { BiHash } from "react-icons/bi";
 import { useCourse } from "../Contexts/Course.Context";
 
 const UpdateCourseInfo = () => {
+  const [loading, setLoading] = useState(false);
   const { infoModal, setInfoModal, course } = useCourse();
 
-  // Local state for the form fields
   const [data, setData] = useState({
     title: "",
     courseCode: "",
@@ -22,35 +22,64 @@ const UpdateCourseInfo = () => {
     credits: null,
   });
 
-  // FIX 1: Sync local state when the course data from context is available
+  // Sync local state when the course data from context is available
   useEffect(() => {
     if (course) {
       setData({
         title: course?.title || "",
         courseCode: course?.courseCode || "",
-        format: course?.format || "major",
-        type: course?.type || "core",
-        credits: course?.credits || 4,
+        format: course?.format || "",
+        type: course?.type || "",
+        credits: course?.credits || "",
       });
     }
   }, [course, infoModal.openModal]);
 
-  // FIX 2: Added 'e' parameter to prevent "e is not defined" error
-  const handleUpdateInfo = (e) => {
+  // LOGIC: Compare current local 'data' with the original 'course' from context
+  const isChanged = 
+    data.title !== (course?.title || "") ||
+    data.courseCode !== (course?.courseCode || "") ||
+    data.format !== (course?.format || "") ||
+    data.type !== (course?.type || "") ||
+    String(data.credits) !== String(course?.credits || "");
+
+  const handleUpdateInfo = async (e) => {
     e.preventDefault(); 
     
-    // Log the data to console as you intended
-    console.log("Updated Data:", data);
+    // Extra guard clause: Stop execution if nothing changed or already loading
+    if (!isChanged || loading) return;
 
-    setInfoModal((prev) => ({
-      ...prev,
-      status: "success",
-    }));
+    setLoading(true); // Fixed: was loading(true)
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      console.log("Updated Data:", data);
+
+      setInfoModal((prev) => ({
+        ...prev,
+        status: "success",
+      }));
+    } catch (error) {
+      setInfoModal((prev) => ({
+        ...prev,
+        status: "error",
+      }));
+    } finally {
+      setLoading(false); // Fixed: was loading(false)
+    }
   };
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     const { name, value } = e.target;
-    setData({ ...data, [name]: value });
+    
+    // Convert credits to a number so it matches the data type in your Database/Context
+    const processedValue = name === "credits" ? (value === "" ? "" : Number(value)) : value;
+    
+    setData((prev) => ({ 
+      ...prev, 
+      [name]: processedValue 
+    }));
   };
 
   return (
@@ -66,7 +95,7 @@ const UpdateCourseInfo = () => {
             <div
               aria-hidden="true"
               className="fixed inset-0 bg-slate-900/20 transition-opacity backdrop-blur-sm"
-              onClick={() => setInfoModal({})}
+              onClick={() => !loading && setInfoModal({})}
             ></div>
             <span
               aria-hidden="true"
@@ -84,7 +113,8 @@ const UpdateCourseInfo = () => {
                     Update Course Details
                   </h3>
                   <button
-                    className="text-slate-400 hover:text-slate-500 focus:outline-none hover:bg-slate-100 dark:hover:bg-slate-700 p-1 rounded-full cursor-pointer transition-colors"
+                    disabled={loading}
+                    className="text-slate-400 hover:text-slate-500 focus:outline-none hover:bg-slate-100 dark:hover:bg-slate-700 p-1 rounded-full cursor-pointer transition-colors disabled:opacity-50"
                     type="button"
                     onClick={() => setInfoModal({})}
                   >
@@ -184,7 +214,7 @@ const UpdateCourseInfo = () => {
                           className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
                           name="format"
                           required
-                          value={data.format} // FIX: Removed 'formate' typo
+                          value={data.format}
                           onChange={handleChange}
                         >
                           <option value="major">Major</option>
@@ -199,17 +229,26 @@ const UpdateCourseInfo = () => {
                   </div>
                   <div className="px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:justify-end gap-3 ">
                     <button
-                      className="mt-3 w-full inline-flex justify-center rounded-lg border border-border-light dark:border-border-dark shadow-sm px-4 py-2 bg-white dark:bg-slate-800 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition-colors cursor-pointer"
+                      disabled={loading}
+                      className="mt-3 w-full inline-flex justify-center rounded-lg border border-border-light dark:border-border-dark shadow-sm px-4 py-2 bg-white dark:bg-slate-800 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       type="button"
                       onClick={() => setInfoModal({})}
                     >
                       Cancel
                     </button>
                     <button
-                      className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-700 focus:outline-none sm:w-auto sm:text-sm transition-colors cursor-pointer"
+                      className={`w-full inline-flex items-center justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white focus:outline-none sm:w-auto sm:text-sm transition-colors ${isChanged && !loading ? "cursor-pointer hover:bg-teal-700 " : ""  }${!isChanged || loading ? "opacity-80 cursor-not-allowed" : ""}`}
                       type="submit"
+                      disabled={!isChanged || loading}
                     >
-                      Update
+                      {loading ? (
+                        <>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                          Updating...
+                        </>
+                      ) : (
+                        "Update"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -288,7 +327,9 @@ const UpdateCourseInfo = () => {
                     className="flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-8 py-4 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition-colors cursor-pointer">
                   Cancel
                 </button>
-                <button className="flex w-full items-center justify-center rounded-xl bg-orange-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-orange-600 focus:outline-none transition-colors cursor-pointer">
+                <button 
+                  onClick={handleUpdateInfo}
+                  className="flex w-full items-center justify-center rounded-xl bg-orange-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-orange-600 focus:outline-none transition-colors cursor-pointer">
                   <MdRefresh size={24} className="mr-1" />
                   Retry
                 </button>
