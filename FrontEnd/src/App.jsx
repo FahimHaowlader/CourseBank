@@ -27,7 +27,7 @@ function App() {
     {
       path: "/check-page",
       element: (
-        <RoleProtectedRoute allowedRoles={["user", "moderator", "admin"]}>
+        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
           <CheckPage />
         </RoleProtectedRoute>
       ),

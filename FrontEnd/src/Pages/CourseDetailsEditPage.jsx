@@ -35,6 +35,7 @@ import { DepartmentMap } from "../Components/DepartmentMap";
 import AddFirstElement from "../Components/AddFirstElement";
 import NoElement from "../Components/NoElement";
 import { useAuth } from "../Contexts/Auth.Context";
+import ElementDeleteConfirmation from "../Components/ElementDeleteConformation";
 
 const CourseDetailsEditPage = () => {
   const navigate = useNavigate();
@@ -72,6 +73,7 @@ const CourseDetailsEditPage = () => {
     handleUpdateAssessment,
     handleDeleteElement,
     handleDelete,
+    setDeleteItem,
     error,
   } = useCourse();
 
@@ -199,6 +201,17 @@ const CourseDetailsEditPage = () => {
   //       console.log("deleting", itemName);
   //       // Simulate deletion process
   //  }
+
+   useEffect(() => {
+    // 1. Try scrolling the window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 2. Safety: Try scrolling the HTML element (for some mobile browsers)
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // 3. Optional: If you have a specific container that scrolls, use:
+    // document.getElementById('main-container').scrollTo({ top: 0 });
+  }, []);
 
   const finalAssessment = course.assessments
     ? course.assessments.filter((assessment) => assessment.type === "final")
@@ -393,6 +406,7 @@ const CourseDetailsEditPage = () => {
                 Edit
               </button>)
               }
+            
              
               <UpdateCourseInfo />
             </div>
@@ -419,6 +433,7 @@ const CourseDetailsEditPage = () => {
                   setInstructorModal={setInstructorModal}
                 />
               </div>
+           
 
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                 {/* <div className="flex items-center gap-4">
@@ -564,12 +579,20 @@ const CourseDetailsEditPage = () => {
                           </div>
                         </div>
                         <button
-                          className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
+                          className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(material.name);
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              id: material.id,
+                              from: "materials",
+                              name: material.name,
+                            });
                           }}
-                        >
+                           >
                           <MdDeleteOutline size={26} />
                         </button>
                       </div>
@@ -602,12 +625,7 @@ const CourseDetailsEditPage = () => {
                 materialModal={materialModal}
                 setMaterialModal={setMaterialModal}
               />
-              <DeleteElement
-                deleteModal={deleteModal}
-                setDeleteModal={setDeleteModal}
-                handleDelete={handleDelete}
-                itemName={"item-38"}
-              />
+              <DeleteElement />
             </section>
 
             {/* Suggested Books Section */}
@@ -646,7 +664,15 @@ const CourseDetailsEditPage = () => {
                           className="text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 ml-2"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(book.title);
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              id: book.id,
+                              from: "books",
+                              name: book.title,
+                            });
                           }}
                         >
                           <MdDeleteOutline size={26} />
@@ -669,12 +695,7 @@ const CourseDetailsEditPage = () => {
 
               {/* Modals outside the list flow */}
               <AddBook bookModal={bookModal} setBookModal={setBookModal} />
-              <DeleteElement
-                deleteModal={deleteModal}
-                setDeleteModal={setDeleteModal}
-                handleDelete={handleDelete}
-                itemName={"item-38"}
-              />
+
             </section>
             {/* Tasks & Assignments Section */}
             <section className="lg:col-span-2">
@@ -706,12 +727,20 @@ const CourseDetailsEditPage = () => {
                             </div>
                           </div>
                           <button
-                            className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(task.name);
-                            }}
-                          >
+                            className="text-slate-400 cursor-pointer hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
+                             onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              id: task.id,
+                              from: "tasks",
+                              name: task.name,
+                            });
+                          }}
+                        >
                             <MdDeleteOutline size={26} />
                           </button>
                         </div>
@@ -801,7 +830,20 @@ const CourseDetailsEditPage = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
+                                <button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                   onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              id: assessment.id,
+                              from: "assessments",
+                              name: assessment.type,
+                            });
+                          }}
+                        >
                                   <MdDeleteOutline size={26} />
                                 </button>
                               </div>
@@ -879,7 +921,20 @@ const CourseDetailsEditPage = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
+                                <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                        onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              id: assessment.id,
+                              from: "assessments",
+                              name: assessment.type,
+                            });
+                          }}
+                        >
                                   <MdDeleteOutline size={26} />
                                 </button>
                               </div>

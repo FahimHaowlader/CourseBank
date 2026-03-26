@@ -22,6 +22,7 @@ export const CourseProvider = ({ children }) => {
   const [taskModal, setTaskModal] = useState({ openModal: false, status: "" });
   const [deleteModal, setDeleteModal] = useState({ openModal: false, status: "" });
   const [assessmentModal, setAssessmentModal] = useState({ openModal: false, status: "" });
+  const [deleteItem, setDeleteItem] = useState({name : "",from:"",id:null}); // To hold the item being deleted
 
   // Update Handlers
   const handleUpdateInfo = () => {
@@ -122,6 +123,8 @@ export const CourseProvider = ({ children }) => {
         handleDeleteElement,
         handleDelete,
         error,
+        deleteItem,
+        setDeleteItem
       }}
     >
       {children}

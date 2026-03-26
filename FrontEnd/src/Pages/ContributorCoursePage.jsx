@@ -27,6 +27,17 @@ const ContributorCoursePage = () => {
     loading: false, 
   });
 
+   useEffect(() => {
+    // 1. Try scrolling the window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 2. Safety: Try scrolling the HTML element (for some mobile browsers)
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // 3. Optional: If you have a specific container that scrolls, use:
+    // document.getElementById('main-container').scrollTo({ top: 0 });
+  }, []);
+
   useEffect(() => {
     const fetchContributorCourses = async () => {
       try {
@@ -214,7 +225,7 @@ const ContributorCoursePage = () => {
           <div className="flex justify-end w-full lg:w-auto">
             {user.status === "active" && (
                <button 
-                className="w-full lg:min-w-[300px] px-6 py-3 rounded-xl 
+                className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
                            bg-emerald-600 hover:bg-emerald-700 
                            text-emerald-50 font-bold 
                            border border-emerald-500/20
@@ -231,7 +242,7 @@ const ContributorCoursePage = () => {
             )}
             {!(user.reviewedBy) && user.status === "pending" && (
                            <button 
-  className="w-full lg:min-w-[300px] px-6 py-3 rounded-xl 
+  className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
              bg-rose-600 hover:bg-rose-700/90 
              text-rose-50 font-bold 
              border border-rose-500/20
@@ -248,9 +259,9 @@ const ContributorCoursePage = () => {
 </button>
             )}
             {user.reviewedBy && user?.status === 'pending' && (
-               <div className="w-full lg:min-w-[400px] group relative">
+               <div className="w-full lg:min-w-100 group relative">
     {/* Decorative Glow Effect */}
-    <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+    <div className="absolute -inset-0.5 bg-linear-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
     
     <button 
       className="relative w-full px-6 py-3 rounded-xl 

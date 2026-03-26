@@ -26,6 +26,7 @@ const CheckPage = () => {
   return (
     // <div className='min-h-screen' >
     <div className="min-h-screen">
+      <ElementDeleteConfirmation />
       {/* <h1 className='text-primary border p-6 rounded-xl'>Hello world </h1> */}
       {/* <SelectBox
   label="Year"
