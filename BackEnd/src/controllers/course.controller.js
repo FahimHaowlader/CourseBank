@@ -214,7 +214,7 @@ const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
 
   // Rule 3: Status Lock (Pending/Approved) - Only blocks non-admins
   // If status is NOT 'draft', contributors/moderators cannot edit
-  if (!isAdmin && course.status !== "draft") {
+  if (!isAdmin && course.status === "approved") {
     throw new apiError(403, `Course Locked: This course is currently '${course.status}' and cannot be edited.`);
   }
 
