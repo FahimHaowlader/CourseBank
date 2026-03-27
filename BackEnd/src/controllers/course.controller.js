@@ -551,6 +551,142 @@ const updateCourseMaterials = asyncHandler(async (req, res) => {
   );
 });
 
+const addNewMaterial = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { material } = req.body; // { name, fileUrl, publicId }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check if user has the 'access' flag set to true in their profile/token
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  // If the user is NOT an admin AND does NOT have the access flag, block them immediately.
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to add materials.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!material || typeof material !== 'object') {
+    throw new apiError(400, "A valid material object is required");
+  }
+
+  if ( !material.name || !material.fileUrl || !material.id) {
+    throw new apiError(400, "Material name and file URL and id are required");
+  }
+
+  // 3. Database Query
+  // Even with 'hasAccess', we still verify they are the creator and it's a draft
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Push Operation
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $push: { materials: material } 
+    },
+    {
+      new: true,
+      runValidators: true,
+      select: 'materials status' 
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Course not found, or you are not the creator, or it's no longer a draft."
+    );
+  }
+
+  const newlyAdded = updatedCourse.materials[updatedCourse.materials.length - 1];
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        newMaterial: newlyAdded,
+        totalMaterials: updatedCourse.materials.length 
+      },
+      "Material added successfully"
+    )
+  );
+});
+
+const deleteMaterial = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { materialId } = req.body; // Expecting { "materialId": "..." }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check access flag from the authenticated user
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to delete materials.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!materialId || !mongoose.Types.ObjectId.isValid(materialId)) {
+    throw new apiError(400, "A valid Material ID is required in the request body");
+  }
+
+  // 3. Database Query
+  // Admin: Can delete from any course.
+  // Others: Must be the creator AND the course must be in 'draft' status.
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Pull Operation
+  // This looks inside the 'materials' array and removes the object where _id matches materialId
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $pull: { materials: { _id: materialId } } 
+    },
+    {
+      new: true,
+      select: 'materials status' 
+    }
+  );
+
+  // 5. Handle Failure (Course not found, not a draft, or not the owner)
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Delete failed: Course not found, unauthorized, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        totalMaterials: updatedCourse.materials.length 
+      },
+      "Material deleted successfully from the course."
+    )
+  );
+});
+
 const updateCourseTasks = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const { tasks } = req.body;
@@ -614,6 +750,145 @@ const updateCourseTasks = asyncHandler(async (req, res) => {
       role === "admin"
         ? "Course tasks updated successfully by admin"
         : "Course tasks updated successfully by moderator"
+    )
+  );
+});
+
+const addNewTask = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { task } = req.body; // Expecting a single object: { title, description, deadline, etc. }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check for the 'access' requirement
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to add tasks.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!task || typeof task !== 'object' ) {
+    throw new apiError(400, "A valid task object is required");
+  }
+
+  // Ensure minimum task data exists (adjust fields based on your schema)
+  if (!task.title || !task.fileUrl || !task.id) {
+    throw new apiError(400, "Task title, file URL, and ID are required");
+  }
+
+  // 3. Database Query Logic
+  // Admin: Can add to any course
+  // Others: Must be the creator AND the course must be in 'draft' status
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Push Operation
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $push: { tasks: task } // Appends the new task object to the existing array
+    },
+    {
+      new: true,
+      runValidators: true,
+      select: 'tasks status' 
+    }
+  );
+
+  // 5. Handle Failure
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Action failed: Course not found, you aren't the owner, or it's no longer a draft."
+    );
+  }
+
+  // Get the newly added task (the last one in the array)
+  const newlyAddedTask = updatedCourse.tasks[updatedCourse.tasks.length - 1];
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        newTask: newlyAddedTask,
+        totalTasks: updatedCourse.tasks.length 
+      },
+      "New task added successfully"
+    )
+  );
+});
+
+const deleteTask = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { taskId } = req.body; // Expecting { "taskId": "..." }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check access flag from the authenticated user
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to delete tasks.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+    throw new apiError(400, "A valid Task ID is required in the request body");
+  }
+
+  // 3. Database Query
+  // Admin: Can delete from any course.
+  // Others: Must be the creator AND the course must be in 'draft' status.
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Pull Operation
+  // This searches the 'tasks' array and removes the object where _id matches taskId
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $pull: { tasks: { _id: taskId } } 
+    },
+    {
+      new: true,
+      select: 'tasks status' 
+    }
+  );
+
+  // 5. Handle Failure (Course not found, not a draft, or not the owner)
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Delete failed: Course not found, unauthorized, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        totalTasks: updatedCourse.tasks.length 
+      },
+      "Task deleted successfully from the course."
     )
   );
 });
@@ -685,6 +960,155 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
   );
 });
 
+const addNewAssessment = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { assessment } = req.body; // Expecting: { title, date, type, etc. }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+  // 1. Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to add assessments.");
+  }
+
+  // 2. Initial Validations
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!assessment || typeof assessment !== 'object') {
+    throw new apiError(400, "A valid assessment object is required");
+  }
+
+  if( !assessment.title || !assessment.date || !assessment.type || !assessment.id) {
+    throw new apiError(400, "Assessment title, date, type, and ID are required");
+  }
+
+  // 3. Date Validation Logic
+  const course = await Course.findById(courseId).select('startingDate createdBy status');
+  
+  if (!course) {
+    throw new apiError(404, "Course not found");
+  }
+
+  // Check if assessment date is before the course starting date
+  if (new Date(assessment.date) < new Date(course.startingDate)) {
+    throw new apiError(
+      400, 
+      `Assessment date cannot be earlier than the course starting date (${course.startingDate.toDateString()})`
+    );
+  }
+
+  // 4. Build Query for Update
+  const query = { _id: courseId };
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 5. Atomic Push Operation
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $push: { assessments: assessment } 
+    },
+    {
+      new: true,
+      runValidators: true,
+      select: 'assessments status' 
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      403, 
+      "Action failed: You aren't the owner or the course is no longer a draft."
+    );
+  }
+
+  const newlyAdded = updatedCourse.assessments[updatedCourse.assessments.length - 1];
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        newAssessment: newlyAdded,
+        totalAssessments: updatedCourse.assessments.length 
+      },
+      "Assessment added successfully"
+    )
+  );
+});
+
+
+const deleteAssessment = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { assessmentId } = req.body; // Expecting { "assessmentId": "..." }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check access flag
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to delete assessments.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!assessmentId || !mongoose.Types.ObjectId.isValid(assessmentId)) {
+    throw new apiError(400, "A valid Assessment ID is required in the request body");
+  }
+
+  // 3. Database Query
+  // Admin: Can delete from any course.
+  // Others: Must be the creator AND the course must be in 'draft' status.
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Pull Operation
+  // This removes the object from the assessments array where _id matches assessmentId
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $pull: { assessments: { _id: assessmentId } } 
+    },
+    {
+      new: true,
+      select: 'assessments status' 
+    }
+  );
+
+  // 5. Handle Failure (Course not found, not a draft, or not the owner)
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Delete failed: Course not found, unauthorized, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        totalAssessments: updatedCourse.assessments.length 
+      },
+      "Assessment deleted successfully."
+    )
+  );
+});
+
+
+
 
 const updateSuggestedBooks = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
@@ -731,70 +1155,271 @@ const updateSuggestedBooks = asyncHandler(async (req, res) => {
   );
 });
 
-
-const updateCourseHandbook = asyncHandler(async (req, res) => {
+const addNewSuggestedBook = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const { handbook } = req.body;
+  const { book } = req.body; // Expecting: { title, author, link, publicId }
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
 
-  // Auth check
-  if (!userId) {
-    throw new apiError(401, "Unauthorized");
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to add suggested books.");
   }
 
-  // Course ID validation
-  if (!courseId) {
-    throw new apiError(400, "Course ID is required");
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
   }
 
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
-    throw new apiError(400, "Invalid Course ID");
+  if (!book || typeof book !== 'object' || Array.isArray(book)) {
+    throw new apiError(400, "A valid book object is required");
   }
 
-  // Handbook validation
-  if (!handbook) {
-    throw new apiError(400, "Handbook URL is required");
+  if (!book.title || !book.authorName || !book.fileUrl || !book.id) {
+    throw new apiError(400, "Book title, authorName, file URL, and ID are required");
   }
 
-  // Role-based query
+  // 3. Database Query
+  // Admin: Can add to any course.
+  // Others: Must be the creator AND the course must be in 'draft' status.
   const query = { _id: courseId };
-
-  // Moderator → only own courses
-  if (role === "moderator") {
+  
+  if (role !== "admin") {
     query.createdBy = userId;
+    query.status = "draft";
   }
 
-  // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
-  }
-
-  // ONE DB CALL
+  // 4. Atomic Push Operation
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { handbook } },
+    { 
+      $push: { books: book } // Appends the book object to the existing array
+    },
     {
       new: true,
       runValidators: true,
-      select: '+handbook +handbook.publicId'
+      select: 'books status' 
     }
   );
 
+  // 5. Handle Failure
   if (!updatedCourse) {
     throw new apiError(
-      403,
-      "Course not found or you are not authorized to update it"
+      404, 
+      "Action failed: Course not found, you aren't the owner, or it's no longer a draft."
+    );
+  }
+
+  // Get the newly added book (last item in the array)
+  const newlyAddedBook = updatedCourse.books[updatedCourse.books.length - 1];
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        newBook: newlyAddedBook,
+        totalBooksCount: updatedCourse.books.length 
+      },
+      "Suggested book added successfully"
+    )
+  );
+});
+
+const deleteSuggestedBook = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { bookId } = req.body; // Expecting { "bookId": "..." }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check for the 'access' flag in the authenticated user
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to delete suggested books.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!bookId || !mongoose.Types.ObjectId.isValid(bookId)) {
+    throw new apiError(400, "A valid Book ID is required in the request body");
+  }
+
+  // 3. Database Query
+  // Admin: Full access to delete from any course.
+  // Others: Must be the creator AND the course must be in 'draft' status.
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Pull Operation
+  // This searches the 'books' array and removes the sub-document where _id matches bookId
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $pull: { books: { _id: bookId } } 
+    },
+    {
+      new: true,
+      select: 'books status' 
+    }
+  );
+
+  // 5. Handle Failure
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Delete failed: Course not found, unauthorized, or it's no longer a draft."
     );
   }
 
   res.status(200).json(
     new apiResponse(
       200,
-      {updatedCourseHandbook : updatedCourse.handbook},
-      role === "admin"
-        ? "Course handbook updated successfully by admin"
-        : "Course handbook updated successfully by moderator"
+      { 
+        totalBooks: updatedCourse.books.length 
+      },
+      "Suggested book deleted successfully from the course."
+    )
+  );
+});
+
+
+
+
+// const updateCourseHandbook = asyncHandler(async (req, res) => {
+//   const { courseId } = req.params;
+//   const { handbook } = req.body;
+//   const userId = req.user?._id;
+//   const role = req.user?.role;
+
+//   // Auth check
+//   if (!userId) {
+//     throw new apiError(401, "Unauthorized");
+//   }
+
+//   // Course ID validation
+//   if (!courseId) {
+//     throw new apiError(400, "Course ID is required");
+//   }
+
+//   if (!mongoose.Types.ObjectId.isValid(courseId)) {
+//     throw new apiError(400, "Invalid Course ID");
+//   }
+
+//   // Handbook validation
+//   if (!handbook) {
+//     throw new apiError(400, "Handbook URL is required");
+//   }
+
+//   // Role-based query
+//   const query = { _id: courseId };
+
+//   // Moderator → only own courses
+//   if (role === "moderator") {
+//     query.createdBy = userId;
+//   }
+
+//   // Only admin or moderator allowed
+//   if (role !== "admin" && role !== "moderator") {
+//     throw new apiError(403, "Forbidden");
+//   }
+
+//   // ONE DB CALL
+//   const updatedCourse = await Course.findOneAndUpdate(
+//     query,
+//     { $set: { handbook } },
+//     {
+//       new: true,
+//       runValidators: true,
+//       select: '+handbook +handbook.publicId'
+//     }
+//   );
+
+//   if (!updatedCourse) {
+//     throw new apiError(
+//       403,
+//       "Course not found or you are not authorized to update it"
+//     );
+//   }
+
+//   res.status(200).json(
+//     new apiResponse(
+//       200,
+//       {updatedCourseHandbook : updatedCourse.handbook},
+//       role === "admin"
+//         ? "Course handbook updated successfully by admin"
+//         : "Course handbook updated successfully by moderator"
+//     )
+//   );
+// });
+
+const updateCourseHandbook = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { handbook } = req.body; // Expecting: { name, fileUrl, publicId }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // Check for the 'access' flag in the authenticated user
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  // If the user is NOT an admin AND does NOT have the access flag, block them
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to update the handbook.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!handbook ) {
+    throw new apiError(400, "A valid handbook object is required");
+  }
+
+
+  // 3. Database Query
+  // Admin: Can update any course
+  // Others: Must be the creator AND the course must be in 'draft' status
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Update Operation
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { handbook } }, // Overwrites the existing handbook object
+    {
+      new: true,
+      runValidators: true,
+      select: 'handbook status' 
+    }
+  );
+
+  // 5. Handle Failure
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Update failed: Course not found, you aren't the owner, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { updatedCourseHandbook: updatedCourse.handbook },
+      "Course handbook updated successfully"
     )
   );
 });
@@ -919,4 +1544,4 @@ const deleteCourse = asyncHandler(async (req, res) => {
 
 
 
-export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse };
+export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook };
