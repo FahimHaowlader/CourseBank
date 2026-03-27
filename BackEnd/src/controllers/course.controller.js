@@ -16,7 +16,7 @@ const userQueryCache = {};
 
 // Helper function to get courses
 async function getCourses(userId, parameters ={},page,sort ={}) {
-  const query = {};
+  const query = {status: "approved"}; // Only approved courses are visible to users
 
   // Build query
   for (const [key, value] of Object.entries(parameters)) {
