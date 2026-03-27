@@ -902,7 +902,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
     if (!existing) throw new apiError(404, "Course not found.");
     
     // Logic to explain WHY the one-call delete failed
-    if (existing.status !== "draft") throw new apiError(403, "Cannot delete non-draft courses.");
+    if (existing.status === "approved") throw new apiError(403, "Cannot delete non-draft courses.");
     if (new Date(existing.createdAt) < oneYearAgo) throw new apiError(403, "Course is over 1 year old.");
     throw new apiError(403, "Unauthorized deletion attempt.");
   }
