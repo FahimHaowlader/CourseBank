@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "./controllers/course.controller.js";
+import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook } from "./controllers/course.controller.js";
 
 
 import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
@@ -48,15 +48,31 @@ router.route('/update-course-info/:courseId').patch(updateCourseInfo);
 
 router.route('/update-course-materials/:courseId').patch(updateCourseMaterials);
 
+router.route('/add-new-material/:courseId').patch(addNewMaterial);
+
+router.route('/delete-material/:courseId').patch(deleteMaterial);
+
 router.route('/update-course-tasks/:courseId').patch(updateCourseTasks);
+
+router.route('/add-new-task/:courseId').patch(addNewTask);
+
+router.route('/delete-task/:courseId').patch(deleteTask);
 
 router.route('/update-course-assessments/:courseId').patch(updateCourseAssessments);
 
+router.route('/add-new-assessment/:courseId').patch(addNewAssessment);
+
+router.route('/delete-assessment/:courseId').patch(deleteAssessment);
+
 router.route('/update-suggested-books/:courseId').patch(updateSuggestedBooks);
+
+router.route('/add-new-suggested-book/:courseId').patch(addNewSuggestedBook);
+
+router.route('/delete-suggested-book/:courseId').patch(deleteSuggestedBook);
 
 router.route('/update-course-handbook/:courseId').patch(updateCourseHandbook);
 
-router.route('/delete-course-handbook/:courseId').delete(deleteCourseHandbook);
+// router.route('/delete-course-handbook/:courseId').delete(deleteCourseHandbook);
 
 router.route('/delete-course/:courseId').delete(deleteCourse);
 

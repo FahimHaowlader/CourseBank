@@ -179,6 +179,10 @@ const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
     throw new apiError(400, "Invalid Course ID");
   }
 
+  if(!hasAccess){
+    throw new apiError(403, "Your account access is restricted. You cannot edit courses.");
+  }
+
   // 2. Fetch course with required hidden fields (Added status and createdAt)
   const course = await Course.findById(courseId).select(
     '+description +instructorDepartment +instructorImage +createdBy +books +materials +tasks +assessments +handbook +status +createdAt'
@@ -257,6 +261,10 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
   // console.log("Filter:", filter);
   const courses = await Course.find(filter);
 
+  if(!courses){
+    throw new apiError(404,"there was no courses")
+  }
+
   res.status(200).json(
    new apiResponse(200, courses, "Courses fetched successfully")
   );
@@ -272,7 +280,7 @@ const createCourse = asyncHandler(async (req, res,next) => {
   if (!userId) throw new apiError(401, "Unauthorized");
 
   // 1. Access Check: Non-admins must have access: true
-  if (userRole !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Your account access is restricted. You cannot create courses.");
   }
 
@@ -322,6 +330,7 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
   const {updatedData} = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
 
   // Auth check
   if (!userId) {
@@ -331,6 +340,10 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
   // Course ID validation
   if (!courseId) {
     throw new apiError(400, "Course ID is required");
+  }
+
+  if (!hasAccess) {
+    throw new apiError(403, "Your account access is restricted. You cannot edit courses.");
   }
 
   if (!mongoose.Types.ObjectId.isValid(courseId)) {
@@ -355,18 +368,13 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
   const query = { _id: courseId };
 
   // Moderator can update only their own course
-  if (role === "moderator" ) {
+  if (role !== "admin" ) {
     query.createdBy = userId;
-  }
-
-  // Admin can update any course (no ownership restriction)
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
   }
 
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: updatedData },
+    { $set: updatedData ,isEditedSinceFeedback : true },
     {
       new: true,
       runValidators: true,
@@ -401,7 +409,7 @@ const updateBasicInfo = asyncHandler(async (req, res) => {
   // User must be an Admin OR have the explicit 'access' flag
   const hasAccess = req.user?.access === true;
 
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access level to update course info.");
   }
 
@@ -439,7 +447,7 @@ const updateBasicInfo = asyncHandler(async (req, res) => {
   // 5. Atomic Update
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: updatedData },
+    { $set: updatedData ,isEditedSinceFeedback : true },
     {
       new: true,
       runValidators: true,
@@ -475,7 +483,7 @@ const updateDescription = asyncHandler(async (req, res) => {
   // 1. Strict Authorization Check
   const hasAccess = req.user?.access === true;
 
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to update the description.");
   }
 
@@ -501,7 +509,7 @@ const updateDescription = asyncHandler(async (req, res) => {
   // 4. Atomic Update Operation
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { description } }, // Updates only the description field
+    { $set: { description,isEditedSinceFeedback : true } }, // Updates only the description field
     {
       new: true,
       runValidators: true,
@@ -535,7 +543,7 @@ const updateInstructorInfo = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if ( !hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access level.");
   }
 
@@ -548,9 +556,9 @@ const updateInstructorInfo = asyncHandler(async (req, res) => {
     throw new apiError(400, "A valid instructor info object is required");
   }
 
-  // REQUIREMENT: Must have at least instructorName OR instructorDepartment
-  if (!instructor.instructorName && !instructor.instructorDepartment) {
-    throw new apiError(400, "Instructor update must include at least a Name or a Department");
+  // REQUIREMENT: Must have at least instructorName AND instructorDepartment
+  if (!instructor.instructorName || !instructor.instructorDepartment) {
+    throw new apiError(400, "Instructor update must include at least a Name and a Department");
   }
 
    // 3. Block restricted academic fields
@@ -575,7 +583,7 @@ const updateInstructorInfo = asyncHandler(async (req, res) => {
   // 5. Atomic Update Operation
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { instructor } }, 
+    { $set: { instructor,isEditedSinceFeedback : true } }, 
     {
       new: true,
       runValidators: true,
@@ -607,7 +615,7 @@ const updateStartingDate = asyncHandler(async (req, res) => {
   const role = req.user?.role;
   const hasAccess = req.user?.access === true;
 
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: Access denied.");
   }
 
@@ -633,7 +641,7 @@ const updateStartingDate = asyncHandler(async (req, res) => {
 
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { startingDate: newDate, year } },
+    { $set: { startingDate: newDate, year , isEditedSinceFeedback : true } },
     { new: true, runValidators: true, select: 'startingDate status' }
   );
 
@@ -756,6 +764,12 @@ const updateCourseMaterials = asyncHandler(async (req, res) => {
   const { materials } = req.body; // Expecting [{name, fileUrl, publicId}]
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+   // 1. Strict Authorization Check
+   if (!hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to update course materials.");
+  }
 
   if (!userId) throw new apiError(401, "Unauthorized");
   if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
@@ -768,16 +782,15 @@ const updateCourseMaterials = asyncHandler(async (req, res) => {
 
   // Define authorization query
   const query = { _id: courseId };
-  if (role === "moderator") {
+  if (role !== "admin") {
     query.createdBy = userId;
-  } else if (role !== "admin") {
-    throw new apiError(403, "Forbidden: Only admins and moderators can update materials");
-  }
+    query.status = "draft";
+  } 
 
   // ONE DB CALL - Fixed Options and Select
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { materials } },
+    { $set: { materials,isEditedSinceFeedback : true } },
     {
       new: true,
       runValidators: true,
@@ -813,7 +826,7 @@ const addNewMaterial = asyncHandler(async (req, res) => {
 
   // 1. Strict Authorization Check
   // If the user is NOT an admin AND does NOT have the access flag, block them immediately.
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to add materials.");
   }
 
@@ -843,7 +856,8 @@ const addNewMaterial = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $push: { materials: material } 
+      $push: { materials: material } ,
+      $set : {isEditedSinceFeedback : true }
     },
     {
       new: true,
@@ -883,7 +897,7 @@ const deleteMaterial = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if ( !hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to delete materials.");
   }
 
@@ -911,7 +925,8 @@ const deleteMaterial = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $pull: { materials: { _id: materialId } } 
+      $pull: { materials: { _id: materialId } } ,
+      $set : {isEditedSinceFeedback : true }
     },
     {
       new: true,
@@ -943,6 +958,12 @@ const updateCourseTasks = asyncHandler(async (req, res) => {
   const { tasks } = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+   // 1. Strict Authorization Check
+   if (!hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to update course tasks.");
+  }
 
   // Auth check
   if (!userId) {
@@ -967,19 +988,16 @@ const updateCourseTasks = asyncHandler(async (req, res) => {
   const query = { _id: courseId };
 
   // Moderator → only own courses
-  if (role === "moderator") {
+  if (role !== "admin") {
     query.createdBy = userId;
+    query.status = "draft";
   }
 
-  // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
-  }
-
+  
   // ONE DB CALL
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { tasks } },
+    { $set: { tasks, isEditedSinceFeedback : true } },
     {
       new: true,
       runValidators: true,
@@ -1011,11 +1029,12 @@ const addNewTask = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const role = req.user?.role;
   
+  
   // Check for the 'access' requirement
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if ( !hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to add tasks.");
   }
 
@@ -1029,8 +1048,8 @@ const addNewTask = asyncHandler(async (req, res) => {
   }
 
   // Ensure minimum task data exists (adjust fields based on your schema)
-  if (!task.title || !task.fileUrl || !task.id) {
-    throw new apiError(400, "Task title, file URL, and ID are required");
+  if (!task.name || !task.fileUrl || !task.id) {
+    throw new apiError(400, "Task name, file URL, and ID are required");
   }
 
   // 3. Database Query Logic
@@ -1047,7 +1066,8 @@ const addNewTask = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $push: { tasks: task } // Appends the new task object to the existing array
+      $push: { tasks: task } , // Appends the new task object to the existing array
+      $set : {isEditedSinceFeedback : true }
     },
     {
       new: true,
@@ -1089,7 +1109,7 @@ const deleteTask = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to delete tasks.");
   }
 
@@ -1117,7 +1137,8 @@ const deleteTask = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $pull: { tasks: { _id: taskId } } 
+      $pull: { tasks: { _id: taskId } } ,
+      $set : {isEditedSinceFeedback : true }
     },
     {
       new: true,
@@ -1149,6 +1170,12 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
   const { assessments } = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+   // 1. Strict Authorization Check
+   if (!hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to update course assessments.");
+  }
 
   // Auth check
   if (!userId) {
@@ -1173,19 +1200,18 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
   const query = { _id: courseId };
 
   // Moderator → only own courses
-  if (role === "moderator") {
+  if (role !== "admin") {
     query.createdBy = userId;
+    query.status = "draft";
   }
 
-  // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
-  }
+  
+  
 
   // ONE DB CALL
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { assessments } },
+    { $set: { assessments , isEditedSinceFeedback : true} },
     {
       new: true,
       runValidators: true,
@@ -1219,7 +1245,7 @@ const addNewAssessment = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to add assessments.");
   }
 
@@ -1262,7 +1288,8 @@ const addNewAssessment = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $push: { assessments: assessment } 
+      $push: { assessments: assessment } ,
+      $set :{ isEditedSinceFeedback : true } 
     },
     {
       new: true,
@@ -1303,7 +1330,7 @@ const deleteAssessment = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to delete assessments.");
   }
 
@@ -1331,7 +1358,8 @@ const deleteAssessment = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $pull: { assessments: { _id: assessmentId } } 
+      $pull: { assessments: { _id: assessmentId } } ,
+      $set : {isEditedSinceFeedback : true }
     },
     {
       new: true,
@@ -1366,6 +1394,12 @@ const updateSuggestedBooks = asyncHandler(async (req, res) => {
   const { books } = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+   // 1. Strict Authorization Check
+   if (!hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to update suggested books.");
+  }
 
   if (!userId) throw new apiError(401, "Unauthorized");
   if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
@@ -1377,15 +1411,15 @@ const updateSuggestedBooks = asyncHandler(async (req, res) => {
   }
 
   const query = { _id: courseId };
-  if (role === "moderator") {
+  if (role !== "admin") {
     query.createdBy = userId;
-  } else if (role !== "admin") {
-    throw new apiError(403, "Forbidden");
+    query.status = "draft";
   }
+  
 
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { books } }, // Overwrites existing books with the new list
+    { $set: { books ,isEditedSinceFeedback:true } }, // Overwrites existing books with the new list
     {
       new: true,
       runValidators: true,
@@ -1414,7 +1448,7 @@ const addNewSuggestedBook = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to add suggested books.");
   }
 
@@ -1423,7 +1457,7 @@ const addNewSuggestedBook = asyncHandler(async (req, res) => {
     throw new apiError(400, "Valid Course ID is required");
   }
 
-  if (!book || typeof book !== 'object' || Array.isArray(book)) {
+  if (!book || typeof book !== 'object' ) {
     throw new apiError(400, "A valid book object is required");
   }
 
@@ -1445,7 +1479,8 @@ const addNewSuggestedBook = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $push: { books: book } // Appends the book object to the existing array
+      $push: { books: book }, // Appends the book object to the existing array
+      $set: { isEditedSinceFeedback: true }
     },
     {
       new: true,
@@ -1487,7 +1522,7 @@ const deleteSuggestedBook = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Strict Authorization Check
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to delete suggested books.");
   }
 
@@ -1515,8 +1550,10 @@ const deleteSuggestedBook = asyncHandler(async (req, res) => {
   const updatedCourse = await Course.findOneAndUpdate(
     query,
     { 
-      $pull: { books: { _id: bookId } } 
+      $pull: { books: { _id: bookId } } ,
+      $set: { isEditedSinceFeedback: true }
     },
+   
     {
       new: true,
       select: 'books status' 
@@ -1623,7 +1660,7 @@ const updateCourseHandbook = asyncHandler(async (req, res) => {
 
   // 1. Strict Authorization Check
   // If the user is NOT an admin AND does NOT have the access flag, block them
-  if (role !== "admin" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: You do not have the required access to update the handbook.");
   }
 
@@ -1650,7 +1687,7 @@ const updateCourseHandbook = asyncHandler(async (req, res) => {
   // 4. Atomic Update Operation
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { handbook } }, // Overwrites the existing handbook object
+    { $set: { handbook,isEditedSinceFeedback:true } }, // Overwrites the existing handbook object
     {
       new: true,
       runValidators: true,
@@ -1680,6 +1717,13 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const userId = req.user?._id;
   const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+  const isAdmin = role === "admin";
+
+   // 1. Strict Authorization Check
+   if (!hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to delete the handbook.");
+  }
 
   // Auth check
   if (!userId) {
@@ -1699,21 +1743,22 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
   const query = { _id: courseId };
 
   // Moderator → only own courses
-  if (role === "moderator") {
+  if (!isAdmin) {
     query.createdBy = userId;
+    query.status = "draft";
   }
 
   // Only admin or moderator allowed
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden");
-  }
+
 
   // ONE DB CALL
  const updatedCourse = await Course.findOneAndUpdate(
   query,
-  { $unset: { handbook: "" } }, // Removes the entire handbook field
-  { new: true },
-  {runValidators: true,}
+  { $set : { isEditedSinceFeedback : true },
+    $unset: { handbook: "" } 
+   },                         // Removes the entire handbook field
+  { new: true ,
+  runValidators: true,}
 );
 
   if (!updatedCourse) {
@@ -1738,6 +1783,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const userId = req.user?._id;
   const isAdmin = req.user?.role === "admin";
+  const hasRole = req.user?.role
   const hasAccess = req.user?.access === true;
 
   if (!courseId) {
@@ -1754,10 +1800,13 @@ const deleteCourse = asyncHandler(async (req, res) => {
   }
 
   // 1. Account Access Check (Pre-DB)
-  if (!isAdmin && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Your account access is restricted.");
   }
 
+  if(!isAdmin && !hasRole) {
+    throw new apiError(403, "Forbidden: You do not have a valid role to delete courses.");
+  }
   // 2. Prepare the Atomic Query
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -1804,7 +1853,7 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Authorization
-  if (role !== "admin" && role !=="moderator" && !hasAccess) {
+  if (!hasAccess) {
     throw new apiError(403, "Forbidden: Access denied.");
   }
 
@@ -1818,6 +1867,7 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
     status: "draft",
     isEditedSinceFeedback: true
   };
+
   if (role !== "admin" && role !== "moderator") {
     query.createdBy = userId;
     
@@ -1923,8 +1973,9 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
   const hasAccess = req.user?.access === true;
 
   // 1. Authorization & ID Validation
-  if (role !== "admin" && role !=="moderator" && !hasAccess) {
-    throw new apiError(403, "Forbidden: Access denied.");
+
+  if (!hasAccess) {
+    throw new apiError(403, "Forbidden: Your account access is restricted.");
   }
 
   if((role === "admin" || role === "moderator") && !feedback) {
@@ -1997,6 +2048,70 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
       200, 
       { courseId: updatedCourse._id, newStatus: updatedCourse.status }, 
       "Submission cancelled. The course is now back in Draft mode for editing."
+    )
+  );
+});
+
+const acceptSubmission = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access
+
+  // 1. Strict Authorization
+
+  if(!hasAccess){
+    throw new apiError(403, "Forbidden: Your account access is restricted.");
+  }
+  // Only Admins and Moderators can approve courses
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Forbidden: Only administrators or moderators can approve submissions.");
+  }
+
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required.");
+  }
+
+  // 2. The Approval Logic
+  // We only approve courses that are currently in 'pending' status
+  const query = { 
+    _id: courseId, 
+    status: "pending" 
+  };
+
+  const updateFields = {
+    status: "approved",
+    reviewedBy: userId,
+    // Reset feedback flags upon successful publication
+    isEditedSinceFeedback: false,
+    feedback: "" 
+  };
+
+  // 3. Atomic Update
+  const approvedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: updateFields },
+    { 
+      new: true, 
+      runValidators: true,
+      select: "title status reviewedBy" 
+    }
+  );
+
+  // 4. Handle Failure
+  if (!approvedCourse) {
+    throw new apiError(
+      404, 
+      "Approval failed: Course not found, or it is not currently in the 'pending' queue."
+    );
+  }
+
+  // 5. Success Response
+  res.status(200).json(
+    new apiResponse(
+      200, 
+      approvedCourse, 
+      `Course "${approvedCourse.title}" has been officially published.`
     )
   );
 });
