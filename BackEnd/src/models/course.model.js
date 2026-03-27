@@ -300,7 +300,7 @@ const courseSchema = new mongoose.Schema(
     },
     isEditedSinceFeedback: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     isLocked: {
       type: Boolean,

@@ -1795,4 +1795,212 @@ const deleteCourse = asyncHandler(async (req, res) => {
 
 
 
+// submit handlers
+  
+const submitCourseForReview = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+  // 1. Authorization
+  if (role !== "admin" && role !=="moderator" && !hasAccess) {
+    throw new apiError(403, "Forbidden: Access denied.");
+  }
+
+  const courseIdValid = courseId && mongoose.Types.ObjectId.isValid(courseId);
+  if (!courseIdValid) {
+    throw new apiError(400, "Valid Course ID is required.");
+  }
+
+
+  const query = { _id: courseId ,
+    status: "draft",
+    isEditedSinceFeedback: true
+  };
+  if (role !== "admin" && role !== "moderator") {
+    query.createdBy = userId;
+    
+  }
+
+  
+
+  // 2. Fetch the Full Course Document from DB
+  const course = await Course.findOne(query).select('handbook assessments');
+  if (!course) {
+    throw new apiError(404, "Course not found in the database.");
+  }
+
+  // 3. Database Validation Logic (The "BD" checks)
+  
+  // A. Handbook Check
+  if (!course.handbook) {
+    throw new apiError(400, "Incomplete: The course handbook must be uploaded before submission.");
+  }
+
+  // B. Assessment Check
+  const assessments = course.assessments || [];
+
+  // Check for Term Tests or Midterms (Matches: termtest-1, midterm2, etc.)
+  const hasTermOrMid = assessments.some(asm => 
+    /termtest|midterm/i.test(asm.type)
+  );
+
+  // Check for Quizzes (Matches: quiz-1, quiz-2, etc.)
+  const hasQuiz = assessments.some(asm => 
+    /quiz/i.test(asm.type)
+  );
+
+  // Check for Projects
+  const hasProject = assessments.some(asm => 
+    /project/i.test(asm.type)
+  );
+
+  // 4. Validate requirements
+  if (!hasTermOrMid && !hasQuiz && !hasProject) {
+    const missing = [];
+    if (!hasTermOrMid) missing.push("Term Test/Midterm");
+    if (!hasQuiz) missing.push("Quiz");
+    if (!hasProject) missing.push("Project");
+
+    throw new apiError(
+      400, 
+      `Incomplete Curriculum in DB: Missing ${missing.join(", ")}. Please add these to the course structure first.`
+    );
+  }
+
+  const hasFinal = assessments.some(asm => 
+    /final/i.test(asm.type)
+  );
+
+  if (!hasFinal) {
+    throw new apiError(
+      400, 
+      "Incomplete Curriculum in DB: At least one Final assessment is required. Please add it to the course structure first."
+    );
+  }   
+
+  // 5. Final Status Update
+  // We only allow transition from 'draft' to 'pending'
+  // const query = { 
+  //   _id: courseId, 
+  //   status: "draft" 
+  // };
+  
+  // Ownership check for non-admins
+  // if (role !== "admin") {
+  //   query.createdBy = userId;
+  // }
+
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { status: "pending",submittedAt : new Date(),isEditedSinceFeedback :false } },
+    { 
+      new: true, 
+      runValidators: true,
+      select: "title status submittedAt" 
+    }
+  );
+
+  if (!updatedCourse) {
+    throw new apiError(
+      400, 
+      "Submission failed: The course is either already under review or you are not the owner."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(200, updatedCourse, "Course successfully verified from DB and submitted for review.")
+  );
+});
+
+
+const cancelCourseSubmission = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { feedback } = req.body; // Optional feedback message when canceling
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+  // 1. Authorization & ID Validation
+  if (role !== "admin" && role !=="moderator" && !hasAccess) {
+    throw new apiError(403, "Forbidden: Access denied.");
+  }
+
+  if((role === "admin" || role === "moderator") && !feedback) {
+    throw new apiError(400, "Feedback is required when canceling a submission as a Moderator or Admin.");
+  }
+
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required.");
+  }
+
+  // 2. Define the Cancellation Query
+  // We ONLY allow cancellation if the status is currently 'pending'
+  const query = { 
+    _id: courseId, 
+    status: "pending" 
+  };
+
+  // If not admin, you must be the owner to cancel your own submission
+  if (role !== "admin" && role !== "moderator") {
+    query.createdBy = userId;
+  }
+
+// 1. Prepare the update object
+  const updateFields = {
+    status: "draft",
+    reviewedBy: userId,
+    // We'll set this dynamically below
+  };
+
+  // 2. PRIVILEGE & FLAG LOGIC
+  // If the user is a Moderator or Admin, they can edit ANY course.
+  // If they are a regular user, they can only edit their OWN course.
+  if (role === "moderator" || role === "admin") {
+    // Moderators/Admins don't "trigger" the edited flag for themselves usually
+    updateFields.isEditedSinceFeedback = false,
+    updateFields.feedback = feedback; // Store the feedback from the moderator/admin
+
+  } else {
+    // If a regular user (CR/Student) edits, they must be the creator
+    // IMPORTANT: When a user edits, we set this to TRUE 
+    // so the Admin knows the feedback was addressed.
+    updateFields.isEditedSinceFeedback = true;
+  }
+
+ 
+  // 3. Revert Status to Draft
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { 
+      $set: updateFields,
+
+       // Removes the timestamp since it's no longer submitted
+    },
+    { 
+      new: true, 
+      select: "title status isEditedSinceFeedback feedback" 
+    }
+  );
+
+  // 4. Handle Failure
+  if (!updatedCourse) {
+    throw new apiError(
+      400, 
+      "Cancel failed: Course not found, not in pending status, or already approved/published."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200, 
+      { courseId: updatedCourse._id, newStatus: updatedCourse.status }, 
+      "Submission cancelled. The course is now back in Draft mode for editing."
+    )
+  );
+});
+
+
+
 export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook };
