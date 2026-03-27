@@ -737,7 +737,7 @@ const CoursePage = () => {
           </div> */}
           <Pagination page={page} setPage={setPage} totalDocs={totalDocs} />
         </div>
-        {/* <div className="hidden mt-12 flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
+        {/* <div className="hidden mt-12  flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
           {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
             <span className="material-symbols-outlined text-4xl">search_off</span>
           </div> 
