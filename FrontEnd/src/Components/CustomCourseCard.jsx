@@ -123,7 +123,7 @@ const CustomCourseCard = ({Course,setModal}) => {
     <div className="relative group overflow-hidden px-2.5 h-8 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-50/50 text-emerald-700 transition-all duration-500 hover:shadow-md hover:shadow-emerald-500/10 dark:bg-emerald-500/5 dark:text-emerald-400 dark:border-emerald-500/30 cursor-default">
       
       {/* Animated Glow Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 via-emerald-400/10 to-emerald-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <div className="absolute inset-0 bg-linear-to-r from-emerald-400/0 via-emerald-400/10 to-emerald-400/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
       {/* Smaller Indicator Dot */}
       <span className="relative flex h-1.5 w-1.5">

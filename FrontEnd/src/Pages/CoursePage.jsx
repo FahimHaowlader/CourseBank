@@ -16,6 +16,7 @@ import CourseCard from "../Components/CourseCard";
 import Pagination from "../Components/Pagination";
 import SkeletonCard from "../Components/SkeletonCard";
 import Department from "../Components/Department";
+import PublicApi from "../Hooks/PublicApi";
 
 const CoursePage = () => {
   const [courses, setCourses] = useState([]);
@@ -48,8 +49,8 @@ const CoursePage = () => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        const response = await axios.post(
-          "https://coursebank.onrender.com/api/v1/users-all-course",
+        const response = await PublicApi.post(
+          "/users-all-course",
           { parameters: filters },
         );
 
@@ -86,8 +87,8 @@ const CoursePage = () => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        const response = await axios.post(
-          "https://coursebank.onrender.com/api/v1/users-all-course",
+        const response = await PublicApi.post(
+          "/users-all-course",
           { parameters: {} },
         );
 
@@ -127,8 +128,8 @@ const CoursePage = () => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        const response = await axios.post(
-          "https://coursebank.onrender.com/api/v1/users-all-course",
+        const response = await PublicApi.post(
+          "/users-all-course",
           { parameters: filters, sort, page },
         );
         // console.log("Sorting Response:", filters); // Check the structure of the response
@@ -154,8 +155,8 @@ const CoursePage = () => {
       try {
         setLoading(true);
         setPage(1); // Reset to first page when sort changes
-        const response = await axios.post(
-          "https://coursebank.onrender.com/api/v1/users-all-course",
+        const response = await PublicApi.post(
+          "/users-all-course",
           { parameters: filters, sort,page},
         );
         
