@@ -391,6 +391,257 @@ const updateCourseInfo = asyncHandler(async (req, res) => {
   );
 });
 
+const updateBasicInfo = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { updatedData } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // 1. Strict Authorization Check
+  // User must be an Admin OR have the explicit 'access' flag
+  const hasAccess = req.user?.access === true;
+
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access level to update course info.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!updatedData || Object.keys(updatedData).length === 0) {
+    throw new apiError(400, "No update data provided");
+  }
+
+  // 3. Block restricted academic fields
+  // These fields are locked at creation and cannot be changed via basic update
+  const restrictedFields = ["department", "semester", "degree", "createdBy"];
+  for (const field of restrictedFields) {
+    if (field in updatedData) {
+      throw new apiError(
+        400,
+        `Updating the '${field}' field is restricted. Please contact an admin for changes.`
+      );
+    }
+  }
+
+  // 4. Database Query Logic
+  // Admin: Can update any course at any time
+  // Others: Must be the owner AND the course must be in 'draft' status
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 5. Atomic Update
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: updatedData },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  // 6. Handle Unauthorized or Not Found
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Update failed: Course not found, you aren't the owner, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      updatedCourse,
+      role === "admin" 
+        ? "Course info updated successfully by admin" 
+        : "Course info updated successfully"
+    )
+  );
+});
+
+
+const updateDescription = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { description } = req.body; // Expecting { "description": "New course details..." }
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  
+  // 1. Strict Authorization Check
+  const hasAccess = req.user?.access === true;
+
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access to update the description.");
+  }
+
+  // 2. Data Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if ( !description) {
+    throw new apiError(400, "Description content is required");
+  }
+
+  // 3. Database Query Logic
+  // Admin: Can update any course.
+  // Others: Must be the creator AND the course must be in 'draft' status.
+  const query = { _id: courseId };
+  
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 4. Atomic Update Operation
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { description } }, // Updates only the description field
+    {
+      new: true,
+      runValidators: true,
+      select: 'description status' 
+    }
+  );
+
+  // 5. Handle Failure
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Update failed: Course not found, you aren't the owner, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { updatedDescription: updatedCourse.description },
+      "Course description updated successfully"
+    )
+  );
+});
+
+
+const updateInstructorInfo = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { instructor } = req.body; 
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+  // 1. Strict Authorization Check
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: You do not have the required access level.");
+  }
+
+  // 2. Data Validation & Presence Check
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "Valid Course ID is required");
+  }
+
+  if (!instructor || typeof instructor !== 'object') {
+    throw new apiError(400, "A valid instructor info object is required");
+  }
+
+  // REQUIREMENT: Must have at least instructorName OR instructorDepartment
+  if (!instructor.instructorName && !instructor.instructorDepartment) {
+    throw new apiError(400, "Instructor update must include at least a Name or a Department");
+  }
+
+   // 3. Block restricted academic fields
+  // These fields are locked at creation and cannot be changed via basic update
+  const restrictedFields = ["department", "semester", "degree", "createdBy"];
+  for (const field of restrictedFields) {
+    if (field in updatedData) {
+      throw new apiError(
+        400,
+        `Updating the '${field}' field is restricted. Please contact an admin for changes.`
+      );
+    }
+  }
+
+  // 4. Database Query Logic
+  const query = { _id: courseId };
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+
+  // 5. Atomic Update Operation
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { instructor } }, 
+    {
+      new: true,
+      runValidators: true,
+      select: 'instructorName instructorDepartment status' 
+    }
+  );
+
+  // 6. Handle Failure
+  if (!updatedCourse) {
+    throw new apiError(
+      404, 
+      "Update failed: Course not found, you aren't the owner, or it's no longer a draft."
+    );
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { updatedInstructor: updatedCourse.instructor },
+      "Instructor information updated successfully"
+    )
+  );
+});
+
+const updateStartingDate = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { startingDate } = req.body;
+  const userId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+  if (role !== "admin" && !hasAccess) {
+    throw new apiError(403, "Forbidden: Access denied.");
+  }
+
+  if (!startingDate) throw new apiError(400, "Starting date is required");
+  const newDate = new Date(startingDate);
+
+  // Fetch course to check for timeline conflicts
+  const course = await Course.findById(courseId).select('assessments createdBy status');
+  if (!course) throw new apiError(404, "Course not found");
+
+  // Logic: Prevent start date from moving past existing assessments
+  const conflict = course.assessments.find(asm => new Date(asm.date) < newDate);
+  if (conflict) {
+    throw new apiError(400, `Conflict: Assessment "${conflict.title}" occurs before this new date.`);
+  }
+
+  const query = { _id: courseId };
+  if (role !== "admin") {
+    query.createdBy = userId;
+    query.status = "draft";
+  }
+  const year = new Date(startingDate).getFullYear();
+
+  const updatedCourse = await Course.findOneAndUpdate(
+    query,
+    { $set: { startingDate: newDate, year } },
+    { new: true, runValidators: true, select: 'startingDate status' }
+  );
+
+  if (!updatedCourse) throw new apiError(404, "Update failed: Course locked or unauthorized.");
+
+  res.status(200).json(new apiResponse(200, { updatedStartingDate: updatedCourse.startingDate }, "Date updated"));
+});
+
 
 const uploadImage = asyncHandler(async (req, res) => {
   const userId = req.user?._id; // do not need to check those 
