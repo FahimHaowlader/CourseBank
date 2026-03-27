@@ -17,6 +17,8 @@ import { MdRefresh } from "react-icons/md";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
+import { MdRestartAlt,MdOutlineCancel,MdDelete } from "react-icons/md";
+
 
 import AddElement from "../Components/AddElement";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
@@ -77,130 +79,6 @@ const CourseDetailsEditPage = () => {
     error,
   } = useCourse();
 
-  // const [infoModal, setInfoModal] = useState({
-  //   openModal: false,
-  // });
-
-  // const [instructorModal, setInstructorModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [descriptionModal, setDescriptionModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [handbookModal, setHandbookModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [materialModal, setMaterialModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [bookModal, setBookModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [taskModal, setTaskModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [deleteModal, setDeleteModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  // const [assessmentModal, setAssessmentModal] = useState({
-  //   openModal: false,
-  //   status: "",
-  // });
-
-  //   const handleUpdateInfo = () => {
-  //     console.log("hello");
-  //     setInfoModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //     console.log(infoModal);
-  //   };
-
-  //   const handleUpdateInstructorInfo = () => {
-  //     setInstructorModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleUpdateDescription = () => {
-  //     setDescriptionModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleUpdateHandbook = () => {
-  //     setHandbookModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleUpdateMaterial = () => {
-  //     console.log("material");
-  //     setMaterialModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleUpdateBook = () => {
-  //     setBookModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleUpdateTask = () => {
-  //     setTaskModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleUpdateAssessment = () => {
-  //     setAssessmentModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "update",
-  //     }));
-  //   };
-
-  //   const handleDeleteElement = () => {
-  //       setDeleteModal((prev) => ({
-  //       ...prev,
-  //       openModal: true,
-  //       status: "delete",
-  //     }));
-
-  //   };
-
-  //  const handleDelete = (itemName) => {
-  //       console.log("deleting", itemName);
-  //       // Simulate deletion process
-  //  }
 
    useEffect(() => {
     // 1. Try scrolling the window
@@ -221,14 +99,25 @@ const CourseDetailsEditPage = () => {
     ? course.assessments.filter((assessment) => assessment.type !== "final")
     : [];
   const handleFinalizeClick = () => {
+    if(finalAssessment.length <= 0 || nonFinalAssessments.length <= 0 || !(course.handbook) ||  course.books.length <= 0 ){
+    setSubmitModal({
+      openModal: true,
+      title: "Submit for Review",
+      status: "warning",
+    });
+   } else {
     setSubmitModal({
       openModal: true,
       title: "Submit for Review",
       status: "submit",
     });
+    }
+
   };
 
-  const cancelDeleteCourse = () => {};
+  const cancelDeleteCourse = () => {
+    setModal({openModal: false, status:''})
+  };
 
   const AppleSpinner = () => (
     /* Apply text-white to the container to color both the text and the SVG */
@@ -271,6 +160,12 @@ const CourseDetailsEditPage = () => {
     status: "", // 'confirm', 'loading', 'success', 'error', 'final-submit'
   });
 
+  const [modal,setModal] = useState({
+    openModal: false,
+    status :""
+  });
+  
+
   const closeModal = () => {
     setSubmitModal({
       openModal: false,
@@ -293,6 +188,36 @@ const CourseDetailsEditPage = () => {
     }
   }, [error, isLoading, navigate, from]);
 
+  const handleCourseDelete = () => {
+    setModal({openModal: true, status:'confirm'})
+  };
+  
+  const handleConfirmCancel = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true }));
+    try {
+      // await PrivateApi.post(`/cancel-account-submission`);
+      // // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
+      
+      // // FIXED: Refresh user context so user.status becomes 'active' again
+      // if (refreshUser) await refreshUser();
+
+      setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
+    } catch (error) {
+      setSubmitModal((prev) => ({ ...prev, status: "cancel-error" }));
+    } finally {    
+      setSubmitModal((prev) => ({ ...prev, loading: false }));
+    };
+  }
+
+    const handleCancelClick = () => {
+    setSubmitModal({
+      openModal: true,
+      status: "cancel",
+      loading: false
+    });
+  };
+
+
   if (isLoading) {
     return (
       <div>
@@ -300,6 +225,19 @@ const CourseDetailsEditPage = () => {
       </div>
     );
   }
+
+  const handleDeleteCourse = async (courseId) => {
+    setModal((prev) => ({ ...prev, status: "loading" }));
+    try {
+      // throw new Error("Testing delete error handling"); // <-- Temporary line to test error modal
+      // await PrivateApi.delete(`/delete-course/${courseId}`);
+      // setCourses((prevCourses) => prevCourses.filter((course) => course._id !== courseId));
+      setModal((prev) => ({ ...prev, status: "success" }));
+    } catch (error) {
+      setModal((prev) => ({ ...prev, status: "error" }));
+      console.error(`Error deleting course:`, error);
+    }
+  };
 
   const handleFinalSubmit = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
@@ -312,12 +250,12 @@ const CourseDetailsEditPage = () => {
 
       setSubmitModal({
         openModal: true,
-        status: "success",
+        status: "submit-success",
         title: "All courses",
         loading: false,
       });
     } catch (error) {
-      setSubmitModal((prev) => ({ ...prev, status: "error", loading: false }));
+      setSubmitModal((prev) => ({ ...prev, status: "submit-error", loading: false }));
     }
   };
 
@@ -524,7 +462,9 @@ const CourseDetailsEditPage = () => {
                     </p>
                   </div>
                 </div>
-
+                    {
+                  course.status === "draft" && (
+                   
                 <button
                   className="flex w-full lg:w-auto  cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
                   onClick={handleUpdateHandbook}
@@ -545,6 +485,7 @@ const CourseDetailsEditPage = () => {
                     </>
                   )}
                 </button>
+                )}
                 <UpdateHandbook
                   handbookModal={handbookModal}
                   setHandbookModal={setHandbookModal}
@@ -1011,9 +952,10 @@ const CourseDetailsEditPage = () => {
           )}
         </div>
 
-        {course.status === "draft" && (
+       
           <div className="flex flex-col gap-4 w-full sm:flex-row lg:flex-col">
             {/* 1. Finalize & Submit Button */}
+             {course.status === "draft" && (
             <button
               type="button"
               onClick={handleFinalizeClick}
@@ -1023,28 +965,19 @@ const CourseDetailsEditPage = () => {
                 size={22}
                 className="transition-transform duration-300 group-hover:scale-110"
               />
-              <span className="tracking-wide">Finalize & Submit Account</span>
+              <span className="tracking-wide"> Submit For Review</span>
             </button>
+               )}
 
-            {/* 2. Delete Course Button */}
-            <button
-              type="button"
-              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
-            >
-              <MdDeleteOutline
-                size={22}
-                className="text-rose-100/90 transition-transform duration-300 group-hover:rotate-12"
-              />
-              <span className="tracking-wide">Delete Course</span>
-            </button>
-          </div>
-        )}
-
-        {course.status === "pending" && (
+               {course.status === "pending" && (
           <button
             type="button"
             onClick={() => {
-              /* Your cancel logic here */
+              setSubmitModal((prev)=> ({
+                ...prev,
+                openModal: true,
+                status: "cancel",
+              }));
             }}
             className="group flex w-full items-center justify-center gap-3 rounded-xl 
                bg-amber-500 hover:bg-amber-600 
@@ -1061,6 +994,130 @@ const CourseDetailsEditPage = () => {
             <span className="tracking-tight">Cancel Submission</span>
           </button>
         )}
+
+
+
+            {/* 2. Delete Course Button */}
+            <button
+              type="button"
+              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
+              onClick={handleCourseDelete}
+              >
+              <MdDeleteOutline
+                size={22}
+                className="text-rose-100/90 transition-transform duration-300 group-hover:rotate-12"
+              />
+              <span className="tracking-wide">Delete Course</span>
+            </button>
+          </div>
+     
+
+        
+
+{/* 1. DELETE CONFIRMATION / LOADING MODAL */}
+{modal.openModal && (modal.status === "confirm" || modal.status === "loading") && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" 
+      onClick={modal.status !== 'loading' ? cancelDeleteCourse : null}
+    ></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 text-red-500">
+          <MdDelete size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Delete Course?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            Are you sure you want to delete {" "}<span className="font-bold text-text-main dark:text-white">{course.title}</span>?
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button 
+            disabled={modal.status === "loading"} 
+            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer" 
+            onClick={cancelDeleteCourse}
+          >
+            Cancel
+          </button>
+          <button 
+            disabled={modal.status === "loading"} 
+            className="flex-1 py-4 rounded-xl bg-red-500 text-white text-lg font-semibold hover:bg-red-600 disabled:bg-red-400 shadow-sm flex justify-center items-center transition-all active:scale-95 cursor-pointer" 
+            onClick={() => handleDeleteCourse(course._id)}
+          >
+            {modal.status === "loading" ? (
+              <AppleSpinner />
+            ) : (
+              <span className="flex justify-center items-center gap-2">
+                <MdDeleteOutline size={26} /> Delete
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* 2. SUCCESS MODAL */}
+{modal.openModal && modal.status === "success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 dark:bg-primary-dark text-primary">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Successfully Deleted!</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            The course has been removed successfully.
+          </p>
+        </div>
+        <button 
+          className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-lg font-semibold hover:bg-primary-hover shadow-sm transition-all active:scale-[0.98] cursor-pointer" 
+          onClick={cancelDeleteCourse}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* 3. DELETION ERROR MODAL */}
+{modal.openModal && modal.status === "error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Deletion Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            We encountered an issue while trying to delete {" "}<span className="font-bold text-text-main dark:text-white">{course.title}</span>. Please try again.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button 
+            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
+            onClick={cancelDeleteCourse}
+          >
+            Cancel
+          </button>
+          <button 
+            className="flex-1 py-4 rounded-xl bg-orange-500 text-white text-lg font-semibold hover:bg-orange-600 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer" 
+            onClick={() => setModal((prev) => ({ ...prev, status: "confirm" }))}
+          >
+            <MdRefresh size={24} /> Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
         {/* --- WARNING MODAL --- */}
         {submitModal.openModal && submitModal.status === "warning" && (
@@ -1085,43 +1142,36 @@ const CourseDetailsEditPage = () => {
 
                 <div className="space-y-4">
                   <h3
-                    className="text-4xl font-bold text-text-main dark:text-white"
+                    className="text-3xl sm:text-4xl font-bold text-text-main dark:text-white"
                     id="modal-title"
                   >
                     Cannot Submit Yet
                   </h3>
                   <div className="text-xl text-text-secondary dark:text-gray-400 space-y-3">
                     <p>
-                      To finalize your account, you must meet the following:
+                      To finalize your submit, you must meet the following:
                     </p>
-                    {/* <ul className="text-left bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-dashed border-amber-300 inline-block mx-auto ">
-            {
-              myCourseCount < 3 && (<> 
-                <li className={`flex items-center gap-2 text-red-500 `}>
-                { '✕'+` Minimum 3 courses required to submit account`}
+                     <ul className="text-left bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-dashed border-amber-300 inline-block mx-auto space-y-.5 ">
+            
+               
+                <li className={`flex items-center gap-2 ${course.handbook ?"text-emerald-600":"text-red-600"}`}> 
+                { `Required the handbook to submit the course` }
               </li>
-               <li className={`flex items-center gap-2  text-emerald-500`}>              
-                 ✓  Your course count ({"myCourseCount"})
+                <li className={`flex items-center gap-2 ${course.books.length > 0 ?"text-emerald-600":"text-red-600"}`}> 
+                { `Minimum 1 suggested book required to submit the course` }
               </li>
-              </>
-              ) 
-            }
-            {
-              myCourseCount !== approvedCourseCount &&  myCourseCount > 2 && (<> 
-                <li className={`flex items-center gap-2 text-red-500`}>
-                 ✓  Must have all courses approved by moderator 
+
+  
+                <li className={`flex items-center gap-2 ${finalAssessment.length > 0 ?"text-emerald-600":"text-red-600"}`}> 
+                { `Minimum 1 final assessmnet required to submit the course` }
               </li>
-               <li className={`flex items-center gap-2  text-emerald-500`}>              
-                 ✓  Approved course count ({approvedCourseCount})
+
+                <li className={`flex items-center gap-2 ${nonFinalAssessments.length > 0 ?"text-emerald-600":"text-red-600"}`}> 
+                { `Minimum 1 non-final assessmnet required to submit the course` }
               </li>
-              </>
-              )
-            }
-             
-              {/* <li className={`flex items-center gap-2  text-emerald-500`}>              
-                 ✓  Approved Course Count ({approvedCourseCount})
-              </li> 
-            </ul> */}
+
+
+            </ul> 
                   </div>
                 </div>
 
@@ -1139,159 +1189,112 @@ const CourseDetailsEditPage = () => {
         )}
 
         {/* --- FINAL SUBMIT MODAL --- */}
-        {submitModal.openModal && submitModal.status === "submit" && (
-          <div
-            aria-labelledby="modal-title"
-            aria-modal="true"
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-            role="dialog"
-          >
-            <div
-              className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
-              onClick={
-                submitModal.status !== "submitting" ? cancelDeleteCourse : null
-              }
-            ></div>
-            <div className="relative w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-left shadow-2xl transition-all border border-border-light dark:border-border-dark">
-              <div className="flex flex-col items-center gap-8 text-center">
-                {/* Icon: Using a checkmark or upload icon */}
-                <div className="flex h-28 w-28 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400">
-                  <span className="material-symbols-outlined text-[56px]">
-                    <IoMdCheckmarkCircle />
-                  </span>
-                </div>
+     {/* --- 1. SUBMIT CONFIRMATION MODAL --- */}
+{submitModal.openModal && submitModal.status === "submit" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onClick={!submitModal.loading ? closeModal : null}></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submit for Review?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            You are about to submit your courses to the moderator. Once submitted, you won't be able to edit them until the review process is complete.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button disabled={submitModal.loading} className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50" onClick={closeModal}>
+            Not Now
+          </button>
+          <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleFinalSubmit}>
+            {submitModal.loading ? <AppleSpinner /> : "Confirm Submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
-                <div className="space-y-4">
-                  <h3
-                    className="text-4xl font-bold text-text-main dark:text-white"
-                    id="modal-title"
-                  >
-                    Submit for Review?
-                  </h3>
-                  <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                    You are about to submit{" "}
-                    <span className="font-bold text-text-main dark:text-white">
-                      {"courses.length"} courses
-                    </span>{" "}
-                    to the moderator. You won't be able to edit them until the
-                    review is complete.
-                  </p>
-                </div>
+{/* --- 2. SUBMIT SUCCESS MODAL --- */}
+{submitModal.openModal && submitModal.status === "submit-success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Successful!</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            Your courses have been submitted for final review. You will be notified once the moderator completes the evaluation.
+          </p>
+        </div>
+        <button className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}>
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
-                <div className="flex w-full gap-6 mt-8">
-                  <button
-                    disabled={submitModal.loading}
-                    className="flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-8 py-4 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50"
-                    onClick={closeModal}
-                  >
-                    Not Now
-                  </button>
-                  <button
-                    disabled={submitModal.loading}
-                    className="flex w-full items-center justify-center rounded-xl bg-emerald-600 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors cursor-pointer"
-                    onClick={handleFinalSubmit}
-                  >
-                    {submitModal.loading ? (
-                      <div className="text-white">
-                        {" "}
-                        <AppleSpinner />{" "}
-                      </div>
-                    ) : (
-                      <span className="flex justify-center items-center gap-2">
-                        Confirm Submit
-                      </span>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+{/* --- 3. CANCEL CONFIRMATION MODAL --- */}
+{submitModal.openModal && submitModal.status === "cancel" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onClick={!submitModal.loading ? closeModal : null}></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdRestartAlt size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Cancel Submission?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            Your courses will no longer be under review, and you will need to submit again later.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button disabled={submitModal.loading} className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50" onClick={closeModal}>
+            Keep Review
+          </button>
+          <button disabled={submitModal.loading} className="flex-1 bg-rose-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-rose-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleConfirmCancel}>
+            {submitModal.loading ? <AppleSpinner /> : "Confirm Cancel"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
-        {/* --- SUBMIT SUCCESS MODAL --- */}
-        {submitModal.openModal && submitModal.status === "success" && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-            role="dialog"
-          >
-            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"></div>
-            <div className="relative w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
-              <div className="flex h-28 w-28 mx-auto items-center justify-center rounded-full bg-primary/10 text-primary mb-8">
-                <IoMdCheckmarkCircle size={56} />
-              </div>
-              <h3 className="text-4xl font-bold text-text-main dark:text-white mb-4">
-                Submission Successful!
-              </h3>
-              <p className="text-xl text-text-secondary dark:text-gray-400 mb-8 leading-relaxed">
-                Your courses have been submitted for final review. You will be
-                notified once the moderator completes the evaluation.
-              </p>
-              <button
-                className="w-full py-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer"
-                onClick={() =>
-                  setSubmitModal((prev) => ({
-                    ...prev,
-                    openModal: false,
-                    status: "",
-                    loading: false,
-                  }))
-                }
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        )}
+{/* --- 4. CANCEL SUCCESS MODAL --- */}
+{submitModal.openModal && submitModal.status === "cancel-success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Cancelled</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            Your request has been withdrawn successfully. You can edit your courses again.
+          </p>
+        </div>
+        <button className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}>
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
-        {/* --- SUBMIT ERROR MODAL --- */}
-        {submitModal.openModal && submitModal.status === "error" && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-            role="dialog"
-          >
-            <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm transition-opacity"></div>
-            <div className="relative w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
-              <div className="flex h-28 w-28 mx-auto items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500 mb-8">
-                <BsExclamationCircleFill size={56} />
-              </div>
-              <h3 className="text-4xl font-bold text-text-main dark:text-white mb-4">
-                Submission Failed
-              </h3>
-              <p className="text-xl text-text-secondary dark:text-gray-400 mb-8 leading-relaxed">
-                We couldn't process your final submission. This might be due to
-                a connection issue. Please try again.
-              </p>
-              <div className="flex w-full gap-6">
-                <button
-                  className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                  onClick={() =>
-                    setSubmitModal((prev) => ({
-                      ...prev,
-                      openModal: false,
-                      status: "",
-                      loading: false,
-                    }))
-                  }
-                >
-                  Cancel
-                </button>
-                <button
-                  className="flex-1 py-4 rounded-xl bg-orange-500 text-white text-xl font-semibold shadow-sm hover:bg-orange-600 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
-                  onClick={() =>
-                    setSubmitModal((prev) => ({
-                      ...prev,
-                      openModal: true,
-                      status: "submit",
-                      loading: false,
-                    }))
-                  }
-                >
-                  <MdRefresh size={24} /> Retry
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+
+
+
+
       </main>
 
       {/* <footer className="bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark py-12">

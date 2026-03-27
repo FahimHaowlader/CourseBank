@@ -29,7 +29,6 @@ const CourseDetailsPage = () => {
   const { id } = useParams();
   // console.log("Course ID from URL:", id); 
 
-  
    useEffect(() => {
     // 1. Try scrolling the window
     window.scrollTo({ top: 0, behavior: 'smooth' });

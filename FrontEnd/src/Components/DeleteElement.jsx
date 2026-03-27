@@ -56,7 +56,7 @@ const DeleteElement = () => {
 
   // Reusing the exact layout structure from your AddBook ModalWrapper
   const ModalWrapper = ({ children }) => (
-    <div className="fixed inset-0 z-[9999] overflow-y-auto" role="dialog">
+    <div className="fixed inset-0 z-9999 overflow-y-auto" role="dialog">
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div 
           className="fixed inset-0 bg-slate-900/40 transition-opacity backdrop-blur-sm" 

@@ -548,7 +548,7 @@ const ContributorCoursePage = () => {
       </h3>
       <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
         This will move your account back to <span className="font-bold text-rose-600">Active mode</span>. 
-        Your courses will no longer be under review, and you will need to submit again later.
+        Your account will no longer be under review, and you will need to submit again later.
       </p>
     </div>
 

@@ -98,7 +98,7 @@ const CourseDeleteConformation = ({openDelete,id}) => {
     <div
       aria-labelledby="modal-title"
       aria-modal="true"
-      className="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="hidden fixed inset-0 z-50 items-center justify-center p-4 sm:p-6"
       role="dialog"
     >
       <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"></div>
