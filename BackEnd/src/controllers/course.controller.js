@@ -1,3 +1,4 @@
+// const mongoose = require('mongoose');
 // utils
 import apiError from '../utils/apiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -267,26 +268,28 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
 });
 
 // --- CREATE COURSE ---
-const createCourse = asyncHandler(async (req, res,next) => {
+const createCourse = asyncHandler(async (req, res, next) => {
   const userId = req.user?._id;
   const userRole = req.user?.role;
   const hasAccess = req.user?.access === true;
   const data = req.body;
 
+  // 1. Initial Authorization & Validation
   if (!userId) throw new apiError(401, "Unauthorized");
-
-  // 1. Access Check: Non-admins must have access: true
   if (!hasAccess) {
     throw new apiError(403, "Your account access is restricted. You cannot create courses.");
   }
-
   if (!data || Object.keys(data).length === 0) {
     throw new apiError(400, "Course data is required");
   }
 
   const { title, courseCode, startingDate, instructorName, type, format, department, semester, degree } = data;
 
-  // 2. Duplicate Check (Owner-based)
+  if (!title || !courseCode || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
+    throw new apiError(400, "All required course fields must be provided");
+  }
+
+  // 2. Duplicate Check (Ownership-based)
   if (userRole !== "admin" && userRole !== "moderator") {
     const duplicate = await Course.findOne({ 
       courseCode: courseCode.trim(), 
@@ -295,29 +298,50 @@ const createCourse = asyncHandler(async (req, res,next) => {
     if (duplicate) throw new apiError(409, `You already created course ${courseCode}`);
   }
 
-  // 3. Validation
-  if (!title || !courseCode || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
-    throw new apiError(400, "All required course fields must be provided");
-  }
-
   const year = new Date(startingDate).getFullYear();
 
-  try {
-    const newCourse = new Course({ ...data, year, createdBy: userId });
-    const savedCourse = await newCourse.save();
+  // 3. START TRANSACTION
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    // 4. Update User Profile Stats
-    await User.findByIdAndUpdate(userId, {
-      $push: { myCourses: savedCourse._id },
-      $inc: { myCourseCount: 1 }
+  try {
+    // 4. Create Course
+    const newCourse = new Course({ 
+      ...data, 
+      year, 
+      createdBy: userId,
+      status: "pending" 
     });
 
-    res.status(201).json(new apiResponse(201, savedCourse, "Course created successfully"));
+    const savedCourse = await newCourse.save({ session });
+
+    // 5. Update User Profile (Push to array and increment count)
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: { myCourses: savedCourse._id },
+        $inc: { myCourseCount: 1 }
+      },
+      { session, new: true }
+    );
+
+    if (!updatedUser) {
+      throw new apiError(404, "User profile not found. Aborting creation.");
+    }
+
+    // 6. COMMIT
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json(new apiResponse(201, savedCourse, "Course created and pending review."));
     
   } catch (err) {
-    if (err.code === 11000) throw new apiError(400, "Course code already exists");
-    throw new apiError(500, err.message || "Error creating course");
+    // ROLLBACK on any error
+    await session.abortTransaction();
+    session.endSession();
 
+    if (err.code === 11000) throw new apiError(400, "This Course Code is already in use.");
+    throw new apiError(500, err.message || "Error creating course");
   }
 });
 
@@ -1778,64 +1802,86 @@ const deleteCourseHandbook = asyncHandler(async (req, res) => {
 const deleteCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const userId = req.user?._id;
-  const isAdmin = req.user?.role === "admin";
-  const hasRole = req.user?.role
+  const role = req.user?.role;
+  const isAdmin = role === "admin";
   const hasAccess = req.user?.access === true;
 
-  if (!courseId) {
-    throw new apiError(400, "missing Course ID");
+  // 1. Basic Validation
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new apiError(400, "A valid Course ID is required.");
   }
 
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
-    throw new apiError(400, "Invalid Course ID format");
-  }
+  if (!userId) throw new apiError(401, "Unauthorized");
+  if (!hasAccess) throw new apiError(403, "Your account access is restricted.");
 
-
-  if (!userId) {
-    throw new apiError(401, "Unauthorized");
-  }
-
-  // 1. Account Access Check (Pre-DB)
-  if (!hasAccess) {
-    throw new apiError(403, "Your account access is restricted.");
-  }
-
-  if(!isAdmin && !hasRole) {
-    throw new apiError(403, "Forbidden: You do not have a valid role to delete courses.");
-  }
-  // 2. Prepare the Atomic Query
+  // 2. Prepare the Query Logic
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
   const query = { _id: courseId };
+  
+  // Non-admins can only delete their own DRAFTS created within the last year
   if (!isAdmin) {
     query.createdBy = userId;
-    query.status = "draft";
+    query.status = "pending"; // Assuming 'pending' or 'draft' is the correct status
     query.createdAt = { $gt: oneYearAgo };
   }
 
-  // --- ATOMIC OPERATION: ONE DB CALL ---
-  const deletedCourse = await Course.findOneAndDelete(query);
+  // 3. START TRANSACTION
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // 3. Error Diagnosis (Only runs if the ONE call above returned nothing)
-  if (!deletedCourse) {
-    const existing = await Course.findById(courseId); // Second call ONLY on failure
-    if (!existing) throw new apiError(404, "Course not found.");
-    
-    // Logic to explain WHY the one-call delete failed
-    if (existing.status === "approved") throw new apiError(403, "Cannot delete non-draft courses.");
-    if (new Date(existing.createdAt) < oneYearAgo) throw new apiError(403, "Course is over 1 year old.");
-    throw new apiError(403, "Unauthorized deletion attempt.");
+  try {
+    // 4. ATOMIC DELETE
+    // We use .session(session) to include this in the transaction
+    const deletedCourse = await Course.findOneAndDelete(query, { session });
+
+    // 5. If Delete Failed, Diagnose WHY (Outside Transaction context is fine for read-only)
+    if (!deletedCourse) {
+      const existing = await Course.findById(courseId);
+      if (!existing) throw new apiError(404, "Course not found.");
+      
+      if (!isAdmin) {
+        if (existing.createdBy.toString() !== userId.toString()) 
+          throw new apiError(403, "Unauthorized: You do not own this course.");
+        if (existing.status !== "pending") 
+          throw new apiError(403, "Cannot delete courses that are already approved.");
+        if (new Date(existing.createdAt) < oneYearAgo) 
+          throw new apiError(403, "Cannot delete courses older than 1 year.");
+      }
+      throw new apiError(403, "Deletion criteria not met.");
+    }
+
+    // 6. CLEANUP USER STATS
+    // We use the 'createdBy' from the deleted document to ensure we hit the right user
+    const updatedUser = await User.findByIdAndUpdate(
+      deletedCourse.createdBy,
+      { 
+        $pull: { myCourses: deletedCourse._id }, 
+        $inc: { myCourseCount: -1 } 
+      },
+      { session, new: true }
+    );
+
+    // If for some reason the User doc is missing, abort the deletion
+    if (!updatedUser) {
+      throw new apiError(404, "User profile not found. Deletion aborted.");
+    }
+
+    // 7. COMMIT EVERYTHING
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(
+      new apiResponse(200, null, "Course deleted successfully and profile updated.")
+    );
+
+  } catch (error) {
+    // 8. ROLLBACK: If User update fails, the Course is RESTORED automatically
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  // 4. Cleanup User Stats
-  const updatedUser = await User.findByIdAndUpdate(
-    deletedCourse.createdBy,
-    { $pull: { myCourses: deletedCourse._id }, $inc: { myCourseCount: -1 } },
-    { new: true }
-  );
-
-  res.status(200).json(new apiResponse(200, { updatedUser }, "Deleted successfully."));
 });
 
 
@@ -2050,66 +2096,73 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
 
 const acceptSubmission = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const userId = req.user?._id;
+  const adminId = req.user?._id;
   const role = req.user?.role;
-  const hasAccess = req.user?.access
+  const hasAccess = req.user?.access;
 
-  // 1. Strict Authorization
-
-  if(!hasAccess){
-    throw new apiError(403, "Forbidden: Your account access is restricted.");
-  }
-  // Only Admins and Moderators can approve courses
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Forbidden: Only administrators or moderators can approve submissions.");
+  // 1. Authorization
+  if (!hasAccess || (role !== "admin" && role !== "moderator")) {
+    throw new apiError(403, "Forbidden: Insufficient permissions to approve courses.");
   }
 
   if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
     throw new apiError(400, "Valid Course ID is required.");
   }
 
-  // 2. The Approval Logic
-  // We only approve courses that are currently in 'pending' status
-  const query = { 
-    _id: courseId, 
-    status: "pending" 
-  };
+  // 2. START TRANSACTION
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const updateFields = {
-    status: "approved",
-    reviewedBy: userId,
-    // Reset feedback flags upon successful publication
-    isEditedSinceFeedback: false,
-    feedback: "" 
-  };
-
-  // 3. Atomic Update
-  const approvedCourse = await Course.findOneAndUpdate(
-    query,
-    { $set: updateFields },
-    { 
-      new: true, 
-      runValidators: true,
-      select: "title status reviewedBy" 
-    }
-  );
-
-  // 4. Handle Failure
-  if (!approvedCourse) {
-    throw new apiError(
-      404, 
-      "Approval failed: Course not found, or it is not currently in the 'pending' queue."
+  try {
+    // 3. Atomic Update of Course
+    // We select 'createdBy' so we know which User to update next
+    const approvedCourse = await Course.findOneAndUpdate(
+      { _id: courseId, status: "pending" },
+      { 
+        $set: {
+          status: "approved",
+          reviewedBy: adminId,
+          isEditedSinceFeedback: false,
+          feedback: "" 
+        } 
+      },
+      { new: true, session, select: "title status createdBy" }
     );
-  }
 
-  // 5. Success Response
-  res.status(200).json(
-    new apiResponse(
-      200, 
-      approvedCourse, 
-      `Course "${approvedCourse.title}" has been officially published.`
-    )
-  );
+    if (!approvedCourse) {
+      throw new apiError(404, "Course not found or is not in 'pending' status.");
+    }
+
+    // 4. Update User Profile
+    // Note: Since the course is now "Live", we usually keep it in 'myCourses' 
+    // but maybe move it from a 'pending' list if your schema has one.
+    const updatedUser = await User.findByIdAndUpdate(
+      approvedCourse.createdBy,
+      { 
+        // Example logic: incrementing a 'totalApproved' counter
+        $inc: { approvedCourseCount: 1 } 
+      },
+      { session, new: true }
+    );
+
+    if (!updatedUser) {
+      throw new apiError(404, "Creator of this course no longer exists.");
+    }
+
+    // 5. COMMIT
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(
+      new apiResponse(200, approvedCourse, `Course "${approvedCourse.title}" published.`)
+    );
+
+  } catch (error) {
+    // ROLLBACK
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 });
 
 
