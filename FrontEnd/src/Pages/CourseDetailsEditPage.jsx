@@ -263,92 +263,63 @@ const CourseDetailsEditPage = () => {
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         <header className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-            {/* basic Info */}
-            <div className="flex-1">
-              <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
-                {course.title
-                  ? course?.title?.charAt(0).toUpperCase() +
-                    course.title.slice(1)
-                  : ""}
-              </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">
-                {DepartmentMap[course.department]
-                  ? "Department of " + DepartmentMap[course.department]
-                  : "Unknown Department"}
-              </p>
-              <p
-                className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
-               selection:text-gray-600 dark:selection:text-gray-300 mb-6 uppercase"
-              >
-                {course.courseCode}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course.degree}
-                </div>
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+  {/* basic Info - Added min-w-0 to allow internal content to shrink/wrap */}
+  <div className="flex-1 min-w-0"> 
+    <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold break-words leading-tight">
+      {/* Added break-words to handle long titles */}
+      {course.title
+        ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1)
+        : ""}
+    </h1>
+    
+    <p className="text-lg text-slate-600 dark:text-slate-400 mb-2 ">
+      {/* Added truncate for department names */}
+      {DepartmentMap[course.department]
+        ? "Department of " + DepartmentMap[course.department]
+        : "Unknown Department"}
+    </p>
 
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course.type}
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course.format}
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course.credits} Credits
-                </div>
+    <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
+      selection:text-gray-600 dark:selection:text-gray-300 mb-6 uppercase break-all">
+      {/* Added break-all specifically for course codes (often no spaces) */}
+      {course.courseCode}
+    </p>
 
-                {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  Undergraduate
-                </div> */}
-
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  <SemesterDisplay code={11} />
-                </div>
-                {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  Mon/Wed 10:00 AM
-                </div> */}
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-              {
-                course.status === "draft" && (
-                   <button
-                className="flex w-full lg:w-auto  cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
-                onClick={handleUpdateInfo}
-              >
-                <span className="material-symbols-outlined ">
-                  <FiEdit2 size={20} />
-                </span>
-                Edit
-              </button>)
-              }
-            
-             
-              <UpdateCourseInfo />
-            </div>
+    <div className="flex flex-wrap gap-3">
+      {/* Map through items or list them with max-w-full to prevent badge overflow */}
+      {[course.degree, course.type, course.format].map((val, i) => (
+        val && (
+          <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize max-w-full">
+            <span className="truncate">{val}</span>
           </div>
+        )
+      ))}
+
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        {course.credits} Credits
+      </div>
+
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        <SemesterDisplay code={course.semester} />
+      </div>
+    </div>
+  </div>
+
+  {/* Actions - shrink-0 ensures buttons don't get squished by the title */}
+  <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+    {course.status === "draft" && (
+      <button
+        className="flex w-full lg:w-auto cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+        onClick={handleUpdateInfo}
+      >
+        <FiEdit2 size={20} />
+        Edit
+      </button>
+    )}
+    <UpdateCourseInfo />
+  </div>
+</div>
         </header>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-3 flex flex-col gap-8">

@@ -3,6 +3,7 @@ import { IoMdClose, IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from '../Hooks/PrivateApi';
 
 // Stable Wrapper outside to prevent re-mounting and focus loss while typing
 const ModalWrapper = ({ children, handleClose, loading }) => (
@@ -28,7 +29,7 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 
 const UpdateHandbook = () => {
   const [loading, setLoading] = useState(false);
-  const { course, handbookModal, setHandbookModal } = useCourse();
+  const { course, handbookModal, setHandbookModal, setCourse } = useCourse();
   
   const [handbook, setHandbook] = useState("");
 
@@ -59,13 +60,19 @@ const UpdateHandbook = () => {
   };
 
   const handleUpdate = async (e) => {
-    if (e) e.preventDefault();
-    if (!canUpdate) return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (!canUpdate || loading) return;
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setHandbookModal((prev) => ({ ...prev, status: "success" }));
+      const res = await PrivateApi.patch(`/update-course-handbook/${course._id}`, { handbook });
+      if (res.data.success) {
+        setCourse((prev) => ({
+          ...prev,
+          handbook: handbook 
+        }));
+        setHandbookModal((prev) => ({ ...prev, status: "success" }));
+      } 
     } catch (error) {
       setHandbookModal((prev) => ({ ...prev, status: "error" }));
     } finally {
@@ -117,7 +124,6 @@ const UpdateHandbook = () => {
                 />
               </label>
 
-              {/* RESERVED HEIGHT TO PREVENT MODAL SHIFTING */}
               <div className="h-5">
                 {!isUrlValid && handbook.length > 0 && (
                   <p className="text-xs text-orange-500 flex items-center gap-1.5 font-medium animate-in fade-in duration-200">
@@ -142,10 +148,10 @@ const UpdateHandbook = () => {
                   disabled={!canUpdate}
                 >
                   {loading ? (
-                    <>
+                    <div className="flex items-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Updating...
-                    </>
+                    </div>
                   ) : (
                     "Update"
                   )}
@@ -179,9 +185,9 @@ const UpdateHandbook = () => {
         </ModalWrapper>
       )}
 
-      {/* 3. ERROR MODE */}
+      {/* 3. ERROR MODE - Design and Loading Fixed */}
       {handbookModal.status === "error" && (
-        <ModalWrapper handleClose={handleClose} loading={false}>
+        <ModalWrapper handleClose={handleClose} loading={loading}>
           <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
               <BsExclamationCircleFill size={56} />
@@ -191,11 +197,28 @@ const UpdateHandbook = () => {
               <p className="text-xl text-text-secondary dark:text-gray-400">Please check your connection and try again.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-3 sm:gap-6">
-              <button onClick={handleClose} className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300">
+              <button 
+                disabled={loading}
+                onClick={handleClose} 
+                className="flex-1 cursor-pointer rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300 transition-colors disabled:opacity-50"
+              >
                 Cancel
               </button>
-              <button onClick={() => setHandbookModal({ ...handbookModal, status: 'update' })} className="flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2">
-                <MdRefresh size={24} /> Retry
+              <button 
+                disabled={loading}
+                onClick={() => handleUpdate()} 
+                className={`flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center transition-all min-h-[64px] ${loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:bg-orange-600"}`}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Retrying...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <MdRefresh size={28} /> <span>Retry</span>
+                  </div>
+                )}
               </button>
             </div>
           </div>

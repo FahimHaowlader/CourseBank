@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { IoMdClose, IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
+
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from '../Hooks/PrivateApi';
 
 // Stable Wrapper outside to prevent re-mounting and focus loss
 const ModalWrapper = ({ children, handleClose, loading }) => (
@@ -28,7 +30,7 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 
 const UpdateDescription = () => {
   const [loading, setLoading] = useState(false);
-  const { course, descriptionModal, setDescriptionModal } = useCourse();
+  const { course, descriptionModal, setDescriptionModal, setCourse } = useCourse();
   const [description, setDescription] = useState("");
 
   useEffect(() => {
@@ -46,14 +48,19 @@ const UpdateDescription = () => {
   };
 
   const handleUpdate = async (e) => {
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!isChanged || loading) return;
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Updated Description:", description);
-      setDescriptionModal((prev) => ({ ...prev, status: "success" }));
+      const res = await PrivateApi.patch(`/update-description/${course._id}`, { description });
+      if (res.data.success) {
+        setCourse((prev) => ({
+          ...prev,
+          description: description 
+        }));
+        setDescriptionModal((prev) => ({ ...prev, status: "success" }));
+      }
     } catch (error) {
       setDescriptionModal((prev) => ({ ...prev, status: "error" }));
     } finally {
@@ -98,7 +105,7 @@ const UpdateDescription = () => {
               <div className="px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:justify-end gap-3">
                 <button
                   disabled={loading}
-                  className="mt-3 w-full inline-flex justify-center rounded-lg border border-border-light dark:border-border-dark shadow-sm px-4 py-2 bg-white dark:bg-slate-800 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-3 cursor-pointer w-full inline-flex justify-center rounded-lg border border-border-light dark:border-border-dark shadow-sm px-4 py-2 bg-white dark:bg-slate-800 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   type="button"
                   onClick={handleClose}
                 >
@@ -110,10 +117,10 @@ const UpdateDescription = () => {
                   disabled={!isChanged || loading}
                 >
                   {loading ? (
-                    <>
+                    <div className="flex items-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Updating...
-                    </>
+                    </div>
                   ) : (
                     "Update"
                   )}
@@ -147,9 +154,9 @@ const UpdateDescription = () => {
         </ModalWrapper>
       )}
 
-      {/* 3. ERROR MODE */}
+      {/* 3. ERROR MODE - Fixed Retry Loading */}
       {descriptionModal.status === "error" && (
-        <ModalWrapper handleClose={handleClose} loading={false}>
+        <ModalWrapper handleClose={handleClose} loading={loading}>
           <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
               <BsExclamationCircleFill size={56} />
@@ -159,11 +166,28 @@ const UpdateDescription = () => {
               <p className="text-xl text-text-secondary dark:text-gray-400">Please check your connection and try again.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-3 sm:gap-6">
-              <button onClick={handleClose} className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300">
+              <button 
+                disabled={loading}
+                onClick={handleClose} 
+                className="flex-1 cursor-pointer rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Cancel
               </button>
-              <button onClick={handleUpdate} className="flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2">
-                <MdRefresh size={24} /> Retry
+              <button 
+                disabled={loading}
+                onClick={() => handleUpdate()} 
+                className={`flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2 transition-all min-h-[64px] ${loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:bg-orange-600 active:scale-[0.98]"}`}
+              >
+                {loading ? (
+                  <>
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <MdRefresh size={24} /> Retry
+                  </>
+                )}
               </button>
             </div>
           </div>

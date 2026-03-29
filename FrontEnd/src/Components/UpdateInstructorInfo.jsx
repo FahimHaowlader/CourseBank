@@ -4,6 +4,7 @@ import { MdOutlinePersonSearch, MdRefresh } from "react-icons/md";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
 import CustomDatePicker from './CustomDatePicker';
+import PrivateApi from '../Hooks/PrivateApi';
 import Department from './Department';
 import { useCourse } from '../Contexts/Course.Context';
 
@@ -20,11 +21,11 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 
 const UpdateInstructorInfo = () => {
   const [loading, setLoading] = useState(false);
-  const { instructorModal, setInstructorModal, course } = useCourse();
+  const { instructorModal, setInstructorModal, course, setCourse } = useCourse();
 
   const [data, setData] = useState({
     instructorName: "",
-    department: "",
+    instructorDepartment: "",
     startingDate: null,
   });
 
@@ -32,7 +33,7 @@ const UpdateInstructorInfo = () => {
     if (instructorModal.openModal && instructorModal.status === "update") {
       setData({
         instructorName: course?.instructorName || "",
-        department: course?.instructorDepartment || "",
+        instructorDepartment: course?.instructorDepartment || "",
         startingDate: course?.startingDate || null,
       });
     }
@@ -56,7 +57,7 @@ const UpdateInstructorInfo = () => {
 
   const isChanged = 
     data.instructorName !== (course?.instructorName || "") ||
-    data.department !== (course?.instructorDepartment || "") ||
+    data.instructorDepartment !== (course?.instructorDepartment || "") ||
     data.startingDate !== (course?.startingDate || null);
 
   const handleClose = () => {
@@ -67,11 +68,48 @@ const UpdateInstructorInfo = () => {
     if (e) e.preventDefault();
     if (!isChanged || loading || isDateInvalid) return;
 
+    const instructorChanged = 
+      data.instructorName !== (course?.instructorName || "") ||
+      data.instructorDepartment !== (course?.instructorDepartment || "");
+      
+    const dateChanged = 
+      data.startingDate !== (course?.startingDate || null);
+     
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const updatePromises = [];
+
+      if (instructorChanged) {
+        updatePromises.push(
+          PrivateApi.patch(`/update-instructor-info/${course._id}`, { 
+            instructor: {
+              instructorName: data.instructorName,
+              instructorDepartment: data.instructorDepartment,
+            }
+          })
+        );
+      }
+
+      if (dateChanged) {
+        updatePromises.push(
+          PrivateApi.patch(`/update-starting-date/${course._id}`, { 
+            startingDate: data.startingDate 
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
+
+      setCourse((prev) => ({
+        ...prev,
+        instructorName: data.instructorName,
+        instructorDepartment: data.instructorDepartment,
+        startingDate: data.startingDate
+      }));
+
       setInstructorModal((prev) => ({ ...prev, status: "success" }));
     } catch (error) {
+      console.error("Update error:", error);
       setInstructorModal((prev) => ({ ...prev, status: "error" }));
     } finally {
       setLoading(false);
@@ -82,6 +120,7 @@ const UpdateInstructorInfo = () => {
 
   return (
     <>
+      {/* 1. EDIT MODE */}
       {instructorModal.status === "update" && (
         <ModalWrapper handleClose={handleClose} loading={loading}>
           <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-slate-100 dark:border-slate-700 rounded-t-2xl">
@@ -121,8 +160,8 @@ const UpdateInstructorInfo = () => {
             
             <div className="w-full">
               <Department 
-                value={data.department} 
-                onChange={(e) => setData({ ...data, department: e.target.value })} 
+                value={data.instructorDepartment} 
+                onChange={(e) => setData({ ...data, instructorDepartment: e.target.value })} 
               />
             </div>
 
@@ -132,7 +171,6 @@ const UpdateInstructorInfo = () => {
                 selectedDate={data.startingDate}
                 onChange={(date) => setData({ ...data, startingDate: date })}
               />
-              {/* RESERVED SPACE FOR ERROR MESSAGE TO PREVENT SHIFT */}
               <div className="h-6 mt-1 overflow-hidden">
                 {isDateInvalid && (
                   <p className="text-xs text-orange-500 flex items-center gap-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
@@ -166,7 +204,7 @@ const UpdateInstructorInfo = () => {
         </ModalWrapper>
       )}
 
-      {/* Success Modal stays as is */}
+      {/* 2. SUCCESS MODE */}
       {instructorModal.status === "success" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
@@ -185,6 +223,49 @@ const UpdateInstructorInfo = () => {
                 onClick={handleClose}>
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. ERROR MODE */}
+      {instructorModal.status === "error" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
+          <div className="relative w-full max-w-2xl transform overflow-hidden rounded-3xl bg-white dark:bg-slate-800 p-10 sm:p-14 text-left shadow-2xl transition-all border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-col items-center gap-8 text-center">
+              <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+                <BsExclamationCircleFill size={56} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-4xl font-bold text-slate-900 dark:text-white">Update Failed</h3>
+                <p className="text-xl text-slate-500 dark:text-gray-400">Please check your connection and try again.</p>
+              </div>
+              <div className="flex flex-col sm:flex-row w-full gap-3 sm:gap-6">
+                <button 
+                  onClick={handleClose} 
+                  disabled={loading}
+                  className="flex-1 cursor-pointer rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-4 text-xl font-semibold text-slate-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleUpdate} 
+                  disabled={loading}
+                  className={`flex-1 cursor-pointer rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2 transition-all ${loading ? "opacity-80 cursor-not-allowed" : "hover:bg-orange-600"}`}
+                >
+                  {loading ? (
+                    <>
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      Retrying...
+                    </>
+                  ) : (
+                    <>
+                      <MdRefresh size={24} /> Retry
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

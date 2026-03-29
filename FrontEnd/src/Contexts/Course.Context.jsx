@@ -91,6 +91,7 @@ export const CourseProvider = ({ children }) => {
     <CourseContext.Provider 
       value={{ 
         course, 
+        setCourse,
         isLoading, 
         setIsLoading,
         addCourse, 

@@ -69,55 +69,50 @@ const CourseDetailsPage = () => {
         <header className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             
-            <div className="flex-1">
-          <h1 className="text-3xl sm:text-4xl mb-2 text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-extrabold 
-               selection:text-gray-600 dark:selection:text-gray-300 ">
-                  {course.title ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1) : ""}
-              </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-1 ">
-               {DepartmentMap[course.department] ? "Department of " + DepartmentMap[course.department] : "Unknown Department"}
-              </p>
-              <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
-               selection:text-gray-600 dark:selection:text-gray-300 mb-6" >{course.courseCode}</p>
-              
-              
-              <div className="flex flex-wrap gap-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                   {course?.degree ? course?.degree?.charAt(0).toUpperCase() + course.degree.slice(1) : ""}
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course?.type ? course?.type?.charAt(0).toUpperCase() + course.type.slice(1) : "" }
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course?.format ? course.format : ""}
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {course.credits} Credits
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  {/* <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span> */}
-                  {/* <SemesterDisplay code={course.semester} /> */}
-                  <SemesterDisplay code={course.semester} />
-                </div>
-              </div>
-            </div>
+           <div className="flex-1 min-w-0"> 
+    <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold break-words leading-tight">
+      {/* Added break-words to handle long titles */}
+      {course.title
+        ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1)
+        : ""}
+    </h1>
+    
+    <p className="text-lg text-slate-600 dark:text-slate-400 mb-2 ">
+      {/* Added truncate for department names */}
+      {DepartmentMap[course.department]
+        ? "Department of " + DepartmentMap[course.department]
+        : "Unknown Department"}
+    </p>
+
+    <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
+      selection:text-gray-600 dark:selection:text-gray-300 mb-6 uppercase break-all">
+      {/* Added break-all specifically for course codes (often no spaces) */}
+      {course.courseCode}
+    </p>
+
+    <div className="flex flex-wrap gap-3">
+      {/* Map through items or list them with max-w-full to prevent badge overflow */}
+      {[course.degree, course.type, course.format].map((val, i) => (
+        val && (
+          <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize max-w-full">
+            <span className="truncate">{val}</span>
+          </div>
+        )
+      ))}
+
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        {course.credits} Credits
+      </div>
+
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        <SemesterDisplay code={course.semester} />
+      </div>
+    </div>
+  </div>
+            
 
             <div className="flex items-center gap-3 shrink-0">
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+              <button className="flex w-full lg:w-auto justify-center cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
                 <span className="material-symbols-outlined text-lg">
                   <GrShareOption />
                 </span>
@@ -172,7 +167,7 @@ const CourseDetailsPage = () => {
                 </p>
               </div>
             </section>
-            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-xl p-6 flex flex-col lg:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-800 flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-primary dark:text-teal-300 text-2xl">
@@ -190,7 +185,7 @@ const CourseDetailsPage = () => {
               </div>
               {
                 course.handbook ? (
-                  <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+                  <button className="flex w-full lg:w-auto justify-center cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
                 <span className="material-symbols-outlined text-lg">
                   <MdOutlineFileDownload size={26} />
                 </span>
