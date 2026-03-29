@@ -261,10 +261,6 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
   // console.log("Filter:", filter);
   const courses = await Course.find(filter);
 
-  if(!courses){
-    throw new apiError(404,"there was no courses")
-  }
-
   res.status(200).json(
    new apiResponse(200, courses, "Courses fetched successfully")
   );
@@ -2118,4 +2114,5 @@ const acceptSubmission = asyncHandler(async (req, res) => {
 
 
 
-export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook };
+export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook,updateBasicInfo,
+updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview, cancelCourseSubmission, acceptSubmission };

@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook } from "./controllers/course.controller.js";
+import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook,updateBasicInfo,
+updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
 
 
 import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
@@ -34,37 +35,45 @@ router.route('/users-all-course').post(userCourseSearch);
 router.route('/course-details/:courseId').get(fullCourseDetails);
 
 
-{/** moderators route */} 
+{/** contributors route */} 
 
 router.use(verifyJwt) ; // all routes below this line require authentication
 
-router.route('/courses-by-creator/:creatorId').get(getCourseByCreatorId);5
+router.route('/courses-by-creator/:creatorId').get(getCourseByCreatorId);
 
 router.route('/course-details-for-edit/:courseId').get(fullCourseDetailsForEdit);
 
 router.route('/create-course').post(createCourse);
 
-router.route('/update-course-info/:courseId').patch(updateCourseInfo);
+// router.route('/update-course-info/:courseId').patch(updateCourseInfo);
 
-router.route('/update-course-materials/:courseId').patch(updateCourseMaterials);
+router.route('/update-basic-info/:courseId').patch(updateBasicInfo);
+
+router.route('/update-description/:courseId').patch(updateDescription);
+
+router.route('/update-instructor-info/:courseId').patch(updateInstructorInfo);
+
+router.route('/update-starting-date/:courseId').patch(updateStartingDate);
+
+// router.route('/update-course-materials/:courseId').patch(updateCourseMaterials);
 
 router.route('/add-new-material/:courseId').patch(addNewMaterial);
 
 router.route('/delete-material/:courseId').patch(deleteMaterial);
 
-router.route('/update-course-tasks/:courseId').patch(updateCourseTasks);
+// router.route('/update-course-tasks/:courseId').patch(updateCourseTasks);
 
 router.route('/add-new-task/:courseId').patch(addNewTask);
 
 router.route('/delete-task/:courseId').patch(deleteTask);
 
-router.route('/update-course-assessments/:courseId').patch(updateCourseAssessments);
+// router.route('/update-course-assessments/:courseId').patch(updateCourseAssessments);
 
 router.route('/add-new-assessment/:courseId').patch(addNewAssessment);
 
 router.route('/delete-assessment/:courseId').patch(deleteAssessment);
 
-router.route('/update-suggested-books/:courseId').patch(updateSuggestedBooks);
+// router.route('/update-suggested-books/:courseId').patch(updateSuggestedBooks);
 
 router.route('/add-new-suggested-book/:courseId').patch(addNewSuggestedBook);
 
@@ -73,6 +82,12 @@ router.route('/delete-suggested-book/:courseId').patch(deleteSuggestedBook);
 router.route('/update-course-handbook/:courseId').patch(updateCourseHandbook);
 
 // router.route('/delete-course-handbook/:courseId').delete(deleteCourseHandbook);
+
+router.route('/submit-course-for-review/:courseId').post(submitCourseForReview);
+
+router.route('/cancel-course-submission/:courseId').post(cancelCourseSubmission);
+
+router.route('/accept-course-submission/:courseId').post(acceptSubmission);
 
 router.route('/delete-course/:courseId').delete(deleteCourse);
 
