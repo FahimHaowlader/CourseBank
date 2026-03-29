@@ -38,6 +38,7 @@ import AddFirstElement from "../Components/AddFirstElement";
 import NoElement from "../Components/NoElement";
 import { useAuth } from "../Contexts/Auth.Context";
 import ElementDeleteConfirmation from "../Components/ElementDeleteConformation";
+import PrivateApi from "../Hooks/PrivateApi";
 
 const CourseDetailsEditPage = () => {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ const CourseDetailsEditPage = () => {
   const from = "/my-courses"; // Default to my courses page if no previous path
   const {
     course,
+    setCourse,
     isLoading,
     addCourse,
     infoModal,
@@ -117,6 +119,7 @@ const CourseDetailsEditPage = () => {
 
   const cancelDeleteCourse = () => {
     setModal({openModal: false, status:''})
+
   };
 
   const AppleSpinner = () => (
@@ -200,6 +203,11 @@ const CourseDetailsEditPage = () => {
       
       // // FIXED: Refresh user context so user.status becomes 'active' again
       // if (refreshUser) await refreshUser();
+      // console.log("Cancelling course submission with ID:", course._id);
+      const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`);
+        if(res.data.success){
+          setCourse(prev => ({ ...prev, status: "draft" }));
+        }
 
       setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
     } catch (error) {
@@ -232,21 +240,38 @@ const CourseDetailsEditPage = () => {
       // throw new Error("Testing delete error handling"); // <-- Temporary line to test error modal
       // await PrivateApi.delete(`/delete-course/${courseId}`);
       // setCourses((prevCourses) => prevCourses.filter((course) => course._id !== courseId));
-      setModal((prev) => ({ ...prev, status: "success" }));
+      const res = await PrivateApi.delete(`/delete-course/${courseId}`);
+        
+
+      setModal((prev) => ({ ...prev, status: "success" })); 
     } catch (error) {
       setModal((prev) => ({ ...prev, status: "error" }));
-      console.error(`Error deleting course:`, error);
+      // console.error(`Error deleting course:`, error);
     }
   };
-
+const successfulDeleteAcknowledgement = () => {
+  setModal({openModal: false, status: ''});
+  navigate(from, {
+    replace: true,
+    state: {
+      message: "Course deleted successfully",
+    },
+  });
+}
   const handleFinalSubmit = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
+      // console.log("Submitting course for review with ID:", course._id);
       // Replace with your actual submission endpoint
       // await PrivateApi.post(`/submit-all-courses`);
 
       // Simulate network delay
       // throw new Error("Simulated submission error"); // Uncomment to test error handling
+      const res = await PrivateApi.post(`/submit-course-for-review/${course._id}`);
+      
+       if(res.data.success){
+          setCourse(prev => ({ ...prev, status: "pending" }));
+       }
 
       setSubmitModal({
         openModal: true,
@@ -1062,7 +1087,7 @@ const CourseDetailsEditPage = () => {
         </div>
         <button 
           className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-lg font-semibold hover:bg-primary-hover shadow-sm transition-all active:scale-[0.98] cursor-pointer" 
-          onClick={cancelDeleteCourse}
+          onClick={successfulDeleteAcknowledgement}
         >
           Done
         </button>
