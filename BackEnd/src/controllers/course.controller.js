@@ -915,6 +915,7 @@ const addNewMaterial = asyncHandler(async (req, res) => {
 
 const deleteMaterial = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
+
   const { materialId } = req.body; // Expecting { "materialId": "..." }
   const userId = req.user?._id;
   const role = req.user?.role;
@@ -1284,7 +1285,7 @@ const addNewAssessment = asyncHandler(async (req, res) => {
     throw new apiError(400, "A valid assessment object is required");
   }
 
-  if( !assessment.title || !assessment.date || !assessment.type || !assessment.id) {
+  if( !assessment.mark || !assessment.date || !assessment.type || !assessment.id || !assessment.fileUrl){ 
     throw new apiError(400, "Assessment title, date, type, and ID are required");
   }
 
@@ -1525,7 +1526,7 @@ const addNewSuggestedBook = asyncHandler(async (req, res) => {
 
   // Get the newly added book (last item in the array)
   const newlyAddedBook = updatedCourse.books[updatedCourse.books.length - 1];
-
+ 
   res.status(200).json(
     new apiResponse(
       200,
@@ -1826,10 +1827,10 @@ const deleteCourse = asyncHandler(async (req, res) => {
 
   const query = { _id: courseId };
   
-  // Non-admins can only delete their own DRAFTS created within the last year
   if (!isAdmin) {
     query.createdBy = userId;
-    query.status = "pending"; // Assuming 'pending' or 'draft' is the correct status
+    // Use $in to check for multiple possible statuses
+    query.status = { $in: ["pending", "draft"] }; 
     query.createdAt = { $gt: oneYearAgo };
   }
 
@@ -2015,7 +2016,7 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
 
 const cancelCourseSubmission = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const { feedback } = req.body; // Optional feedback message when canceling
+  const { feedback } = req.body || {};  // Optional feedback message when canceling
   const userId = req.user?._id;
   const role = req.user?.role;
   const hasAccess = req.user?.access === true;

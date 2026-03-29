@@ -75,6 +75,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["active", "pending", "approved"],
       default: "active",
+      select: true,
     },
     submittedAt: {
       type: Date,

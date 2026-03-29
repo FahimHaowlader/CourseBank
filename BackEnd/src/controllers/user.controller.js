@@ -304,39 +304,64 @@ const requestForSubmitAccount = asyncHandler(async (req, res) => {
 
 const cancelAccountSubmission = asyncHandler(async (req, res) => {
   const requester = req.user;
-  let userId;
-  if(requester.role === 'admin' || requester.role === 'moderator') {
-    userId = req.body.userId; // Staff must provide target userId in body
-  }
+  const { feedback, userId } = req.body || {};
+  const hasAccess = requester?.access === true;
 
-  // 1. Identity Guard
+  
+  const isStaff = ["admin", "moderator"].includes(requester.role);
+  const targetUserId = isStaff ? userId : requester._id;
+  const isTargetingSelf = targetUserId?.toString() === requester?._id?.toString();
+
   if (!requester?._id) {
     throw new apiError(401, "Authentication required");
   }
+  
+  if (requester.status !== 'pending') {
+    throw new apiError(400, "Your account is not currently pending submission.");
+  }
+  if (!hasAccess) {
+     throw new apiError(403, "Your account access is restricted.");
+  }
 
-  const isStaff = ["admin", "moderator"].includes(requester.role);
+   if(isStaff && !isTargetingSelf && !hasAccess) {
+     throw new apiError(403, "Forbidden: You do not have active access to manage other users.");
+   }
 
-  // 2. Resolve Target ID (Logic: Contributor is locked to self; Staff can use body)
-  const targetUserId = (isStaff && userId) ? userId : requester._id;
-  const isTargetingSelf = targetUserId.toString() === requester._id.toString();
+   if(isStaff && !isTargetingSelf && !feedback) {
+     throw new apiError(400, "Feedback is required when canceling another user's submission.");
+   }
 
-  // 3. Permission Guard
-  // Contributors must be 'pending' to cancel their own.
+   if(requester.role === 'contributor' && requester.status !== 'pending') {
+     throw new apiError(400, "Your account is not currently pending submission.");
+   }
+  // 1. Staff Validation: Feedback, Target ID, and Access check
+  // if (isStaff) {
+  //   // Staff must provide feedback
+  //   if (!feedback || feedback.trim().length === 0) {
+  //     throw new apiError(400, "Feedback is required for staff actions.");
+  //   }
+    
+  //   // Staff must provide a target User ID
+  //   if (!userId) {
+  //     throw new apiError(400, "Target userId is required.");
+  //   }
+
+  //   // CRITICAL: Staff MUST have 'access: true' to cancel someone else's submission
+  //   if (!isTargetingSelf && requester.access !== true) {
+  //     throw new apiError(403, "Forbidden: You do not have active access to manage other users.");
+  //   }
+  // }
+
+  // 2. Contributor Guard
   if (requester.role === 'contributor' && requester.status !== 'pending') {
-    throw new apiError(400, "Your account is not currently pending submission");
+    throw new apiError(400, "Your account is not currently pending submission.");
   }
 
-  // Staff canceling SOMEONE ELSE'S request need 'access: true'
-  if (!isTargetingSelf && isStaff && requester.access !== true) {
-    throw new apiError(403, "Staff members require active access to manage other users");
-  }
-
-  // 4. Atomic Update
-  // We use $unset to remove the submittedAt field entirely
+  // 3. Atomic Update
   const updatedUser = await User.findOneAndUpdate(
     { 
       _id: targetUserId, 
-      status: 'pending' // Ensures the TARGET is actually pending
+      status: 'pending' 
     },
     { 
       $set: { 
@@ -350,9 +375,8 @@ const cancelAccountSubmission = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  // 5. Result Validation
   if (!updatedUser) {
-    throw new apiError(400, "Operation failed: Target user not found or not in 'pending' state");
+    throw new apiError(404, "User not found or not in 'pending' state.");
   }
 
   res.status(200).json(
