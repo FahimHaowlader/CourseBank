@@ -6,6 +6,7 @@ import { MdRefresh } from "react-icons/md";
 
 import CustomDatePicker from "./CustomDatePicker";
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from "../Hooks/PrivateApi";
 
 const ModalWrapper = ({ children, handleClose, loading }) => (
   <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog">
@@ -20,7 +21,7 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 );
 
 const AddAssessment = () => {
-  const { assessmentModal, setAssessmentModal, course } = useCourse();
+  const { assessmentModal, setAssessmentModal, course ,setCourse} = useCourse();
   const [loading, setLoading] = useState(false);
 
   // Full list of required options
@@ -50,7 +51,7 @@ const AddAssessment = () => {
     type: availableOptions[0]?.value || "project",
     mark: "",
     date: getToday(),
-    link: ""
+    fileUrl: ""
   });
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const AddAssessment = () => {
         type: availableOptions[0]?.value || "project",
         mark: "",
         date: getToday(),
-        link: ""
+        fileUrl: ""
       });
     }
   }, [assessmentModal.openModal, assessmentModal.status]);
@@ -77,7 +78,7 @@ const AddAssessment = () => {
     return selected < start;
   };
 
-  const urlOk = isUrlValid(formData.link);
+  const urlOk = isUrlValid(formData.fileUrl);
   const dateOk = !isDateInvalid();
   const canUpdate = urlOk && dateOk && formData.mark !== "" && formData.date !== null && !loading;
 
@@ -87,6 +88,16 @@ const AddAssessment = () => {
     setLoading(true);
     try {
       await new Promise(r => setTimeout(r, 1500));
+      const res = await PrivateApi.patch(`/add-new-assessment/${course._id}`, { assessment: {
+        type: formData.type,
+        mark: formData.mark,
+        date: formData.date,
+        fileUrl: formData.fileUrl,
+        id: Date.now() // Temporary ID generation, replace with backend-generated ID if available
+      }});
+      if(res.data.success) {
+        setCourse(prev => ({ ...prev, assessments: [...prev.assessments, res?.data?.data?.newAssessment] }));
+      }
       setAssessmentModal({ openModal: true, status: "success" });
     } catch (err) {
       setAssessmentModal({ openModal: true, status: "error" });
@@ -159,9 +170,9 @@ const AddAssessment = () => {
                   <input 
                     type="text" 
                     placeholder="https://drive.google.com/..."
-                    className={`w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-slate-900 border outline-none text-sm text-slate-900 dark:text-white transition-all ${!urlOk && formData.link ? 'border-orange-500 focus:border-orange-600' : 'border-slate-200 dark:border-slate-700 focus:border-teal-500'}`}
-                    value={formData.link}
-                    onChange={(e) => setFormData({...formData, link: e.target.value})}
+                    className={`w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-slate-900 border outline-none text-sm text-slate-900 dark:text-white transition-all ${!urlOk && formData.fileUrl ? 'border-orange-500 focus:border-orange-600' : 'border-slate-200 dark:border-slate-700 focus:border-teal-500'}`}
+                    value={formData.fileUrl}
+                    onChange={(e) => setFormData({...formData, fileUrl: e.target.value})}
                   />
                 </div>
               </div>
@@ -201,21 +212,34 @@ const AddAssessment = () => {
       )}
 
       {assessmentModal.status === "error" && (
-        <ModalWrapper handleClose={handleClose} loading={false}>
-          <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
-            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 text-orange-500">
-              <BsExclamationCircleFill size={56} />
-            </div>
-            <h3 className="text-4xl font-bold text-slate-900 dark:text-white">Addition Failed</h3>
-            <div className="flex flex-col sm:flex-row w-full gap-3">
-              <button onClick={handleClose} className="flex-1 rounded-xl border border-slate-200 py-4 text-xl font-semibold text-slate-700 cursor-pointer">Cancel</button>
-              <button onClick={() => setAssessmentModal({...assessmentModal, status: 'update'})} className="flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-600">
-                <MdRefresh size={24} /> Retry
-              </button>
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
+  <ModalWrapper handleClose={handleClose} loading={false}>
+    <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
+      <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 text-orange-500">
+        <BsExclamationCircleFill size={56} />
+      </div>
+      <div className="space-y-4">
+        <h3 className="text-4xl font-bold text-slate-900 dark:text-white">Addition Failed</h3>
+        <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
+         Something went wrong while adding this assessment . Please try again.
+        </p>
+      </div>
+      <div className="flex flex-col sm:flex-row w-full gap-3">
+        <button 
+          onClick={handleClose} 
+          className="flex-1 rounded-xl border border-slate-200 py-4 text-xl font-semibold text-slate-700 cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button 
+          onClick={() => setAssessmentModal({...assessmentModal, status: 'update'})} 
+          className="flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-600 transition-all active:scale-95"
+        >
+          <MdRefresh size={24} /> Retry
+        </button>
+      </div>
+    </div>
+  </ModalWrapper>
+)}
     </>
   );
 };

@@ -490,7 +490,8 @@ const CourseDetailsEditPage = () => {
                             </h4>
                           </div>
                         </div>
-                        <button
+                        {
+                          course.status === "draft" && (<button
                           className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -499,14 +500,16 @@ const CourseDetailsEditPage = () => {
                               status: "delete",   
                             });
                             setDeleteItem({
-                              id: material.id,
+                              _id: material._id,
                               from: "materials",
                               name: material.name,
                             });
                           }}
                            >
                           <MdDeleteOutline size={26} />
-                        </button>
+                        </button>)
+                        }
+                        
                       </div>
                     ))}
                     {course.status === "draft" && (
@@ -572,7 +575,8 @@ const CourseDetailsEditPage = () => {
                             </p>
                           </div>
                         </div>
-                        <button
+                        {
+                          course.status === "draft" && (   <button
                           className="text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 ml-2"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -581,14 +585,16 @@ const CourseDetailsEditPage = () => {
                               status: "delete",   
                             });
                             setDeleteItem({
-                              id: book.id,
+                              _id: book._id,
                               from: "books",
                               name: book.title,
                             });
                           }}
                         >
                           <MdDeleteOutline size={26} />
-                        </button>
+                        </button>)
+                        }
+                      
                       </div>
                     ))}
                     {
@@ -638,7 +644,8 @@ const CourseDetailsEditPage = () => {
                               </h4>
                             </div>
                           </div>
-                          <button
+                          {
+                            course.status === "draft" && ( <button
                             className="text-slate-400 cursor-pointer hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
                              onClick={(e) => {
                             e.stopPropagation();
@@ -647,14 +654,16 @@ const CourseDetailsEditPage = () => {
                               status: "delete",   
                             });
                             setDeleteItem({
-                              id: task.id,
+                              _id: task._id,
                               from: "tasks",
                               name: task.name,
                             });
                           }}
                         >
                             <MdDeleteOutline size={26} />
-                          </button>
+                          </button>)
+                          }
+                         
                         </div>
                       ))}
                       {
@@ -742,7 +751,8 @@ const CourseDetailsEditPage = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                {
+                                  course.status === "draft" && (<button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
                                    onClick={(e) => {
                             e.stopPropagation();
                             setDeleteModal({
@@ -750,14 +760,16 @@ const CourseDetailsEditPage = () => {
                               status: "delete",   
                             });
                             setDeleteItem({
-                              id: assessment.id,
+                              _id: assessment._id,
                               from: "assessments",
                               name: assessment.type,
                             });
                           }}
                         >
                                   <MdDeleteOutline size={26} />
-                                </button>
+                                </button> )
+                                }
+                                
                               </div>
                             ))}
                             {
@@ -833,7 +845,8 @@ const CourseDetailsEditPage = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                {
+                                  course.status === "draft" && (<button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
                                         onClick={(e) => {
                             e.stopPropagation();
                             setDeleteModal({
@@ -841,26 +854,28 @@ const CourseDetailsEditPage = () => {
                               status: "delete",   
                             });
                             setDeleteItem({
-                              id: assessment.id,
+                              _id: assessment._id,
                               from: "assessments",
                               name: assessment.type,
                             });
                           }}
                         >
                                   <MdDeleteOutline size={26} />
-                                </button>
+                                </button>)
+                                }
+                                
                               </div>
                             ))}
-                        </div>
                         {
                           course.status === "draft" && (
-                             <div
-                          onClick={handleUpdateAssessment}
-                          className="cursor-pointer"
-                        >
+                            <div
+                            onClick={handleUpdateAssessment}
+                            className="cursor-pointer"
+                            >
                           <AddElement />
                         </div> )}
                        
+                          </div>
                       </div>
                     ) : (
                       <div>
@@ -1148,7 +1163,7 @@ const CourseDetailsEditPage = () => {
 
                 <div className="w-full mt-8">
                   <button
-                    className="w-full rounded-xl bg-amber-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-amber-600 transition-colors cursor-pointer"
+                    className="w-full rounded-xl bg-amber-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-amber-600 hover:cursor-pointer transition-colors cursor-pointer"
                     onClick={closeModal}
                   >
                     Got it, I'll fix it
@@ -1211,6 +1226,52 @@ const CourseDetailsEditPage = () => {
   </div>
 )}
 
+{submitModal.openModal && submitModal.status === "submit-error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    {/* Backdrop */}
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    
+    {/* Modal Card */}
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all animate-in fade-in zoom-in duration-300">
+      <div className="flex flex-col items-center gap-8">
+        
+        {/* Error Icon Circle */}
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+
+        {/* Text Content */}
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">
+            Submission Failed
+          </h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
+            We couldn't process your course request. Please check your connection or schedule for conflicts and try again.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row w-full gap-4 mt-8">
+          <button 
+            className="w-full py-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
+            onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+          >
+            Cancel
+          </button>
+          
+          <button 
+            className="w-full py-4 rounded-xl bg-orange-500 text-white text-xl font-semibold hover:bg-orange-600 shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+            onClick={() => setSubmitModal(prev => ({ ...prev, status: "submit", loading: false }))}
+          >
+            <MdRefresh size={28} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 {/* --- 3. CANCEL CONFIRMATION MODAL --- */}
 {submitModal.openModal && submitModal.status === "cancel" && (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
@@ -1262,7 +1323,44 @@ const CourseDetailsEditPage = () => {
   </div>
 )}
 
+{submitModal.openModal && submitModal.status === "cancel-error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        {/* Error Icon Container */}
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        
+        {/* Text Content */}
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Cancellation Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
+            We encountered an error while trying to withdraw your request. Your account is still under review. Please try again later.
+          </p>
+        </div>
 
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row w-full gap-4 mt-8">
+          <button 
+            className="w-full py-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
+            onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+          >
+            Close
+          </button>
+          <button 
+            className="w-full py-4 rounded-xl bg-orange-500 text-white text-xl font-semibold hover:bg-orange-600 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+            onClick={() => setSubmitModal(prev => ({ ...prev, status: "cancel", loading: false }))}
+          >
+            <MdRefresh size={28} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
 
 

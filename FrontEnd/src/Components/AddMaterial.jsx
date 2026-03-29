@@ -5,6 +5,7 @@ import { LuLink } from "react-icons/lu";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from "../Hooks/PrivateApi";
 
 // --- MOVE THIS OUTSIDE THE MAIN COMPONENT TO PREVENT FOCUS LOSS ---
 const ModalWrapper = ({ children, handleClose, loading }) => (
@@ -23,17 +24,17 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 );
 
 const AddMaterial = () => {
-  const { materialModal, setMaterialModal } = useCourse();
+  const { materialModal, setMaterialModal,course,setCourse } = useCourse();
   const [loading, setLoading] = useState(false);
   
   const [data, setData] = useState({
     name: "",
-    link: ""
+    fileUrl: ""
   });
 
   useEffect(() => {
     if (materialModal.openModal && materialModal.status === "update") {
-      setData({ name: "", link: "" });
+      setData({ name: "", fileUrl: "" });
     }
   }, [materialModal.openModal]);
 
@@ -47,8 +48,8 @@ const AddMaterial = () => {
     }
   };
 
-  const isUrlValid = isValidGoogleUrl(data.link);
-  const isChanged = data.name.trim().length > 0 && data.link.trim().length > 0;
+  const isUrlValid = isValidGoogleUrl(data.fileUrl);
+  const isChanged = data.name.trim().length > 0 && data.fileUrl.trim().length > 0;
   const canUpdate = isChanged && !loading && isUrlValid;
 
   const handleClose = () => {
@@ -61,7 +62,17 @@ const AddMaterial = () => {
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // await new Promise((resolve) => setTimeout(resolve, 1500));
+      const res = await PrivateApi.patch(`/add-new-material/${course?._id}`, {material : {
+        name: data.name,
+        fileUrl: data.fileUrl,
+        id: Date.now()
+      }});
+      if (res.data.success) {
+        setCourse(prev => ({...prev, 
+          materials: [...(prev?.materials || []), res?.data?.data?.newMaterial || {}] 
+        }));
+      } 
       setMaterialModal({ openModal: true, status: "success" });
     } catch (error) {
       setMaterialModal({ openModal: true, status: "error" });
@@ -113,11 +124,11 @@ const AddMaterial = () => {
                   <span className="absolute left-3 text-text-secondary"><LuLink size={20} /></span>
                   <input 
                     type="text" 
-                    value={data.link}
-                    onChange={(e) => setData({ ...data, link: e.target.value })}
+                    value={data.fileUrl}
+                    onChange={(e) => setData({ ...data, fileUrl: e.target.value })}
                     placeholder="https://google.com/..." 
                     className={`w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border ${
-                      !isUrlValid && data.link.length > 0 
+                      !isUrlValid && data.fileUrl.length > 0 
                       ? "border-orange-500 focus:border-orange-600" 
                       : "border-border-light dark:border-border-dark focus:border-primary"
                     } focus:outline-none text-sm text-text-main dark:text-white transition-all`}
@@ -127,7 +138,7 @@ const AddMaterial = () => {
 
                 {/* --- NO SHIFT ERROR CONTAINER --- */}
                 <div className="h-5 mt-1">
-                    {!isUrlValid && data.link.length > 0 && (
+                    {!isUrlValid && data.fileUrl.length > 0 && (
                         <p className="text-xs text-orange-500 flex items-center gap-1.5 font-medium">
                         <BsExclamationCircleFill size={14} />
                         Please provide a valid Google URL.

@@ -310,14 +310,14 @@ const ContributorCoursePage = () => {
         <div className="flex w-full gap-6 mt-8">
           <button 
             disabled={modal.status === "loading"} 
-            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors" 
+            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer" 
             onClick={cancelDeleteCourse}
           >
             Cancel
           </button>
           <button 
             disabled={modal.status === "loading"} 
-            className="flex-1 py-4 rounded-xl bg-red-500 text-white text-lg font-semibold hover:bg-red-600 disabled:bg-red-400 shadow-sm flex justify-center items-center transition-all active:scale-95" 
+            className="flex-1 py-4 rounded-xl bg-red-500 text-white text-lg font-semibold hover:bg-red-600 disabled:bg-red-400 shadow-sm flex justify-center items-center transition-all active:scale-95 cursor-pointer" 
             onClick={() => handleDeleteCourse(modal.id)}
           >
             {modal.status === "loading" ? (
@@ -349,7 +349,7 @@ const ContributorCoursePage = () => {
         </p>
       </div>
       <button 
-        className="w-full py-4 rounded-xl bg-emerald-600 text-white text-lg font-semibold hover:bg-emerald-700 shadow-sm transition-all active:scale-[0.98]" 
+        className="w-full py-4 rounded-xl bg-emerald-600 text-white text-lg font-semibold hover:bg-emerald-700 shadow-sm transition-all active:scale-[0.98] cursor-pointer" 
         onClick={cancelDeleteCourse}
       >
         Done
@@ -374,13 +374,13 @@ const ContributorCoursePage = () => {
       </div>
       <div className="flex w-full gap-6 mt-8">
         <button 
-          className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors" 
+          className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
           onClick={cancelDeleteCourse}
         >
           Cancel
         </button>
         <button 
-          className="flex-1 py-4 rounded-xl bg-orange-500 text-white text-lg font-semibold hover:bg-orange-600 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95" 
+          className="flex-1 py-4 rounded-xl bg-orange-500 text-white text-lg font-semibold hover:bg-orange-600 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer" 
           onClick={() => retryDeleteCourse(modal.id)}
         >
           <MdRefresh size={24} /> Retry
@@ -435,7 +435,7 @@ const ContributorCoursePage = () => {
           </div>
 
           <button
-            className="w-full rounded-xl bg-amber-500 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-amber-600 transition-all active:scale-95"
+            className="w-full rounded-xl cursor-pointer bg-amber-500 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-amber-600 transition-all active:scale-95"
             onClick={closeModal}
           >
             Got it, I'll fix it
@@ -462,14 +462,14 @@ const ContributorCoursePage = () => {
           <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
             <button
               disabled={submitModal.loading}
-              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 cursor-pointer transition-colors"
               onClick={closeModal}
             >
               Not Now
             </button>
             <button
               disabled={submitModal.loading}
-              className="w-full rounded-xl bg-emerald-600 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 flex justify-center items-center"
+              className="w-full rounded-xl bg-emerald-600 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 flex justify-center items-center cursor-pointer"
               onClick={handleFinalSubmit}
             >
               {submitModal.loading ? <AppleSpinner /> : "Confirm Submit"}
@@ -495,7 +495,7 @@ const ContributorCoursePage = () => {
             </p>
           </div>
           <button 
-            className="w-full py-3 sm:py-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover shadow-sm transition-all active:scale-95" 
+            className="w-full py-3 sm:py-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover shadow-sm transition-all active:scale-95 cursor-pointer" 
             onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
           >
             Done
@@ -519,13 +519,13 @@ const ContributorCoursePage = () => {
           </div>
           <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
             <button 
-              className="w-full py-3 sm:py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg sm:text-xl font-semibold text-text-main hover:bg-gray-50" 
+              className="w-full py-3 sm:py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg sm:text-xl font-semibold text-text-main hover:bg-gray-50 cursor-pointer transition-colors" 
               onClick={closeModal}
             >
               Cancel
             </button>
             <button 
-              className="w-full py-3 sm:py-4 rounded-xl bg-orange-500 text-white text-lg sm:text-xl font-semibold shadow-sm hover:bg-orange-600 flex items-center justify-center gap-2 transition-all active:scale-95" 
+              className="w-full py-3 sm:py-4 rounded-xl bg-orange-500 text-white text-lg sm:text-xl font-semibold shadow-sm hover:bg-orange-600 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer" 
               onClick={() => setSubmitModal(prev => ({ ...prev, status: "submit", loading: false }))}
             >
               <MdRefresh size={24} /> Retry
@@ -556,7 +556,7 @@ const ContributorCoursePage = () => {
       {/* Secondary Action: Stay Pending */}
       <button
         disabled={submitModal.loading}
-        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer"
         onClick={closeModal}
       >
         Keep Under Review
@@ -565,7 +565,7 @@ const ContributorCoursePage = () => {
       {/* Primary Action: Confirm Cancel */}
       <button
         disabled={submitModal.loading}
-        className="w-full rounded-xl bg-rose-600 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 flex justify-center items-center gap-2 transition-all active:scale-95"
+        className="w-full rounded-xl bg-rose-600 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 flex justify-center items-center gap-2 transition-all active:scale-95 cursor-pointer"
         onClick={handleConfirmCancel} // This function calls your "cancel" API
       >
         {submitModal.loading ? (
@@ -596,7 +596,7 @@ const ContributorCoursePage = () => {
       </p>
     </div>
     <button 
-      className="w-full py-3 sm:py-4 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 shadow-sm transition-all active:scale-95" 
+      className="w-full py-3 sm:py-4 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 shadow-sm transition-all active:scale-95 cursor-pointer" 
       onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
     >
       Done
@@ -619,13 +619,13 @@ const ContributorCoursePage = () => {
     </div>
     <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
       <button 
-        className="w-full py-3 sm:py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg sm:text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors" 
+        className="w-full py-3 sm:py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg sm:text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
         onClick={closeModal}
       >
         Close
       </button>
       <button 
-        className="w-full py-3 sm:py-4 rounded-xl bg-orange-500 text-white text-lg sm:text-xl font-semibold shadow-sm hover:bg-orange-600 flex items-center justify-center gap-2 transition-all active:scale-95" 
+        className="w-full py-3 sm:py-4 rounded-xl bg-orange-500 text-white text-lg sm:text-xl font-semibold shadow-sm hover:bg-orange-600 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer" 
         onClick={() => setSubmitModal(prev => ({ ...prev, status: "cancel", loading: false }))}
       >
         <MdRefresh size={24} /> Retry

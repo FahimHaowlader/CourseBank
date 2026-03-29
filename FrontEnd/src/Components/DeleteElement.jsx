@@ -3,9 +3,10 @@ import { MdDelete, MdDeleteOutline, MdRefresh } from "react-icons/md";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from "../Hooks/PrivateApi";
 
 const DeleteElement = () => {
-  const { deleteModal, setDeleteModal, deleteItem,course } = useCourse();
+  const { deleteModal, setDeleteModal, deleteItem,course,setCourse } = useCourse();
   const [loading, setLoading] = useState(false);
 
   if (!deleteModal.openModal) return null;
@@ -19,39 +20,100 @@ const DeleteElement = () => {
   const handleDelete = async () => {
     setLoading(true);
 
-    if(deleteItem.from === "material"){
-      // Call your API to delete material here, using deleteItem.id and course.id
-      console.log("Deleting material with ID:", deleteItem.id, "from course ID:", course.id);
-    }
+    if(deleteItem.from === "materials"){
 
-    if(deleteItem.from === "book"){
-      // Call your API to delete book here, using deleteItem.id and course.id
-      console.log("Deleting book with ID:", deleteItem.id, "from course ID:", course.id);
-    }
+     try {
+        const materialId = deleteItem._id;
+       const res = await PrivateApi.patch(`/delete-material/${course._id}`,{materialId} );
+ 
+       if(res.data.success){
+         setCourse(prev => {
+           const updatedMaterials = prev.materials.filter(mat => mat._id !== deleteItem._id);
+           return { ...prev, materials: updatedMaterials };
+         });
+         setDeleteModal({ ...deleteModal, status: "success" });
+       } 
 
-    if(deleteItem.from === "task"){
-      // Call your API to delete task here, using deleteItem.id and course.id
-      console.log("Deleting task with ID:", deleteItem.id, "from course ID:", course.id);
-    }
-     if(deleteItem.from === "assessment"){
-      // Call your API to delete assessment here, using deleteItem.id and course.id
-      console.log("Deleting assessment with ID:", deleteItem.id, "from course ID:", course.id);
-    }
-
-    // Simulation logic - Replace this with your actual API call
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const isSuccess = Math.random() < 0.1; // 90% success rate for testing
-      if (isSuccess) {
-        setDeleteModal({ ...deleteModal, status: "success" });
-      } else {
+     } catch (error) {
         setDeleteModal({ ...deleteModal, status: "error" });
-      }
-    } catch (error) {
-      setDeleteModal({ ...deleteModal, status: "error" });
-    } finally {
-      setLoading(false);
+     } finally {
+       setLoading(false);
+     }
+
     }
+
+    if(deleteItem.from === "books"){
+
+      try {
+        const bookId = deleteItem._id;
+       const res = await PrivateApi.patch(`/delete-suggested-book/${course._id}`,{bookId} );
+ 
+       if(res.data.success){
+         setCourse(prev => {
+           const updatedBooks = prev.books.filter(book => book._id !== deleteItem._id);
+           return { ...prev, books: updatedBooks };
+         });
+        } 
+         setDeleteModal({ ...deleteModal, status: "success" });
+     } catch (error) {
+        setDeleteModal({ ...deleteModal, status: "error" });
+     } finally {
+       setLoading(false);
+     }
+    }
+      
+
+    if(deleteItem.from === "tasks"){
+      
+      try {
+        const taskId = deleteItem._id;
+        const res = await PrivateApi.patch(`/delete-task/${course._id}`,{taskId} );
+        if(res.data.success){
+          setCourse(prev => {
+            const updatedTasks = prev.tasks.filter(task => task._id !== deleteItem._id);
+            return { ...prev, tasks: updatedTasks };
+          });
+         } 
+         setDeleteModal({ ...deleteModal, status: "success" });
+     } catch (error) {
+        setDeleteModal({ ...deleteModal, status: "error" });
+     } finally {
+       setLoading(false);
+     }
+    }
+
+     if(deleteItem.from === "assessments"){
+      try {
+        const assessmentId = deleteItem._id;
+        const res = await PrivateApi.patch(`/delete-assessment/${course._id}`,{assessmentId} );
+        if(res.data.success){
+          setCourse(prev => {
+            const updatedAssessments = prev.assessments.filter(assess => assess._id !== deleteItem._id);
+            return { ...prev, assessments: updatedAssessments };
+          });
+         } 
+         setDeleteModal({ ...deleteModal, status: "success" });
+     } catch (error) {
+        setDeleteModal({ ...deleteModal, status: "error" });
+     } finally {
+       setLoading(false);
+     }  
+    }
+
+  //   // Simulation logic - Replace this with your actual API call
+  //   try {
+  //     await new Promise((resolve) => setTimeout(resolve, 1500));
+  //     const isSuccess = Math.random() < 0.1; // 90% success rate for testing
+  //     if (isSuccess) {
+  //       setDeleteModal({ ...deleteModal, status: "success" });
+  //     } else {
+  //       setDeleteModal({ ...deleteModal, status: "error" });
+  //     }
+  //   } catch (error) {
+  //     setDeleteModal({ ...deleteModal, status: "error" });
+  //   } finally {
+  //     setLoading(false);
+  //   }
   };
 
   // Reusing the exact layout structure from your AddBook ModalWrapper

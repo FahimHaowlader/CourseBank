@@ -5,6 +5,7 @@ import { LuLink } from "react-icons/lu";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from "../Hooks/PrivateApi";
 
 // --- MOVE OUTSIDE TO PREVENT FOCUS LOSS ---
 const ModalWrapper = ({ children, handleClose, loading }) => (
@@ -23,18 +24,18 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 );
 
 const AddTask = () => {
-  const { taskModal, setTaskModal } = useCourse();
+  const { taskModal, setTaskModal,course,setCourse } = useCourse();
   const [loading, setLoading] = useState(false);
   
   const [data, setData] = useState({
     name: "",
-    link: ""
+    fileUrl: ""
   });
 
   // Reset state when modal opens
   useEffect(() => {
     if (taskModal.openModal && taskModal.status === "update") {
-      setData({ name: "", link: "" });
+      setData({ name: "", fileUrl: "" });
     }
   }, [taskModal.openModal]);
 
@@ -48,8 +49,8 @@ const AddTask = () => {
     }
   };
 
-  const isUrlValid = isValidGoogleUrl(data.link);
-  const isChanged = data.name.trim().length > 0 && data.link.trim().length > 0;
+  const isUrlValid = isValidGoogleUrl(data.fileUrl);
+  const isChanged = data.name.trim().length > 0 && data.fileUrl.trim().length > 0;
   const canUpdate = isChanged && !loading && isUrlValid;
 
   const handleClose = () => {
@@ -62,7 +63,18 @@ const AddTask = () => {
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // await new Promise((resolve) => setTimeout(resolve, 1500));
+      const res = await PrivateApi.patch(`/add-new-task/${course?._id}`, { task :{
+        name: data.name,
+        fileUrl: data.fileUrl,
+        id : Date.now() // Temporary ID generation, replace with backend-generated ID if available
+      }
+      });
+
+      if(res.data.success){
+        setCourse(prev => ({ ...prev, tasks: [...prev.tasks, res?.data?.data?.newTask || {}] }));
+      }
+
       setTaskModal({ openModal: true, status: "success" });
     } catch (error) {
       setTaskModal({ openModal: true, status: "error" });
@@ -114,11 +126,11 @@ const AddTask = () => {
                   <span className="absolute left-3 text-text-secondary"><LuLink size={20} /></span>
                   <input 
                     type="text" 
-                    value={data.link}
-                    onChange={(e) => setData({ ...data, link: e.target.value })}
+                    value={data.fileUrl}
+                    onChange={(e) => setData({ ...data, fileUrl: e.target.value })}
                     placeholder="https://google.com/..." 
                     className={`w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border ${
-                      !isUrlValid && data.link.length > 0 
+                      !isUrlValid && data.fileUrl.length > 0 
                       ? "border-orange-500 focus:border-orange-600" 
                       : "border-border-light dark:border-border-dark focus:border-primary"
                     } focus:outline-none text-sm text-text-main dark:text-white transition-all`}
@@ -128,7 +140,7 @@ const AddTask = () => {
                 
                 {/* RESERVED SPACE TO PREVENT LAYOUT SHIFT */}
                 <div className="h-5 mt-1">
-                  {!isUrlValid && data.link.length > 0 && (
+                  {!isUrlValid && data.fileUrl.length > 0 && (
                     <p className="text-xs text-orange-500 flex items-center gap-1.5 font-medium">
                       <BsExclamationCircleFill size={14} />
                       Please provide a valid Google URL.

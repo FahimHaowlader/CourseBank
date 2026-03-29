@@ -5,6 +5,7 @@ import { LuLink, LuUser } from "react-icons/lu";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
 import { useCourse } from '../Contexts/Course.Context';
+import PrivateApi from "../Hooks/PrivateApi";
 
 const ModalWrapper = ({ children, handleClose, loading }) => (
   <div className="fixed inset-0 z-9999 overflow-y-auto" role="dialog">
@@ -22,18 +23,18 @@ const ModalWrapper = ({ children, handleClose, loading }) => (
 );
 
 const AddBook = () => {
-  const { bookModal, setBookModal } = useCourse();
+  const { bookModal, setBookModal, setCourse, course } = useCourse();
   const [loading, setLoading] = useState(false);
   
   const [data, setData] = useState({
     bookName: "",
     authorName: "",
-    link: ""
+    fileUrl: ""
   });
 
   useEffect(() => {
     if (bookModal.openModal && bookModal.status === "update") {
-      setData({ bookName: "", authorName: "", link: "" });
+      setData({ bookName: "", authorName: "", fileUrl: "" });
     }
   }, [bookModal.openModal]);
 
@@ -47,28 +48,51 @@ const AddBook = () => {
     }
   };
 
-  const isUrlValid = isValidGoogleUrl(data.link);
-  const isChanged = data.bookName.trim().length > 0 && data.authorName.trim().length > 0 && data.link.trim().length > 0;
+  const isUrlValid = isValidGoogleUrl(data.fileUrl);
+  const isChanged = data.bookName.trim().length > 0 && data.authorName.trim().length > 0 && data.fileUrl.trim().length > 0;
   const canUpdate = isChanged && !loading && isUrlValid;
 
   const handleClose = () => {
-    if (!loading) setBookModal({ openModal: false, status: "add" });
+    if (!loading) setBookModal({ openModal: false, status: "" });
   };
 
   const handleUpdate = async (e) => {
-    if (e) e.preventDefault();
-    if (!canUpdate) return;
+  if (e) e.preventDefault();
+  if (!canUpdate) return;
+  
+  setLoading(true);
+  try {
+    // CAPTURE the response here
+    const res = await PrivateApi.patch(`/add-new-suggested-book/${course?._id}`, {
+      book: {
+        title: data.bookName,
+        authorName: data.authorName,
+        fileUrl: data.fileUrl,
+        id: Date.now() 
+      }
+    });
 
-    setLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setBookModal({ openModal: true, status: "success" });
-    } catch (error) {
-      setBookModal({ openModal: true, status: "error" });
-    } finally {
-      setLoading(false);
+    // CHECK if the status is 200 (Success)
+    // Your backend sends 200, but doesn't send "success: true"
+    console.log("API Response:", res);
+    if (res.data.success) {
+       setCourse(prev => ({...prev, 
+        books: [...(prev?.books || []), res?.data?.data?.newBook || {}] 
+      }));
     }
-  };
+      // CLEAR data and show success
+      setData({ bookName: "", authorName: "", fileUrl: "" });
+      setBookModal({ openModal: true, status: "success" });
+    
+
+  } catch (error) {
+    // If the request fails entirely (Network error / 500 error)
+    // console.error("Update Error:", error);
+    setBookModal({ openModal: true, status: "error" });
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (!bookModal.openModal) return null;
 
@@ -127,11 +151,11 @@ const AddBook = () => {
                   <span className="absolute left-3 text-text-secondary"><LuLink size={20} /></span>
                   <input 
                     type="text" 
-                    value={data.link}
-                    onChange={(e) => setData({ ...data, link: e.target.value })}
+                    value={data.fileUrl}
+                    onChange={(e) => setData({ ...data, fileUrl: e.target.value })}
                     placeholder="https://google.com/..." 
                     className={`w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border ${
-                      !isUrlValid && data.link.length > 0 
+                      !isUrlValid && data.fileUrl.length > 0 
                       ? "border-orange-500 focus:border-orange-600" 
                       : "border-border-light dark:border-border-dark focus:border-primary"
                     } focus:outline-none text-sm text-text-main dark:text-white transition-all`}
@@ -139,9 +163,8 @@ const AddBook = () => {
                   />
                 </div>
                 
-                {/* FIXED LAYOUT ERROR MESSAGE */}
                 <div className="h-5 mt-1"> 
-                  {!isUrlValid && data.link.length > 0 && (
+                  {!isUrlValid && data.fileUrl.length > 0 && (
                     <p className="text-xs text-orange-500 flex items-center gap-1.5 font-medium animate-in fade-in duration-200">
                       <BsExclamationCircleFill size={14} />
                       Please provide a valid Google URL.
@@ -179,7 +202,6 @@ const AddBook = () => {
         </ModalWrapper>
       )}
 
-      {/* Success and Error modes remain the same */}
       {bookModal.status === "success" && (
         <ModalWrapper handleClose={handleClose} loading={false}>
           <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
