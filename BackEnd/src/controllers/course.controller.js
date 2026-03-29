@@ -310,7 +310,7 @@ const createCourse = asyncHandler(async (req, res, next) => {
       ...data, 
       year, 
       createdBy: userId,
-      status: "pending" 
+      status: "draft" // New courses start as draft and require approval
     });
 
     const savedCourse = await newCourse.save({ session });
@@ -424,7 +424,8 @@ const updateBasicInfo = asyncHandler(async (req, res) => {
   const { updatedData } = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
-  
+  // console.log("Update Basic Info Request:", { courseId, updatedData, userId, role });
+  // throw new apiError(500, "This endpoint is currently disabled for testing purposes.");
   // 1. Strict Authorization Check
   // User must be an Admin OR have the explicit 'access' flag
   const hasAccess = req.user?.access === true;
@@ -585,14 +586,14 @@ const updateInstructorInfo = asyncHandler(async (req, res) => {
   // These fields are locked at creation and cannot be changed via basic update
   const restrictedFields = ["department", "semester", "degree", "createdBy"];
   for (const field of restrictedFields) {
-    if (field in updatedData) {
+    if (field in instructor) {
       throw new apiError(
         400,
         `Updating the '${field}' field is restricted. Please contact an admin for changes.`
       );
     }
   }
-
+// console.log("Update Instructor Info Request:", { courseId, instructor, userId, role });
   // 4. Database Query Logic
   const query = { _id: courseId };
   if (role !== "admin") {
@@ -600,16 +601,21 @@ const updateInstructorInfo = asyncHandler(async (req, res) => {
     query.status = "draft";
   }
 
-  // 5. Atomic Update Operation
-  const updatedCourse = await Course.findOneAndUpdate(
-    query,
-    { $set: { instructor,isEditedSinceFeedback : true } }, 
-    {
-      new: true,
-      runValidators: true,
-      select: 'instructorName instructorDepartment status' 
-    }
-  );
+
+ 
+
+  // Correct way to update individual fields inside the object
+const updatedCourse = await Course.findOneAndUpdate(
+  query,
+  { 
+    $set: { 
+      instructorName: instructor.instructorName, 
+      instructorDepartment: instructor.instructorDepartment,
+      isEditedSinceFeedback: true 
+    } 
+  }, 
+  { new: true, runValidators: true,select: 'instructorName instructorDepartment status'  }
+);
 
   // 6. Handle Failure
   if (!updatedCourse) {
@@ -1834,7 +1840,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
   try {
     // 4. ATOMIC DELETE
     // We use .session(session) to include this in the transaction
-    const deletedCourse = await Course.findOneAndDelete(query, { session });
+    const deletedCourse = await Course.findOneAndDelete(query, { session,select: 'createdBy' });
 
     // 5. If Delete Failed, Diagnose WHY (Outside Transaction context is fine for read-only)
     if (!deletedCourse) {
@@ -1851,7 +1857,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
       }
       throw new apiError(403, "Deletion criteria not met.");
     }
-
+    // console.log("Deleted Course:", deletedCourse);
     // 6. CLEANUP USER STATS
     // We use the 'createdBy' from the deleted document to ensure we hit the right user
     const updatedUser = await User.findByIdAndUpdate(
