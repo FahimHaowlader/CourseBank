@@ -15,15 +15,15 @@ const AdminPage = () => {
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5  gap-4 ">
           <div>
-            <h1 class="text-3xl sm:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight pb-1 font-extrabold">
+            <h1 class="text-3xl sm:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight  font-extrabold">
               Admin Dashboard
             </h1>
-            <p class="text-secondary-text dark:text-gray-400 mt-2 text-lg max-w-3xl pl-1">
+            <p class="text-secondary-text dark:text-gray-400 mt-0.5 text-lg max-w-3xl pl-1">
               Manage university resources, users, and system settings.
             </p>
           </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2  gap-6">
           <a
             class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             href="#"
@@ -96,37 +96,14 @@ const AdminPage = () => {
               </span>
             </div>
           </a>
-
-
-          <a
+          
+             <a
             class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             href="#"
           >
-            <div class="h-12 w-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined text-[28px]">
-                <MdOutlineGavel />
-              </span>
-            </div>
-            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
-              Content Moderation
-            </h3>
-            <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
-              Review reported content, manage feedback, and ensure community
-              guidelines.
-            </p>
-            <div class="flex items-center text-amber-600 dark:text-amber-400 font-semibold text-sm mt-auto hover:underline">
-              <span>Access Module</span>
-              <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
-                <IoArrowForwardSharp />
-              </span>
-            </div>
-          </a>
+            
+                        <div class="h-12 w-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
 
-          <a
-            class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
-            href="#"
-          >
-            <div class="h-12 w-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
               <span class="material-symbols-outlined text-[28px]">
                 <LuChartNoAxesCombined />
               </span>
@@ -138,7 +115,8 @@ const AdminPage = () => {
               Track system usage, course popularity trends, and student
               engagement metrics.
             </p>
-            <div class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold text-sm mt-auto hover:underline">
+          
+              <div class="flex items-center text-amber-600 dark:text-amber-400 font-semibold text-sm mt-auto hover:underline">
               <span>Access Module</span>
               <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
                 <IoArrowForwardSharp />
@@ -146,6 +124,33 @@ const AdminPage = () => {
             </div>
           </a>
           
+  
+  
+         <a
+            class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
+            href="#"
+          >
+           <div class="h-12 w-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[28px]">
+                <MdOutlineGavel />
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">
+              Content Moderation
+            </h3>
+            <p class="text-sm text-text-secondary dark:text-gray-400 mb-6 flex-1">
+              Review reported content, manage feedback, and ensure community
+              guidelines.
+            </p>
+             <div class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold text-sm mt-auto hover:underline">
+              <span>Access Module</span>
+              <span class="material-symbols-outlined text-[18px] ml-1 transition-transform group-hover:translate-x-1">
+                <IoArrowForwardSharp />
+              </span>
+            </div>
+          </a>
+
+         
           <a
             class="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             href="#"
@@ -168,7 +173,7 @@ const AdminPage = () => {
                 <IoArrowForwardSharp />
               </span>
             </div>
-          </a>
+          </a> 
 
           
          

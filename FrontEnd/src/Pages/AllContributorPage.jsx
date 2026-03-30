@@ -1,347 +1,372 @@
-import React from "react";
-import { AiOutlineSearch } from "react-icons/ai";
-import { MdOutlinePersonSearch } from "react-icons/md";
-import { BiHash } from "react-icons/bi";
-import { IoIosArrowDown } from "react-icons/io";
+import React, { useState } from "react";
+import { AiOutlineSearch, AiOutlinePlus } from "react-icons/ai";
 import { MdRefresh } from "react-icons/md";
-import { IoIosArrowBack } from "react-icons/io";
-import { IoIosArrowForward } from "react-icons/io";
-import { MdOutlinePersonOutline } from "react-icons/md";
-import { LuCalendarDays } from "react-icons/lu";
-import { IoArrowForwardSharp } from "react-icons/io5";
-import { GrShareOption } from "react-icons/gr";
+import { IoIosArrowDown } from "react-icons/io";
 import { LiaIdCardSolid } from "react-icons/lia";
-import CustomCourseCard from "../Components/CustomCourseCard";
-import { AiOutlinePlus } from "react-icons/ai";
-import GmailTableClearConditional from "../Components/SelectAbleTable";
+import Department from "../Components/Department";
+import GmailTableWithSort from "../Components/SelectAbleTable";
 
 const AllContributorPage = () => {
+  // 1. State Management for all filters
+  const [filters, setFilters] = useState({
+    contributorId: "", // Updated from moderatorId
+    semester: "",
+    degree: "",
+    year: "",
+    status: "",
+    access: "",
+    department: ""
+  });
+
+  const generateYearRange = (start) => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: current - start + 1 }, (_, i) => current - i);
+  };
+  const years = generateYearRange(2025);
+
+  // 2. Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 3. Search Action
+  const handleSearch = () => {
+    console.log("Searching for Contributor Data:", filters);
+    // Logic for API call goes here
+  };
+
+  // 4. Reset Action
+  const handleReset = () => {
+    setFilters({
+      contributorId: "",
+      semester: "",
+      degree: "",
+      year: "",
+      status: "",
+      access: "",
+      department: ""
+    });
+  };
+
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
         <header className="mb-5">
-          <div className="sm:flex justify-between mb-1">
-            <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
-              All Moderators
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-1">
+            <h1 className="text-2xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
+              Search and Explore Contributors
             </h1>
-            {/* <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
-              <span className="material-symbols-outlined text-lg">
-                <AiOutlinePlus />
-              </span>
-              Add Course
-            </button> */}
           </div>
-          <p className="mt-2 text-lg text-secondary-text dark:text-gray-400 max-w-4xl pl-0.5">
-            Search and explore moderators by semester, teacher, and category to
-            plan your academic journey.
+          <p className="mt-0.5 text-base md:text-lg text-secondary-text dark:text-gray-400 max-w-4xl pl-0.5">
+            Filter contributors by ID, department, status, and access to manage scholarly input.
           </p>
         </header>
 
-        <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 mb-2">
-          <div className="grid grid-cols-1 md:grid-cols-10 gap-4 mb-6">
-            {/* <label className="flex flex-col gap-1.5 w-full md:col-span-10">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400 ">
-                Course Title
+        <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-4 md:p-6 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-24 gap-4 items-end">
+            
+            {/* Contributor ID - UPDATED */}
+            <label className="flex flex-col gap-1.5 w-full sm:col-span-2 md:col-span-24 xl:col-span-8">
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
+                Contributor Id
               </span>
               <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
-                <span className="absolute left-3 text-text-secondary material-symbols-outlined  text-[20px]">
-                  <AiOutlineSearch />
-                </span>
-                <input
-                  placeholder="e.g. Intro to Computer Science"
-                  type="text"
-                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
-                />
-              </div>
-            </label> */}
-            {/* <label className="flex flex-col gap-1.5 w-full md:col-span-3">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Teacher Name
-              </span>
-              <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg  ">
-                <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
-                  <MdOutlinePersonSearch />
-                </span>
-                <input
-                  type="text"
-                  placeholder="e.g. Dr. Sarah Jenkins"
-                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
-                />
-              </div>
-            </label> */}
-            <label className="flex flex-col gap-1.5 w-full md:col-span-5 xl:col-span-2">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Moderator Id
-              </span>
-              <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg  ">
-                <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
+                <span className="absolute left-3 text-text-secondary text-[20px]">
                   <LiaIdCardSolid />
                 </span>
                 <input
                   type="text"
-                  placeholder="e.g. CSE-2024-001-B"
-                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
+                  name="contributorId"
+                  value={filters.contributorId}
+                  onChange={handleChange}
+                  placeholder="e.g. CON-2026-001"
+                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border-0 focus:ring-2 focus:ring-primary focus:outline-none text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
                 />
               </div>
             </label>
-            {/* <label className="flex flex-col gap-1.5 w-full md:col-span-2">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Course ID
-              </span>
-              <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
-                <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
-                  <BiHash />
-                </span>
-                <input
-                  placeholder="ABCD-1234-EFGH-5678"
-                  type="text"
-                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border border-border-light dark:border-border-dark focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0 text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
-                />
-              </div>
-            </label> */}
-            <label className="flex flex-col md:col-span-5 xl:col-span-2  gap-1.5 w-full">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Semester
-              </span>
+
+            {/* Semester */}
+            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-6">
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Semester</span>
               <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                <select 
+                  name="semester" 
+                  value={filters.semester} 
+                  onChange={handleChange}
+                  className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                >
                   <option value="">All Semesters</option>
-                  <option>Fall</option>
-                  <option>Spring</option>
-                  <option>Summer</option>
+                  <option value="11">First Year 1st Semester</option>
+                  <option value="12">First Year 2nd Semester</option>
+                  <option value="21">Second Year 1st Semester</option>
+                  <option value="22">Second Year 2nd Semester</option>
+                  <option value="31">Third Year 1st Semester</option>
+                  <option value="32">Third Year 2nd Semester</option>
+                  <option value="41">Fourth Year 1st Semester</option>
+                  <option value="42">Fourth Year 2nd Semester</option>
                 </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                  <IoIosArrowDown />
-                </span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
               </div>
             </label>
-            <label className="flex flex-col md:col-span-4 xl:col-span-1  gap-1.5 w-full ">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Department
-              </span>
+
+            {/* Degree */}
+            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-5">
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Degree</span>
               <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                  <option value="">All Departments</option>
-                  <option>Computer Science</option>
-                  <option>Arts &amp; Design</option>
-                  <option>Physics</option>
-                  <option>Mathematics</option>
-                  <option>Business</option>
-                </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                  <IoIosArrowDown />
-                </span>
-              </div>
-            </label>
-            <label className="flex flex-col md:col-span-3 xl:col-span-1  gap-1.5 w-full">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Degree
-              </span>
-              <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                <select name="degree" value={filters.degree} onChange={handleChange} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
                   <option value="">All Degrees</option>
-                  <option>Bachelor</option>
-                  <option>Master</option>
-                  <option>PhD</option>
-                  <option>Associate</option>
+                  <option value="bachelors">Bachelor</option>
+                  <option value="masters">Master</option>
+                  <option value="phd">PhD</option>
                 </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                  <IoIosArrowDown />
-                </span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
               </div>
             </label>
-            <label className="flex flex-col md:col-span-3 xl:col-span-1 gap-1.5 w-full">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                Year
-              </span>
+
+            {/* Year */}
+            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-8 xl:col-span-5">
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Year</span>
               <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                <select name="year" value={filters.year} onChange={handleChange} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
                   <option value="">All Years</option>
-                  <option>2024</option>
-                  <option>2023</option>
-                  <option>2022</option>
+                  {years.map((year) => <option key={year} value={year}>{year}</option>)}
                 </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                  <IoIosArrowDown />
-                </span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
               </div>
             </label>
 
-            <div className="flex items-center justify-between gap-3 w-full xl:w-auto xl:ml-auto">
-              <div>
-                <label className="flex flex-col gap-2.5 cursor-pointer select-none">
-                  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Exists?
-                  </span>
+            {/* Department */}
+            <div className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-16 xl:col-span-6">
+              <Department defaultText={"All Departments"} value={filters.department} onChange={handleChange} />
+            </div>
 
-                  {/* Checkbox */}
-                  <input
-                    type="checkbox"
-                    defaultChecked
-                    className="peer hidden "
-                  />
+            {/* Status */}
+            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-4">
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Status</span>
+              <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
+                <select name="status" value={filters.status} onChange={handleChange} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+                  <option value="">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
+              </div>
+            </label>
 
-                  {/* Custom box */}
-                  <div
-                    className="ml-1 sm:ml-1.5 sm:mb-2.5
-     h-10 sm:h-8 w-10 sm:w-8 rounded-md
-      border border-border-light dark:border-border-dark
-      bg-white dark:bg-background-dark
-      flex items-center justify-center
-      transition
-      peer-checked:bg-primary peer-checked:border-primary
-    "
-                  >
-                    {/* Check mark */}
-                    <svg
-                      className="h-3 w-3 text-white opacity-0 peer-checked:opacity-100 transition"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 10l3 3 7-7" />
-                    </svg>
-                  </div>
-                </label>
+            {/* Access */}
+            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-4">
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Access</span>
+              <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors bg-white dark:bg-background-dark">
+                <select name="access" value={filters.access} onChange={handleChange} className="w-full h-11 pl-4 pr-10 rounded-lg bg-transparent border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer text-text-primary dark:text-gray-200">
+                  <option value="">All Access</option>
+                  <option value="allow">Allow</option>
+                  <option value="deny">Deny</option>
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3 w-full xl:w-auto mt-2  xl:mt-6 xl:ml-auto">
-                <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold active:scale-95 py-2 ">
-                  <span className="material-symbols-outlined  text-[20px] font-semibold">
-                    <MdRefresh />
-                  </span>
-                  Reset
-                  <span className=""> Filters</span>
+            </label>
+
+            {/* Action Buttons Container */}
+            <div className="col-span-1 sm:col-span-2 md:col-span-12 xl:col-span-10 mt-4 md:mt-auto">
+              <div className="flex flex-col sm:flex-row items-center justify-start xl:justify-end gap-3 w-full sm:h-11">
+                
+                {/* Reset Button */}
+                <button 
+                  onClick={handleReset}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors font-semibold active:scale-95 py-2 order-1 cursor-pointer"
+                >
+                  <MdRefresh className="text-[20px]" />
+                  <span className="whitespace-nowrap">Reset Filters</span>
                 </button>
-                <button className="flex-1  sm:flex-none flex items-center  gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark active:scale-95">
-                  <span className="material-symbols-outlined text-[20px] font-semibold">
-                    <AiOutlineSearch />
-                  </span>
-                  Search
+
+                {/* Search Button */}
+                <button 
+                  onClick={handleSearch}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-8 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all shadow-sm shadow-primary/30 active:scale-95 order-2 cursor-pointer"
+                >
+                  <AiOutlineSearch className="text-[20px]" />
+                  <span className="whitespace-nowrap">Search</span>
+                </button>
+
+                {/* New Contributor Button */}
+                <button className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all shadow-sm shadow-primary/30 active:scale-95 order-3 cursor-pointer">
+                  <AiOutlinePlus className="text-[20px]" />
+                  <span className="whitespace-nowrap">New Contributor</span>
                 </button>
               </div>
             </div>
-            {/* <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-end">
-            <div className=" gap-4 w-full xl:flex-1">
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Degree
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                    <option value="">All Degrees</option>
-                    <option>Bachelor</option>
-                    <option>Master</option>
-                    <option>PhD</option>
-                    <option>Associate</option>
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label>
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Year
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                    <option value="">All Years</option>
-                    <option>2024</option>
-                    <option>2023</option>
-                    <option>2022</option>
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label>
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Semester
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                    <option value="">All Semesters</option>
-                    <option>Fall</option>
-                    <option>Spring</option>
-                    <option>Summer</option>
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label>
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Type
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                    <option value="">All Types</option>
-                    <option>Core</option>
-                    <option>Elective</option>
-                    <option>Lab</option>
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label>
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Credit
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                    <option value="">All Credits</option>
-                    <option>1 - 3 Credits</option>
-                    <option>3 - 6 Credits</option>
-                    <option>6+ Credits</option>
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label>
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Major / Non-Major
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
-                    <option value="">All Categories</option>
-                    <option>Major Required</option>
-                    <option>Major Elective</option>
-                    <option>Non-Major (General)</option>
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label> *
-            </div>
-            <div className="flex items-center gap-3 w-full xl:w-auto mt-2 xl:mt-0 xl:ml-auto">
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors order-first hover:cursor-pointer active:text-primary-dark font-semibold active:scale-95 ">
-                <span className="material-symbols-outlined  text-[20px] font-semibold">
-                  <MdRefresh />
-                </span>
-                Reset
-                <span className="hidden md:block"> Filters</span>
-              </button>
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-colors shadow-sm shadow-primary/30 hover:cursor-pointer active:bg-primary-dark active:scale-95">
-                <span className="material-symbols-outlined text-[20px] font-semibold">
-                  <AiOutlineSearch />
-                </span>
-                Search
-              </button>
-            </div>
-          </div> */}
           </div>
         </div>
-        <GmailTableClearConditional/>
+        <div>
+          {/* <div className="w-full mt-8 rounded-xl overflow-hidden border border-border-light dark:border-border-dark shadow-sm">
+  {/* Header: Hidden on mobile, Flex on sm+ *
+  <div className="hidden sm:flex items-center justify-between bg-primary text-white font-semibold text-sm md:text-base">
+    <div className="p-4 w-1/4 min-w-[120px]">Contributor ID</div>
+    <div className="p-4 w-1/4 text-center">Password</div>
+    <div className="p-4 w-1/4 text-center">Access</div>
+    <div className="p-4 w-1/4 lg:w-1/3 text-right pr-8">Status</div>
+  </div>
+
+  {/* Table Body / Content *
+  <div className="bg-white dark:bg-card-dark divide-y divide-border-light dark:divide-border-dark">
+    
+    {/* Example Row: Repeated for each contributor *
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-0 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+      
+      {/* Contributor ID *
+      <div className="p-0 sm:p-4 w-full sm:w-1/4 flex justify-between sm:block">
+        <span className="sm:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500">ID:</span>
+        <span className="font-mono text-sm font-medium text-primary dark:text-primary-light">CON-2026-001</span>
+      </div>
+
+      {/* Password *
+      <div className="p-0 sm:p-4 w-full sm:w-1/4 flex justify-between sm:text-center mt-2 sm:mt-0">
+        <span className="sm:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500">Pass:</span>
+        <span className="text-sm dark:text-gray-300">********</span>
+      </div>
+
+      {/* Access *
+      <div className="p-0 sm:p-4 w-full sm:w-1/4 flex justify-between sm:text-center mt-2 sm:mt-0">
+        <span className="sm:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500">Access:</span>
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          Allow
+        </span>
+      </div>
+
+      {/* Status *
+      <div className="p-0 sm:p-4 w-full sm:w-1/4 lg:w-1/3 flex justify-between sm:justify-end sm:pr-8 mt-2 sm:mt-0">
+        <span className="sm:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500">Status:</span>
+        <span className="flex items-center gap-1.5 text-sm font-medium text-text-main dark:text-gray-200">
+          <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span>
+          Pending Review
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+</div> */}
+
+{/* --- Start of Contributor Card/Table --- */}
+<div className="w-full mt-8 md:rounded-xl md:border border-border-light dark:border-border-dark overflow-hidden md:shadow-sm">
+  
+  {/* DESKTOP HEADER (Hidden on Mobile) */}
+  <div className="hidden md:grid grid-cols-24 bg-primary text-white font-bold text-sm uppercase tracking-wider">
+    <div className="p-4 col-span-6 pl-8">Contributor ID</div>
+    <div className="p-4 col-span-6 text-center">Password</div>
+    <div className="p-4 col-span-4 text-center">Access</div>
+    <div className="p-4 col-span-8 text-center">Status</div>
+  </div>
+
+  {/* CARD CONTAINER / TABLE BODY */}
+  <div className="flex flex-col gap-4 md:gap-0 bg-transparent md:bg-white dark:md:bg-card-dark md:divide-y md:divide-border-light dark:md:divide-border-dark">
+    
+    {/* Map through your data here */}
+    {[
+      { id: "CON-2026-001", pass: "mevfghfggfg", access: "allow", status: "approved" },
+      { id: "CON-2026-002", pass: "admin12345", access: "deny", status: "pending" },
+      { id: "CON-2026-003", pass: "activeUser99", access: "allow", status: "active" },
+      { id: "CON-2026-003", pass: "activeUser99", access: "allow", status: "active" },
+      { id: "CON-2026-003", pass: "activeUser99", access: "allow", status: "active" },
+      { id: "CON-2026-003", pass: "activeUser99", access: "allow", status: "active" },
+      { id: "CON-2026-003", pass: "activeUser99", access: "allow", status: "active" },
+    ].map((item, index) => {
+      
+      // Dynamic Status Logic with your Theme Colors for "Approved"
+      const getStatusDetails = (status) => {
+        switch (status.toLowerCase()) {
+          case 'approved':
+            return { 
+                text: "text-primary dark:text-primary", 
+                dot: "bg-primary dark:bg-primary", 
+                ping: "bg-primary/60" 
+            };
+          case 'active':
+            return { text: "text-sky-600 dark:text-sky-400", dot: "bg-sky-500", ping: "bg-green-400" };
+          case 'denied':
+          case 'deny':
+            return { text: "text-red-600 dark:text-red-400", dot: "bg-red-500", ping: "bg-red-400" };
+          default: // Pending
+            return { text: "text-orange-600 dark:text-orange-400", dot: "bg-orange-500", ping: "bg-orange-400" };
+        }
+      };
+
+      const theme = getStatusDetails(item.status);
+
+      return (
+        <div 
+          key={index} 
+          className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center 
+                     p-5 md:p-0 
+                     bg-white dark:bg-card-dark md:bg-transparent 
+                     rounded-2xl md:rounded-none 
+                     border border-border-light dark:border-border-dark md:border-0
+                     shadow-sm md:shadow-none 
+                     hover:bg-primary/5 dark:hover:bg-white/5 transition-all 
+                     gap-y-4 md:gap-y-0 hover:cursor-pointer"
+        >
+          {/* --- COLUMN 1 ON MOBILE (Left Side) --- */}
+          <div className="flex flex-col gap-4 md:contents">
+            {/* 1. Contributor ID */}
+            <div className="md:p-4 md:col-span-6 flex flex-col md:block gap-1 md:pl-8">
+              <span className="md:hidden text-xs font-bold uppercase text-primary/80 dark:text-primary/40 px-2">
+                Contributor ID
+              </span>
+              <span className="text-sm font-bold text-text-main dark:text-white px-2 py-1 md:p-0 rounded w-fit">
+                {item.id}
+              </span>
+            </div>
+
+            {/* 2. Password */}
+            <div className="md:p-4 md:col-span-6 flex flex-col md:items-center gap-1">
+              <span className="md:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500 px-2">
+                Credential
+              </span>
+              <span className="text-sm font-medium tracking-widest text-text-secondary dark:text-gray-400 px-2">
+                {item.pass}
+              </span>
+            </div>
+          </div>
+
+          {/* --- COLUMN 2 ON MOBILE (Right Side) --- */}
+          <div className="flex flex-col gap-4 md:contents items-end md:items-center text-right md:items-center">
+            {/* 3. Access (Design Preserved) */}
+            <div className="md:p-4 md:col-span-4 flex flex-col md:items-center gap-1 items-end md:items-center">
+              <span className="md:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500 px-2">
+                Access
+              </span>
+              <span className={`w-fit px-3 py-1 rounded-full text-[11px] font-bold border uppercase ${
+                item.access === 'allow'
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800"
+              }`}>
+                {item.access}
+              </span>
+            </div>
+
+            {/* 4. Status (Design Preserved with Theme Colors) */}
+            <div className="md:p-4 md:col-span-8 flex flex-col md:items-center gap-1 items-end px-2">
+              <span className="md:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500">
+                Status
+              </span>
+              <div className={`flex items-center gap-2 text-sm font-semibold ${theme.text}`}>
+                <span className="relative flex h-2 w-2">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${theme.ping}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${theme.dot}`}></span>
+                </span>
+                <span className="capitalize">{item.status}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+        </div>
+        {/* <GmailTableWithSort></GmailTableWithSort> */}
       </main>
     </div>
   );
