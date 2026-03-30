@@ -550,7 +550,7 @@ const CoursePage = () => {
                 </span>
                 <div className="relative">
                   <select
-                    className="pl-3 pr-10 py-2 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-main dark:text-white focus:border-primary focus:ring-0 cursor-pointer appearance-none shadow-sm hover:shadow transition-shadow"
+                    className="pl-3 pr-10 py-2 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-main dark:text-white focus:border-primary outline-none appearance-none cursor-pointer shadow-sm hover:shadow transition-shadow"
                     value={
                       sort.sortField
                         ? `${sort.sortField}_${sort.sortOrder}`
@@ -559,7 +559,7 @@ const CoursePage = () => {
                     onChange={handleSortChange}
                   >
                     <option value={"title_asc"}>Course Title (A-Z)</option>
-                    <option value={"title_asc"}>Course Title (A-Z)</option>
+                   
                     <option value={"title_desc"}>Course Title (Z-A)</option>
                     <option value={"professor_asc"}>
                       Professor Name (A-Z)
