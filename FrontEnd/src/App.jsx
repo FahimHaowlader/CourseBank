@@ -79,7 +79,11 @@ function App() {
     },
 
     { path: "/admin", element: <AdminPage /> },
-    { path: "/all", element: <AllCoursePage /> },
+    { path: "/all", element: (
+      <RoleProtectedRoute allowedRoles={["moderator", "admin"]}>
+    <AllCoursePage />
+</RoleProtectedRoute>
+    ) },
     { path: "/contributors", element: <AllContributorPage /> },
     {
       path: "*",

@@ -109,9 +109,9 @@ const CoursePage = () => {
     fetchCourses();
     setPage(1);
     setSort({
-      sortField: "",
-      sortOrder: "",
-    });
+    sortField: "staringDate",
+    sortOrder: "desc",
+  });
   };
 
   useEffect(() => {
@@ -163,7 +163,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          console.log(response.data.data);
+          // console.log(response.data.data);
           setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
@@ -201,7 +201,10 @@ const CoursePage = () => {
     const value = e.target.value; // e.g., "year_desc"
 
     if (!value) {
-      setSort({ sortField: "", sortOrder: "" });
+      setSort({
+    sortField: "staringDate",
+    sortOrder: "desc",
+    });
       return;
     }
 
@@ -279,7 +282,7 @@ const CoursePage = () => {
               <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
                 Course Code
               </span>
-              <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
+              <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg uppercase">
                 <span className="absolute left-3 text-text-secondary material-symbols-outlined text-[20px]">
                   <BiHash />
                 </span>
@@ -528,7 +531,7 @@ const CoursePage = () => {
           </div>
         </div>
         {totalDocs > 0 && (
-          <div className="flex px-2 flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <div className="flex px-2 flex-col-reverse sm:flex-row justify-between items-center mb-6 gap-4">
             <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center">
               Showing{" "}
               <span className="font-bold text-text-main dark:text-white">
@@ -540,7 +543,7 @@ const CoursePage = () => {
               </span>{" "}
               courses of{" "}
               <span className="font-bold text-text-main dark:text-white">
-                {totalDocs}
+              {totalDocs} courses
               </span>
             </div>
             <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">

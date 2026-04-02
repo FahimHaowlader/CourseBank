@@ -331,9 +331,9 @@ const AllContributorPage = () => {
           </div>
 
           {/* --- COLUMN 2 ON MOBILE (Right Side) --- */}
-          <div className="flex flex-col gap-4 md:contents items-end md:items-center text-right md:items-center">
+          <div className="flex flex-col gap-4 md:contents items-end  text-right md:items-center">
             {/* 3. Access (Design Preserved) */}
-            <div className="md:p-4 md:col-span-4 flex flex-col md:items-center gap-1 items-end md:items-center">
+            <div className="md:p-4 md:col-span-4 flex flex-col  gap-1 items-end md:items-center">
               <span className="md:hidden text-xs font-bold uppercase text-text-secondary dark:text-gray-500 px-2">
                 Access
               </span>

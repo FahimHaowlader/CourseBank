@@ -44,7 +44,7 @@ useEffect(() => {
       setError("Please enter both User ID and password.");
       return;
     }
-    if (userid.length !== 11 && userid.length !== 10) {
+    if (userid.length !== 11) {
       setError("Invalid User ID .");
       return;
     }
