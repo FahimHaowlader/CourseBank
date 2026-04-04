@@ -970,7 +970,7 @@ const successfulDeleteAcknowledgement = () => {
             <button
               type="button"
               onClick={handleFinalizeClick}
-              className="group relative flex flex-1 items-center justify-center gap-3 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition-all duration-200 hover:bg-emerald-700 hover:shadow-emerald-900/40 active:scale-[0.98] cursor-pointer"
+              className="group relative flex flex-1 items-center justify-center gap-3 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition-all duration-200 hover:bg-emerald-700 hover:shadow-emerald-900/40 active:scale-[0.98] cursor-pointer"
             >
               <IoCloudDoneOutline
                 size={22}
@@ -996,7 +996,7 @@ const successfulDeleteAcknowledgement = () => {
                border border-amber-400/30
                shadow-lg shadow-amber-900/20 
                transition-all duration-200 
-               transform active:scale-[0.97] cursor-pointer py-3.5"
+               transform active:scale-[0.97] cursor-pointer py-3"
           >
             <IoMdClose
               size={22}
@@ -1009,9 +1009,12 @@ const successfulDeleteAcknowledgement = () => {
 
 
             {/* 2. Delete Course Button */}
+            {
+              course.status !== "approved" && (
+            
             <button
               type="button"
-              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
+              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
               onClick={handleCourseDelete}
               >
               <MdDeleteOutline
@@ -1020,6 +1023,7 @@ const successfulDeleteAcknowledgement = () => {
               />
               <span className="tracking-wide">Delete Course</span>
             </button>
+              )}
           </div>
      
 

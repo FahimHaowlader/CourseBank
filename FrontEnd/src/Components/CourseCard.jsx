@@ -65,14 +65,14 @@ const CourseCard = ({Course}) => {
                   </div>
                 </div>
       <div className="p-5 pt-0">
-          <Link  to={'/course/' + Course._id}>
         <button className="w-auto px-4 h-9 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
+          <Link  to={'/course/' + Course._id} className="flex items-center gap-1.5">
         View Details 
           <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
             <IoArrowForwardSharp size={18} />
           </span>
-        </button>
         </Link> 
+        </button>
       </div>
     </article>
   );

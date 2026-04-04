@@ -37,7 +37,7 @@ import PrivateApi from "../Hooks/PrivateApi";
 import { parseUserId } from "../const";
 
 const AddCoursePage = () => {
-  const[errormessage,setErrorMessage] = useState("");
+  const[errorMessage,setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -58,6 +58,7 @@ const AddCoursePage = () => {
     description: "",
     instructorName: "",
     instructorDepartment: "",
+    // Assuming HSC year is one year after the starting year of the course
   });
 
 
@@ -81,7 +82,7 @@ const AddCoursePage = () => {
 
   Object.keys(data).forEach((key) => {
     if (!data[key] || data[key].toString().trim() === "") {
-      console.log("Missing field:", key); // log missing field
+      // console.log("Missing field:", key); // log missing field
       allFilled = false;
     }
   });
@@ -153,9 +154,9 @@ const isHandbookValid = () => {
     const hasBook = isHandbookValid();
 
     if (hasBook)  {
-    courseData = { ...formData,handbook, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }
+    courseData = { ...formData, hscYear: userInfo?.year,handbook, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }
     } else {;  
-     courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
+     courseData = { ...formData, hscYear: userInfo?.year, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
     }
     // console.log("Course Data:", courseData);
  
@@ -163,9 +164,9 @@ const isHandbookValid = () => {
     try {
       setLoading(true);
       // Replace with your API endpoint
-      console.log("Sending course data to API:", courseData);
+      // console.log("Sending course data to API:", courseData);
       const response = await PrivateApi.post("/create-course", courseData);
-      console.log("Course created successfully:", response.data);
+      // console.log("Course created successfully:", response.data);
       setModalStatus('success');
       // Optionally, reset form or redirect user
     } catch (error) {
@@ -226,7 +227,7 @@ const isHandbookValid = () => {
     return titleValid && authorValid && isValidGoogleUrl;
   });
 
-  console.log("Cleaned Books:", cleanedBooks);
+  // console.log("Cleaned Books:", cleanedBooks);
 
   if (cleanedBooks.length === 0) {
     // Reset UI: Using 'link' for consistency with your console log
@@ -285,7 +286,7 @@ const isHandbookValid = () => {
     return nameValid && isValidUrl && isGoogle;
   });
 
-  console.log("Cleaned Materials:", cleanedMaterials);
+  // console.log("Cleaned Materials:", cleanedMaterials);
 
   if (cleanedMaterials.length === 0) {
     setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
@@ -334,7 +335,7 @@ const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
     return nameValid && isValidGoogleUrl;
   });
 
-  console.log("Cleaned Tasks:", cleanedTasks);
+  // console.log("Cleaned Tasks:", cleanedTasks);
 
   if (cleanedTasks.length === 0) {
     // Reset to one empty row using 'link' for consistency
@@ -449,7 +450,7 @@ const cleanAssessments = () => {
       );
     });
 
-  console.log("Cleaned Assessments:", cleaned);
+  // console.log("Cleaned Assessments:", cleaned);
 
   // 2. Reset UI state (Consistency check: using 'link' here)
   setAssessments([
@@ -1351,13 +1352,13 @@ const handleTryAgain = () => {
         <div className="flex flex-col sm:flex-row w-full gap-4 mt-4">
           <button 
             onClick={handleCancel}
-            className="w-full py-4 text-xl font-semibold rounded-xl border border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors"
+            className="w-full py-4 text-xl font-semibold rounded-xl border border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button 
             onClick={handleTryAgain} // Closes modal to allow edit
-            className="w-full flex items-center justify-center gap-2 bg-orange-500 py-4 text-xl font-semibold text-white rounded-xl hover:bg-orange-600 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-orange-500 py-4 text-xl font-semibold text-white rounded-xl hover:bg-orange-600 transition-colors cursor-pointer"
           >
             <MdRefresh size={24} />
             Try Again

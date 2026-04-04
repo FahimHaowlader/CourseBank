@@ -11,8 +11,9 @@ import Department from '../Components/Department';
 import { useAuth } from '../Contexts/Auth.Context.jsx';
 import semesterTransformer from '../Components/semesterTransformer.jsx';
 import PrivateApi from '../Hooks/PrivateApi.jsx';
-import CourseCard from '../Components/CourseCard.jsx';
+
 import SkeletonCard from '../Components/SkeletonCard.jsx';
+import Pagination from '../Components/Pagination.jsx';
 
 const AllCoursePage = () => {
   const {user} = useAuth(); // Assuming you have a useAuth hook for authentication context
@@ -29,14 +30,16 @@ const AllCoursePage = () => {
     status: '',
     courseCode: '',
     department: '',
-    degree: user?.degree,
+    degree: user?.degree || '',
     year: '',
-    semester: user?.semester,
+    semester: user?.semester || '',
     type: '',
     credits: '',
     format: ''
   });
+  // console.log("Initial Filters State:", filters); // Debugging line to check initial filters state
 
+  // if (user) {
    const [sort, setSort] = useState({
     sortField: "staringDate",
     sortOrder: "desc",
@@ -63,6 +66,14 @@ const AllCoursePage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFilterChangeIntoNumber = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value === "" ? "" : isNaN(value) ? value : +value,
+    }));
   };
 
   // Reset Filters
@@ -112,19 +123,19 @@ const AllCoursePage = () => {
     // We create a fresh object for the API to ensure 'createdBy' is handled
     const requestFilters = { ...filters };
     
-    const response = await PrivateApi.post('/users-all-course', {
-      parameters: { 
-        filters: requestFilters, // Using the local copy
+    const response = await PrivateApi.post('/administrative-course-search', {
+      parameters: requestFilters, // Using the local copy
         sort,
         page,
         limit: 12
-      }
+      
     });
     // console.log('API Response:', response.data); // Debugging line to check API response structure
-    setCourses(response.data.courses || response.data); 
-    setTotalCourses( 9);
+    setCourses(response.data.data.courses || []); 
+    // console.log("Courses set in state:", response.data.courses || response.data); // Debugging line to check courses being set
+    setTotalCourses(response.data.data.totalDocuments ); // Adjust based on actual response structure
   } catch (error) {
-    console.error('Error fetching courses:', error);
+    // console.error('Error fetching courses:', error);
   } finally {
     setLoading(false);
   }
@@ -191,7 +202,7 @@ const AllCoursePage = () => {
             </label>
 
             <label className="flex flex-col gap-1.5 w-full md:col-span-5 xl:col-span-3">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Creater Id</span>
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">{user?.role === "admin" ? "Creater" : "Contributor"} Id</span>
               <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
                 <span className="absolute left-3 text-text-secondary"><LiaIdCardSolid size={20} /></span>
                 <input
@@ -287,7 +298,7 @@ const AllCoursePage = () => {
                 <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Semester</span>
                    <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
                   <select 
-                    name="semester" value={filters.semester} onChange={handleInputChange}
+                    name="semester" value={filters.semester} onChange={handleFilterChangeIntoNumber}
                     disabled={user?.role !== "admin" }
                     className={`w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark appearance-none ${user?.role !== "admin" ? "cursor-not-allowed opacity-70":"cursor-pointer"} text-sm outline-none`}
 
@@ -316,7 +327,7 @@ const AllCoursePage = () => {
                 <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Year</span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
                   <select 
-                    name="year" value={filters.year} onChange={handleInputChange}
+                    name="year" value={filters.year} onChange={handleFilterChangeIntoNumber}
                     className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark appearance-none cursor-pointer text-sm outline-none"
                   >
                     <option value="">All Years</option>
@@ -344,7 +355,7 @@ const AllCoursePage = () => {
                <label className="flex flex-col gap-1.5 w-full">
                 <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Credit</span>
                   <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select name="credits" value={filters.credits} onChange={handleInputChange} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark appearance-none text-sm outline-none cursor-pointer">
+                  <select name="credits" value={filters.credits} onChange={handleFilterChangeIntoNumber} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark appearance-none text-sm outline-none cursor-pointer">
                     <option value="">All Credits</option>
                     {[1, 2, 3, 4, 5, 6].map(c => <option key={c} value={c}>{c} Credits</option>)}
                   </select>
@@ -383,7 +394,7 @@ const AllCoursePage = () => {
           totalCourses > 0 && (
 
            
-                <div className="flex px-2 flex-col-reverse sm:flex-row justify-between items-center mb-6 gap-4">
+                <div className={`flex px-2 flex-col-reverse sm:flex-row justify-between items-center ${totalCourses ? "flex " :"invisible"} gap-4`}>
             <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center">
               Showing{" "}
               <span className="font-bold text-text-main dark:text-white">
@@ -403,7 +414,7 @@ const AllCoursePage = () => {
             Showing <span className="font-bold text-text-main dark:text-white">{courses.length > 0 ? (page - 1) * 12 + 1 : 0}</span> to <span className="font-bold text-text-main dark:text-white">{Math.min(page * 12, totalCourses)}</span> of <span className="font-bold text-text-main dark:text-white">{totalCourses}</span> courses
           </div> */}
           
-          <div className="flex items-center gap-2 ml-auto sm:ml-0">
+          <div className="flex items-center gap-2 ml-auto sm:ml-0 ">
             <span className="hidden sm:inline text-sm font-medium text-text-secondary dark:text-gray-400 whitespace-nowrap">Sort by:</span>
             <div className="relative">
               <select 
@@ -435,7 +446,7 @@ const AllCoursePage = () => {
 
 
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${totalCourses ? "mt-5":'mt-16'}`}>
           {loading && (
             <>
               <div>
@@ -479,48 +490,53 @@ const AllCoursePage = () => {
 
           {!loading && courses && courses.length > 0
             ? courses.map((course) => (
-                <CourseCard key={course._id} Course={course} />
+                <CustomCourseCard key={course._id} Course={course} />
               ))
             : !loading && (
             <div className="col-span-full py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-dashed border-border-light dark:border-border-dark">
               <h3 className="text-xl font-bold text-text-main dark:text-white mb-2">No courses found</h3>
               <p className="text-text-secondary dark:text-gray-400">  We couldn't find any courses matching your filters. Try adjusting your search criteria.</p>
-              <button onClick={resetFilters} className="mt-5 text-primary font-semibold hover:underline">Clear all filters</button>
+              <button onClick={resetFilters} className="mt-5 text-primary font-semibold hover:underline cursor-pointer">Clear all filters</button>
             </div>
           )}
         </div>
 
         {/* Pagination */}
         {totalCourses > 12 && (
-          <div className="flex flex-1 items-center justify-center md:justify-end mt-8">
-            <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
-              <button 
-                disabled={page === 1}
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-2 py-2 text-text-secondary border border-border-light dark:border-border-dark rounded-l-md hover:bg-primary/10 disabled:opacity-50"
-              >
-                <IoIosArrowBack size={20} />
-              </button>
+          // <div className="flex flex-1 items-center justify-center md:justify-end mt-8">
+          //   <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
+          //     <button 
+          //       disabled={page === 1}
+          //       onClick={() => setPage(p => Math.max(1, p - 1))}
+          //       className="px-2 py-2 text-text-secondary border border-border-light dark:border-border-dark rounded-l-md hover:bg-primary/10 disabled:opacity-50"
+          //     >
+          //       <IoIosArrowBack size={20} />
+          //     </button>
               
-              {[...Array(Math.ceil(totalCourses / 12))].map((_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => setPage(i + 1)}
-                  className={`px-4 py-2 text-sm font-semibold border border-border-light dark:border-border-dark ${page === i + 1 ? 'bg-primary text-white' : 'text-text-secondary hover:bg-primary/10'}`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+          //     {[...Array(Math.ceil(totalCourses / 12))].map((_, i) => (
+          //       <button
+          //         key={i + 1}
+          //         onClick={() => setPage(i + 1)}
+          //         className={`px-4 py-2 text-sm font-semibold border border-border-light dark:border-border-dark ${page === i + 1 ? 'bg-primary text-white' : 'text-text-secondary hover:bg-primary/10'}`}
+          //       >
+          //         {i + 1}
+          //       </button>
+          //     ))}
 
-              <button 
-                disabled={page >= Math.ceil(totalCourses / 12)}
-                onClick={() => setPage(p => p + 1)}
-                className="px-2 py-2 text-text-secondary border border-border-light dark:border-border-dark rounded-r-md hover:bg-primary/10 disabled:opacity-50"
-              >
-                <IoIosArrowForward size={20} />
-              </button>
-            </nav>
-          </div>
+          //     <button 
+          //       disabled={page >= Math.ceil(totalCourses / 12)}
+          //       onClick={() => setPage(p => p + 1)}
+          //       className="px-2 py-2 text-text-secondary border border-border-light dark:border-border-dark rounded-r-md hover:bg-primary/10 disabled:opacity-50"
+          //     >
+          //       <IoIosArrowForward size={20} />
+          //     </button>
+          //   </nav>
+          // </div>
+          <Pagination 
+            page={page} 
+            setPage={setPage} 
+            totalDocs={totalCourses} 
+          />
         )}
       </main>
     </div>

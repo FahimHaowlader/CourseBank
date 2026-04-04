@@ -28,7 +28,7 @@ export const parseUserId = (fullCode) => {
     dept: dept,
     degree: degreeType,
     semester: semester,
-    year: numbers.substring(0, 4) // Optional: first 4 digits usually mean Year
+    year: Number(numbers.substring(0, 4)) // Optional: first 4 digits usually mean Year
   };
 };
 

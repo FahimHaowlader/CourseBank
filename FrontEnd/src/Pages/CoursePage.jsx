@@ -136,7 +136,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          console.log(response.data.data);
+          // console.log(response.data.data);
           setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
