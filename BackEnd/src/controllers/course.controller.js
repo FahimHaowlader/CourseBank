@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import { deleteLocalFiles , deleteLocalFile } from '../utils/delete.js';
 import { uploadOnCloudinary , deleteCloudinaryFileById } from '../utils/cloudinary.js';
 import { v4 as uuidv4, validate } from 'uuid';
-
+import { ObjectId } from 'mongodb';
 // model
 import Course from '../models/course.model.js';
 import User from '../models/user.model.js';
@@ -17,12 +17,15 @@ const userQueryCache = {};
 
 // Helper function to get courses
 async function getCourses(userId, parameters ={},page,sort ={}) {
-  const query = {status: "approved"}; // Only approved courses are visible to users
+
 
   // Build query
+    const query = {};
   for (const [key, value] of Object.entries(parameters)) {
     if (!value) continue;
-
+    if (key === 'createdBy') {
+      query.createdBy = new ObjectId(value);
+    }
     if (typeof value === "number" && key !== "year") {
       query[key] = value;
     } else if (key === "year") {
@@ -32,7 +35,7 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
         $lte: new Date(year, 11, 31, 23, 59, 59),
       };
     } else if (
-      ["department", "degree", "type", "format", "semester"].includes(key)
+      ["department", "degree", "type", "format","status"].includes(key)
     ) {
       query[key] = value.toLowerCase();
     } else if (typeof value === "string") {
@@ -70,9 +73,9 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
       sendTotal = false;
     } else {
       // Count documents
+    // console.log("Cache miss or expired for user:", userId);
       totalDocuments = await Course.countDocuments(query);
       sendTotal = true;
-
       // Save cache
       userQueryCache[userId] = {
         lastQueryKey: currentQueryKey,
@@ -119,7 +122,7 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
 // User dynamic seacrh with caching
 const userCourseSearch = asyncHandler(async (req, res) => {
   const { parameters = {}, page = 1, sort = {} } = req.body;
-
+  parameters.status = 'approved'; // Only show approved courses to users
   // Check cookie for userId
   let userId = req.cookies?.userId;
   if (!userId) {
@@ -2173,6 +2176,65 @@ const acceptSubmission = asyncHandler(async (req, res) => {
 });
 
 
+const administrativeCourseSearch = asyncHandler(async (req, res) => {
+  const { parameters = {}, page = 1, sort = {} } = req.body;
+
+  const currentUserId = req.user?._id;
+  const role = req.user?.role;
+  const hasAccess = req.user?.access === true;
+
+  // 1. Authorization Check
+  const isPrivileged = ["admin", "moderator"].includes(role);
+  if (!hasAccess || !isPrivileged) {
+    throw new apiError(403, "Forbidden: Administrative access required.");
+  }
+
+  // Check cookie for userId
+  let userId = req.cookies?.userId;
+  if (!userId) {
+    // Generate random ID for anonymous user
+    userId = uuidv4();
+  }
+
+  // Refresh cookie on every request (1 hour from now)
+  res.cookie("userId", userId, {
+    maxAge: 60 * 60 * 1000, // 1 hour
+    httpOnly: true,
+    sameSite: "none",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  if (parameters.createdBy) {
+    const targetUser = await User.findOne({ userId : parameters.createdBy });
+    if (!targetUser) {
+      throw new apiError(404, "Target user not found.");
+    }
+    // console.log("AdministrativeCourseSearch - Target User:", targetUser);
+    // Safety Check: Moderators can only view Contributors or themselves
+    if (role === "moderator" && targetUser.role === "contributor" && targetUser.year !== req.user.year && targetUser.degree !== req.user.degree && targetUser.semester !== req.user.semester) {
+      throw new apiError(403, "Moderators can only view courses from contributors.");
+    }
+    if( role === "moderator" && targetUser.role !== "contributor" && targetUser._id.toString() !== currentUserId.toString() ) {
+      throw new apiError(403, "Moderators can only view their own courses.");
+    }
+
+    parameters.createdBy = targetUser._id;
+  }
+  // parameters.status = 'draft'; // Only show courses that haven't been edited since feedback
+
+  if (role === "moderator") {
+    parameters.hscYear = req.user.year;
+    parameters.degree = req.user.degree;
+    parameters.semester = req.user.semester;
+  }
+  // console.log("UserCourseSearch2 - Parameters after user filter:", parameters);
+  const result = await getCourses(userId, parameters, page, sort );
+
+  if (!result) throw new apiError(500, "Error fetching courses");
+
+  res.status(200).json( new apiResponse(200, result, "Courses fetched successfully"));
+});
+
 
 export { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook,updateBasicInfo,
-updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview, cancelCourseSubmission, acceptSubmission };
+updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview, cancelCourseSubmission, acceptSubmission,administrativeCourseSearch };

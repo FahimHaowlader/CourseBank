@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
     year: {
       type: Number,
       required: true,
-      select: false,
+  
     },
     semester: {
       type: Number,

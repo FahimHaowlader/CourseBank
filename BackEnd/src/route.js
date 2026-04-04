@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook,updateBasicInfo,
-updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
+updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview,administrativeCourseSearch, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
 
 
 import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
@@ -38,6 +38,10 @@ router.route('/course-details/:courseId').get(fullCourseDetails);
 {/** contributors route */} 
 
 router.use(verifyJwt) ; // all routes below this line require authentication
+
+router.route('/ad-course').post(administrativeCourseSearch);
+
+// router.route('/co').post(userCourseSearch2);
 
 router.route('/courses-by-creator/:creatorId').get(getCourseByCreatorId);
 

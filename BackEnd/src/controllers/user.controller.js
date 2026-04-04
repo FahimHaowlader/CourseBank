@@ -94,7 +94,7 @@ const userLogin = asyncHandler(async (req, res) => {
     throw new apiError(400, "Please provide userId and password");
   }
 
-  if(userId.length !== 10 && userId.length !== 11) {
+  if(userId.length !== 11) {
     throw new apiError(400, "userId must be either 10 or 11 characters long");
   }
   if(password.length < 6) {
@@ -353,9 +353,9 @@ const cancelAccountSubmission = asyncHandler(async (req, res) => {
   // }
 
   // 2. Contributor Guard
-  if (requester.role === 'contributor' && requester.status !== 'pending') {
-    throw new apiError(400, "Your account is not currently pending submission.");
-  }
+  // if (requester.role === 'contributor' && requester.status !== 'pending') {
+  //   throw new apiError(400, "Your account is not currently pending submission.");
+  // }
 
   // 3. Atomic Update
   const updatedUser = await User.findOneAndUpdate(

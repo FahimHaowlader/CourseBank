@@ -57,6 +57,10 @@ const courseSchema = new mongoose.Schema(
       lowercase: true,
       enum: ["major", "non-major", "elective"],
     },
+    hscYear: {
+      type: Number,
+      required: true,
+    },
 
     type: {
       type: String,
@@ -274,7 +278,7 @@ const courseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      select: false,
+
     },
 
     status: {
