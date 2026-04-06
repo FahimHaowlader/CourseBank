@@ -2206,27 +2206,33 @@ const administrativeCourseSearch = asyncHandler(async (req, res) => {
 
   if (parameters.createdBy) {
     const targetUser = await User.findOne({ userId : parameters.createdBy });
+    
     if (!targetUser) {
       throw new apiError(404, "Target user not found.");
     }
+    
     // console.log("AdministrativeCourseSearch - Target User:", targetUser);
+
     // Safety Check: Moderators can only view Contributors or themselves
     if (role === "moderator" && targetUser.role === "contributor" && targetUser.year !== req.user.year && targetUser.degree !== req.user.degree && targetUser.semester !== req.user.semester) {
       throw new apiError(403, "Moderators can only view courses from contributors.");
     }
+    
     if( role === "moderator" && targetUser.role !== "contributor" && targetUser._id.toString() !== currentUserId.toString() ) {
       throw new apiError(403, "Moderators can only view their own courses.");
     }
 
-    parameters.createdBy = targetUser._id;
+    // Force the ID to be a string
+    parameters.createdBy = targetUser._id.toString(); 
   }
   // parameters.status = 'draft'; // Only show courses that haven't been edited since feedback
 
   if (role === "moderator") {
-    parameters.hscYear = req.user.year;
-    parameters.degree = req.user.degree;
-    parameters.semester = req.user.semester;
+    // parameters.hscYear = req.user.year;
+    // parameters.degree = req.user.degree;
+    // parameters.semester = req.user.semester;
   }
+  // console.log("AdministrativeCourseSearch - Final Parameters:", parameters);
   // console.log("UserCourseSearch2 - Parameters after user filter:", parameters);
   const result = await getCourses(userId, parameters, page, sort );
 

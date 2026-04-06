@@ -3,7 +3,7 @@ import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseB
 updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview,administrativeCourseSearch, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
 
 
-import { createUser,handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
+import { handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
 import {upload} from "./middlewares/multer.middleware.js";
@@ -39,7 +39,7 @@ router.route('/course-details/:courseId').get(fullCourseDetails);
 
 router.use(verifyJwt) ; // all routes below this line require authentication
 
-router.route('/ad-course').post(administrativeCourseSearch);
+router.route('/administrative-course-search').post(administrativeCourseSearch);
 
 // router.route('/co').post(userCourseSearch2);
 
@@ -99,7 +99,7 @@ router.route('/delete-course/:courseId').delete(deleteCourse);
 
 {/** admin route */} 
 
-router.route('/create-user').post(createUser);
+// router.route('/create-user').post(createUser);
 
 router.route('/update-user-info/:userId').patch(updateUserInfo);
 

@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     },
     department: {
       type: String,
-      required: true,
+      // required: true,
       lowercase: true,
       select: false,
     },
@@ -69,6 +69,7 @@ const userSchema = new mongoose.Schema(
           ref: "Course",
         },
       ],
+      default: [],
       select: false, // This now correctly applies to the field
     },
     status: {
@@ -85,6 +86,11 @@ const userSchema = new mongoose.Schema(
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      select: false,
+    },
+    approvedAt: {
+      type: Date,
+      set: (value) => new Date(value),
       select: false,
     },
     feedback: {

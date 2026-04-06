@@ -7,47 +7,148 @@ import apiResponse from "../utils/apiResponse.js";
 //model import
 import  User  from "../models/user.model.js";
 
-const createUser = asyncHandler(async (req, res) => {
-  try {
-    const {role :adminRole }  = req.user;
-    // console.log("Admin Role:", adminRole  );
-    // Only admin can create users
-    if (adminRole !== "admin") {
-      throw new apiError(403, "Only admin can create users");
-    }
-    const {user} = req.body;
-    const { userId, password,role } = user;
+const createContributors = asyncHandler(async (req, res) => {
+  const { contributor } = req.body;
+  
+  // Destructure req.user (populated by your auth middleware)
+  const { role, access, userId: adminId } = req.user;
 
-    // Validate required fields
-    if (!userId || !password || !role)  {
-      throw new apiError(400, "Please provide all required fields");
-    }
-
-    if(userId.length !== 10 && userId.length !== 11) {
-      throw new apiError(400, "userId must be either 10 or 11  characters long");
-    }
-      if(password.length < 6) {
-        throw new apiError(400, "userId and password must be at least 6 characters long");
-      }
-
-
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ userId });
-    if (existingUser) {
-      throw new apiError(409, "User with this userId already exists");
-    }
-
-    // Create new user
-    const newUser = new User(user)
-    await newUser.save();
-
-    res.status(201).json(new apiResponse(201, newUser, "User created successfully"));
-  } catch (error) {
-    console.error("Create User Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+  // 1. Authorization & Access Guard
+  if (!access) {
+    throw new apiError(403, "Your account access is restricted.");
   }
+
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Only admins and moderators can create contributors");
+  }
+
+  // 2. Semester/Department Logic for Moderators
+  if (role === "moderator") {
+    // Safety check: ensure both IDs exist and are long enough
+    if (!contributor?.userId || !adminId || contributor.userId.length < 11 || adminId.length < 11) {
+      throw new apiError(400, "Invalid User ID format for departmental verification");
+    }
+
+    // Extracting the 4th to 11th character (Indices 3 to 11)
+    const contributorAccess = contributor.userId.substring(3, 11);
+    const moderatorAccess = adminId.substring(3, 11);
+
+    if (contributorAccess !== moderatorAccess) {
+      throw new apiError(403, "Moderators can only create contributors for their own semester/department");
+    }
+  }
+
+  // 3. Strict Validation
+  const requiredFields = ['userId', 'password', 'department', 'year', 'semester', 'degree'];
+  const missingFields = requiredFields.filter(field => !contributor?.[field]);
+
+  if (missingFields.length > 0) {
+    throw new apiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+  }
+
+  if (contributor.userId.length !== 11) {
+    throw new apiError(400, "userId must be exactly 11 characters long");
+  }
+
+  if (contributor.password.length < 6) {
+    throw new apiError(400, "Password must be at least 6 characters long");
+  }
+
+  // 4. Duplicate Check (HTTP 409 Conflict)
+  const existingUser = await User.findOne({ userId: contributor.userId });
+  if (existingUser) {
+    throw new apiError(409, "A contributor with this User ID already exists");
+  }
+
+  // 5. Creation
+  // We spread the contributor data and explicitly set the role
+  const newUser = await User.create({
+    ...contributor,
+    role: "contributor" 
+  });
+
+  if (!newUser) {
+    throw new apiError(500, "Something went wrong while creating the contributor");
+  }
+
+  // 6. Response (Returning full user object including password as requested)
+  return res.status(201).json(
+    new apiResponse(201, newUser, "Contributor created successfully")
+  );
 });
+
+const createModerators = asyncHandler(async (req, res) => {
+  const { moderator } = req.body;
+  const { role, access } = req.user;
+
+  // 1. Authorization
+  if (!access) throw new apiError(403, "Your account access is restricted.");
+  if (role !== "admin") throw new apiError(403, "Only admins can create moderators");
+
+  // 2. Validation for Moderator Data
+  const requiredFields = ['userId', 'password', 'year', 'semester', 'degree'];
+  if (!moderator || requiredFields.some(field => !moderator[field])) {
+    throw new apiError(400, "Missing required fields for moderator setup");
+  }
+
+  if (moderator.userId.length < 11) {
+    throw new apiError(400, "Moderator userId must be at least 11 characters");
+  }
+
+  // 3. Check if Moderator already exists
+  const existingMod = await User.findOne({ userId: moderator.userId });
+  if (existingMod) {
+    throw new apiError(409, "A user with this Moderator ID already exists");
+  }
+
+  // 4. Generate Contributors for All Departments
+  const allDepartments = [
+    "arc", "cep", "cee", "cse", "eee", "fet", "ipe", "mee", "pme", "swe",
+    "che", "gee", "mat", "ocg", "phy", "sta",
+    "bmb", "fes", "geb",
+    "anp", "bng", "eco", "eng", "pss", "pad", "scw", "soc",
+    "ban"
+  ];
+
+  // Helper to generate 8-character small-case password
+  const generatePassword = () => Math.random().toString(36).slice(-8).toLowerCase();
+
+  // Extract last 8 characters of moderator ID
+  const modIdSuffix = moderator.userId.slice(-8);
+
+  const contributorsToCreate = allDepartments.map(dept => ({
+    userId: `${dept}${modIdSuffix}`, // e.g., "cse" + "12345678"
+    password: generatePassword(),    // 8-character lowercase string
+    department: dept,
+    year: moderator.year,
+    semester: moderator.semester,
+    degree: moderator.degree,
+    role: "contributor"
+  }));
+
+  // 5. Bulk Insert Contributors (Ignore Existing)
+  try {
+    // { ordered: false } allows the operation to continue if some IDs already exist
+    await User.insertMany(contributorsToCreate, { ordered: false });
+  } catch (err) {
+    console.log("Bulk insert completed: Existing contributors were skipped.");
+  }
+
+  // 6. Create the Moderator
+  const newModerator = await User.create({
+    ...moderator,
+    role: "moderator"
+  });
+
+  if(!newModerator) {
+    throw new apiError(500, "Something went wrong while creating the moderator");
+  }
+
+  return res.status(201).json(
+    new apiResponse(201, newModerator, "Moderator created and all departmental contributors generated.")
+  );
+});
+
 
 const updateUserInfo = asyncHandler(async (req, res) => {
   const { userId } = req.params;
@@ -156,26 +257,63 @@ const userLogin = asyncHandler(async (req, res) => {
 });
 
 
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteContributor = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   const role = req.user?.role;
+  const access = req.user?.access;
+
+  // 1. Authorization Check
+  if (!access) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
 
   // Only admin can delete users
-  if (role !== "admin") {
-    throw new apiError(403, "Only admin can delete users");
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Only admin and moderator can delete users");
   }
 
-  // Validate userId
-  // if (!mongoose.Types.ObjectId.isValid(userId)) {
-  //   throw new apiError(400, "Invalid User ID");
-  // }
+  if (role === "moderator") {
+    // Safety check: ensure both IDs exist and are long enough
+    if (!userId || !req.user.userId || userId.length < 11 || req.user.userId.length < 11) {
+      throw new apiError(400, "Invalid User ID format for departmental verification");
+    }
 
-  // Delete the user
-  const deletedUser = await User.findOneAndDelete(userId);
+    // Extracting the 4th to 11th character (Indices 3 to 11)
+    const targetAccess = userId.substring(3, 11);
+    const moderatorAccess = req.user.userId.substring(3, 11);
 
-  if (!deletedUser) {
-    throw new apiError(404, "User not found");
+    if (targetAccess !== moderatorAccess) {
+      throw new apiError(403, "Moderators can only delete contributors from their own semester/department");
+    }
   }
+
+   // Validate userId format
+   if (!userId || userId.length !== 11) {
+     throw new apiError(400, "Invalid User ID format");
+   }
+   
+   // Check if user exists
+   const userToDelete = await User.findOne({ userId });
+   if (!userToDelete) {
+     throw new apiError(404, "User not found");
+   }
+
+   // Prevent moderators from deleting other moderators or admins
+   if (req.user.role === "moderator" && ["admin", "moderator"].includes(userToDelete.role)) {
+     throw new apiError(403, "Moderators cannot delete other moderators or admins");
+   }
+
+   // Prevent admins from deleting themselves
+   if (req.user.role === "admin" && userToDelete._id.toString() === req.user._id.toString()) {
+     throw new apiError(403, "Admins cannot delete their own account");
+   }
+
+   // All checks passed, proceed to delete the user
+   const deletedUser = await User.findOneAndDelete({ userId });
+
+   if (!deletedUser) {
+     throw new apiError(500, "Something went wrong while deleting the user");
+   }
 
   // Remove password before sending response
   // const responseUser = deletedUser.toObject();
@@ -186,47 +324,199 @@ const deleteUser = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "User deleted successfully"));
 });
 
-const getAllUserSearch = asyncHandler(async (req, res) => {
+const deleteModerator = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
   const role = req.user?.role;
+  const access = req.user?.access;
 
+  // 1. Authorization Check
+  if (!access) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  // Only admin can delete moderators
   if (role !== "admin") {
-    throw new apiError(403, "Only admin can search users");
+    throw new apiError(403, "Only admin can delete moderators");
   }
 
-  // const { parameter } = req.body;g
-  console.log("Search Parameters:", parameter);
+   // Validate userId format
+   if (!userId || userId.length !== 11) {
+     throw new apiError(400, "Invalid User ID format");
+   }
+   
+   // Check if user exists
+   const userToDelete = await User.findOne({ userId });
+   if (!userToDelete) {
+     throw new apiError(404, "User not found");
+   }
+
+   // Prevent admins from deleting themselves
+   if (userToDelete._id.toString() === req.user._id.toString()) {
+     throw new apiError(403, "Admins cannot delete their own account");
+   }
+
+   // All checks passed, proceed to delete the user
+   const deletedUser = await User.findOneAndDelete({ userId });
+
+   if (!deletedUser) {
+     throw new apiError(500, "Something went wrong while deleting the user");
+   }
+
+  res
+    .status(200)
+    .json(new apiResponse(200, {}, "Moderator deleted successfully"));
+});
+
+ 
+
+const getAllContributors= asyncHandler(async (req, res) => {
+  const { parameter } = req.body;
+  const { role, access: requesterAccess, year: adminYear, semester: adminSemester, degree: adminDegree } = req.user;
+
+  // 1. Pagination Setup
+  // Use query parameters or body parameters; default to page 1 and limit 15
+  const page = parseInt(req.body.page) || 1;
+  const limit = 15;
+  const skip = (page - 1) * limit;
+
+  // 2. Authorization Guard
+  if (!requesterAccess) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Only admins and moderators can search users.");
+  }
+
   if (!parameter || typeof parameter !== "object") {
-    throw new apiError(400, "parameter object is required");
+    throw new apiError(400, "A valid parameter object is required.");
   }
 
-  const { userId, year, degree, semester, department } = parameter;
+  const { userId, year, degree, semester, department, status, access } = parameter;
 
-  // Build dynamic filter add
+  // 3. Build the Filter Base
   const filter = {};
 
-  // ✅ Partial, case-insensitive match
+  filter.role = "contributor"; // We are only searching for contributors
+
   if (userId) {
     filter.userId = { $regex: userId, $options: "i" };
   }
 
-  if (year) filter.year = year;
-  if (degree) filter.degree = degree;
-  if (semester) filter.semester = semester;
-  if (department) filter.department = department;
+  // 4. Apply Role-Based Logic
+  if (role === "moderator") {
+    filter.year = adminYear;
+    filter.semester = adminSemester;
+    filter.degree = adminDegree;
+    
+    // Moderators see active users in their scope
+    // filter.access = true; 
+    // filter.status = "active";
 
-  const users = await User.find(filter)
-    .select("+password"); // Include password for admin view
+    if (department) filter.department = department;
+    if (status) filter.status = status;
+    if (access !== undefined) filter.access = access;
+  } else {
+    // Admins have global search access
+    if (year) filter.year = year;
+    if (degree) filter.degree = degree;
+    if (semester) filter.semester = semester;
+    if (department) filter.department = department;
+    if (status) filter.status = status;
+    if (access !== undefined) filter.access = access;
+  }
 
+  // 5. Database Query with Pagination
+  // We run countDocuments and find in parallel for better performance
+  const [totalContributors, contributors] = await Promise.all([
+    User.countDocuments(filter),
+    User.find(filter)
+      .select("+password")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }) // Show newest users first
+  ]);
+
+  // 6. Response with Metadata
   res.status(200).json(
     new apiResponse(
       200,
-      { users },
+      { 
+        contributors,
+        totalContributors,
+      },
       "Users retrieved successfully"
     )
   );
 });
 
 // This handler only runs if verifyJwt passes (Next() was called)
+const getAllModerators = asyncHandler(async (req, res) => {
+  const { parameter } = req.body;
+  const { role, access: requesterAccess } = req.user;
+
+  // 1. Strict Admin Authorization Guard
+  if (!requesterAccess) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  // Only Admin can access this list.
+  if (role !== "admin") {
+    throw new apiError(403, "Access denied. Only administrators can view the moderators list.");
+  }
+
+  // 2. Pagination Setup (15 per page)
+  const page = parseInt(req.body.page) || 1;
+  const limit = 15;
+  const skip = (page - 1) * limit;
+
+  // 3. Build the Filter
+  // Filter strictly by role: "moderator"
+  const filter = { role: "moderator" };
+
+   if (!parameter || typeof parameter !== "object") {
+    throw new apiError(400, "A valid parameter object is required.");
+  }
+  const { userId, year, degree, semester, status, access } = parameter;
+
+    // Partial search for userId (Case-insensitive)
+    if (userId) {
+      filter.userId = { $regex: userId, $options: "i" };
+    }
+
+    // Admins can search by academic batch/group
+    if (year) filter.year = year;
+    if (degree) filter.degree = degree;
+    if (semester) filter.semester = semester;
+    
+    // Status and Access management
+    if (status) filter.status = status;
+    if (access !== undefined) filter.access = access;
+  
+
+  // 4. Database Query
+  const [totalModerators, moderators] = await Promise.all([
+    User.countDocuments(filter),
+    User.find(filter)
+      .select("+password +access +status -approvedCourseCount -myCourseCount -feedback") // Include password, access, and status; exclude course counts for cleaner response
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+  ]);
+
+  // 5. Response
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { 
+        moderators,
+        totalModerators,
+      },
+      "Moderators retrieved successfully"
+    )
+  );
+});
+
  const handleRefresh = asyncHandler(async (req, res) => {
     try {
         // req.user was attached by your verifyJwt middleware
@@ -250,140 +540,499 @@ const getAllUserSearch = asyncHandler(async (req, res) => {
     }
 });
 
-const requestForSubmitAccount = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
-  const user = req.user;
 
-  // 1. Standard Auth Guard
-  if (!userId) {
+
+const requestForSubmitContributorsAccount = asyncHandler(async (req, res) => {
+  const { role, access: requesterAccess, userId: requesterUserId, 
+          year: modYear, semester: modSemester, degree: modDegree } = req.user;
+  
+  // 1. Identify Target Contributor
+  // If Admin/Mod, they provide contributorId in body. If Contributor, use their own ID.
+  const targetUserId = (role !== "contributor" && req.body.contributorUserId) 
+    ? req.body.contributorUserId 
+    : requesterUserId;
+
+  // 2. Authorization Guard
+  if (!requesterAccess) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  // Fetch the target contributor from DB
+  const targetUser = await User.findOne({ userId: targetUserId }).select("+approvedCourseCount +myCourseCount +status +access +year +semester +degree");
+  if (!targetUser || targetUser.role !== 'contributor') {
+    throw new apiError(404, "Contributor account not found.");
+  }
+
+  // 3. Moderator Scope Guard
+  // Moderators can only submit contributors from their own Year/Semester/Degree
+  if (role === "moderator") {
+    const isSameScope = 
+      targetUser.year === modYear && 
+      targetUser.semester === modSemester && 
+      targetUser.degree === modDegree;
+
+    if (!isSameScope) {
+      throw new apiError(403, "Moderators can only submit contributors within their own semester scope.");
+    }
+  }
+
+  // 4. Status & Pre-Condition Checks
+  if (targetUser.status !== 'active') {
+    throw new apiError(400, "This account is already under review.");
+  }
+
+  // Logic: At least 3 approved courses
+  if (targetUser.approvedCourseCount < 3) {
+    throw new apiError(400, "At least 3 approved courses are required for submission.");
+  }
+
+  // Logic: Clean Slate (All courses must be approved)
+  if (targetUser.myCourseCount !== targetUser.approvedCourseCount) {
+    throw new apiError(400, "All uploaded courses must be approved before submission.");
+  }
+
+  // 5. Atomic Update
+  const updatedUser = await User.findOneAndUpdate(
+    { userId: targetUserId },
+    { 
+      $set: { 
+        access: false,       // Always lock access on submission
+        status: 'pending',
+        submittedAt: new Date(),
+      } ,
+      $unset: {
+        feedback: "", // Clear any previous feedback on new submission
+        reviewedBy: "" // Clear any previous reviewer tag on new submission
+    },
+  },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new apiError(500, "Something went wrong while updating the account.");
+  }
+
+  // 6. Response
+  const message = role === "contributor" 
+    ? "Your account has been submitted successfully." 
+    : `Contributor account (${targetUser.userId}) has been submitted by ${role}.`;
+
+  res.status(200).json(new apiResponse(200, {}, message));
+});
+
+const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
+  const requester = req.user;
+  const { feedback, userId } = req.body || {};
+
+  // 1. Basic Auth & Access Guard
+  if (!requester) {
     throw new apiError(401, "Authentication required");
   }
 
-  // 2. NEW: Status Guard (Prevent re-submitting if already pending)
-  if (user.status !== 'active') {
-    throw new apiError(400, "Your account is already under review");
+  if (!requester.access) {
+    throw new apiError(403, "Your account access is restricted.");
   }
 
-  // 3. NEW: Access Guard (Prevent action if already restricted)
-  if (user.access === false) {
-    throw new apiError(400, "Account access is already restricted or submitted");
+  // 2. Identify Target (Staff can provide a userId, Contributors default to self)
+  const isStaff = ["admin", "moderator"].includes(requester.role);
+  const isTargetingSelf = !userId || userId === requester.userId;
+  const targetUserId = isTargetingSelf ? requester.userId : userId;
+
+  // 3. Permission & Scope Guards
+  if (!isTargetingSelf) {
+    if (!isStaff) {
+      throw new apiError(403, "Only staff members can cancel other users' submissions.");
+    }
+
+    // Feedback is mandatory when a staff member cancels a contributor's work
+    if (!feedback || feedback.trim().length === 0) {
+      throw new apiError(400, "Feedback is required when canceling another user's submission.");
+    }
+
+    // Moderator Scope Check (Last 8 digits must match)
+    if (requester.role === "moderator") {
+      const contributorSuffix = targetUserId.slice(-8);
+      const moderatorSuffix = requester.userId.slice(-8);
+      if (contributorSuffix !== moderatorSuffix) {
+        throw new apiError(403, "Moderators can only manage contributors within their own batch.");
+      }
+    }
   }
 
-  // 4. Logic: At least 3 approved courses
-  if (user.approvedCourseCount < 3) {
-    throw new apiError(400, "You need at least 3 approved courses to submit your account");
-  }
+  // 4. Build Update Object
+  const updateData = {
+    access: true,         // Restore login access so they can fix errors
+    status: 'active',     // Revert from 'pending' to 'active'
+    submittedAt: null     // Reset submission timer
+  };
 
-  // 5. Logic: Clean Slate (All courses must be approved)
-  if (user.myCourseCount !== user.approvedCourseCount) {
-    throw new apiError(400, "All courses must be approved before submission");
+  // 5. Audit & Feedback Logic
+  if (!isTargetingSelf) {
+    // STAFF ACTION: Add the reviewer ID and the required feedback
+    updateData.reviewedBy = requester._id;
+    updateData.feedback = feedback;
+  } else {
+    // SELF ACTION: Reset feedback and remove the reviewer tag
+    updateData.feedback = "";
+    // No reviewedBy added for self-cancellation
   }
 
   // 6. Atomic Update
   const updatedUser = await User.findOneAndUpdate(
-    { _id: userId },
     { 
-      $set: { 
-        access: false,
-        status: 'pending',
-        submittedAt: new Date(),
-        // Optional: clear any previous rejection messages
-      } 
-    },
-    { new: true }
-  );
-
-  if (!updatedUser) {
-    throw new apiError(404, "User not found");
-  }
-
-  res.status(200).json(
-    new apiResponse(200, { }, "Account submitted successfully")
-  );
-});
-
-const cancelAccountSubmission = asyncHandler(async (req, res) => {
-  const requester = req.user;
-  const { feedback, userId } = req.body || {};
-  const hasAccess = requester?.access === true;
-
-  
-  const isStaff = ["admin", "moderator"].includes(requester.role);
-  const targetUserId = isStaff ? userId : requester._id;
-  const isTargetingSelf = targetUserId?.toString() === requester?._id?.toString();
-
-  if (!requester?._id) {
-    throw new apiError(401, "Authentication required");
-  }
-  
-  if (requester.status !== 'pending') {
-    throw new apiError(400, "Your account is not currently pending submission.");
-  }
-  if (!hasAccess) {
-     throw new apiError(403, "Your account access is restricted.");
-  }
-
-   if(isStaff && !isTargetingSelf && !hasAccess) {
-     throw new apiError(403, "Forbidden: You do not have active access to manage other users.");
-   }
-
-   if(isStaff && !isTargetingSelf && !feedback) {
-     throw new apiError(400, "Feedback is required when canceling another user's submission.");
-   }
-
-   if(requester.role === 'contributor' && requester.status !== 'pending') {
-     throw new apiError(400, "Your account is not currently pending submission.");
-   }
-  // 1. Staff Validation: Feedback, Target ID, and Access check
-  // if (isStaff) {
-  //   // Staff must provide feedback
-  //   if (!feedback || feedback.trim().length === 0) {
-  //     throw new apiError(400, "Feedback is required for staff actions.");
-  //   }
-    
-  //   // Staff must provide a target User ID
-  //   if (!userId) {
-  //     throw new apiError(400, "Target userId is required.");
-  //   }
-
-  //   // CRITICAL: Staff MUST have 'access: true' to cancel someone else's submission
-  //   if (!isTargetingSelf && requester.access !== true) {
-  //     throw new apiError(403, "Forbidden: You do not have active access to manage other users.");
-  //   }
-  // }
-
-  // 2. Contributor Guard
-  // if (requester.role === 'contributor' && requester.status !== 'pending') {
-  //   throw new apiError(400, "Your account is not currently pending submission.");
-  // }
-
-  // 3. Atomic Update
-  const updatedUser = await User.findOneAndUpdate(
-    { 
-      _id: targetUserId, 
+      userId: targetUserId, 
       status: 'pending' 
     },
     { 
-      $set: { 
-        access: true,
-        status: 'active'
-      },
-      $unset: { 
-        submittedAt: "" 
-      } 
+      $set: updateData,
+      // If self-canceling, ensure we remove any old reviewedBy ID from the document
+      ...(isTargetingSelf && { $unset: { reviewedBy: "" } })
     },
     { new: true }
   );
 
   if (!updatedUser) {
-    throw new apiError(404, "User not found or not in 'pending' state.");
+    throw new apiError(404, "Target user not found or account is not in 'pending' state.");
   }
 
+  // 7. Response
+  const successMessage = isTargetingSelf 
+    ? "Your account submission has been canceled successfully." 
+    : `Submission for contributor ${targetUserId} has been canceled by ${requester.role}.`;
+
   res.status(200).json(
-    new apiResponse(200, {}, "Account submission canceled successfully")
+    new apiResponse(200, {}, successMessage)
   );
 });
 
 
+const approveContributorAccountSubmission = asyncHandler(async (req, res) => {
+  const { contributorUserId } = req.body;
+  const { role, _id: reviewerId, userId: reviewerUserId, access: requesterAccess } = req.user;
 
-export { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, handleRefresh,requestForSubmitAccount, cancelAccountSubmission };
+  // 1. Authorization Guard
+  if (!requesterAccess) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Unauthorized: Only admins or moderators can approve contributors.");
+  }
+
+  // 2. Validate Target Input
+  if (!contributorUserId || contributorUserId.trim().length !== 11) {
+    throw new apiError(400, "A valid 11-character Contributor User ID is required.");
+  }
+
+  // 3. Find the Target Contributor
+  const targetContributor = await User.findOne({ 
+    userId: contributorUserId, 
+    role: "contributor" 
+  }).select("+myCourseCount +approvedCourseCount +status +access");
+
+  if (!targetContributor) {
+    throw new apiError(404, "Contributor account not found.");
+  }
+
+  if (targetContributor.status !== "pending") {
+    throw new apiError(400, "Only accounts in 'pending' status can be approved.");
+  }
+
+  if (!targetContributor.approvedCourseCount || targetContributor.approvedCourseCount < 3 ) {
+    throw new apiError(400, "Contributor must have at least 3 approved courses to be eligible for approval.");
+  }
+
+  if (targetContributor.myCourseCount !== targetContributor.approvedCourseCount) {
+    throw new apiError(400, "All uploaded courses must be approved before the contributor can be approved.");
+  }
+
+  
+
+
+  // 4. Suffix Matching Logic for Moderators
+  if (role === "moderator") {
+    const contributorSuffix = targetContributor.userId.slice(-8);
+    const moderatorSuffix = reviewerUserId.slice(-8);
+
+    if (contributorSuffix !== moderatorSuffix) {
+      throw new apiError(403, "Moderators can only approve contributors from their own department/batch.");
+    }
+  }
+
+  // 5. Final Approval Update
+  const approvedUser = await User.findOneAndUpdate(
+    { 
+      userId: contributorUserId, 
+      status: "pending" 
+    },
+    { 
+      $set: { 
+        access: false,         // Set access false as per your flow (final lock)
+        status: "approved", 
+        reviewedBy: reviewerId,
+        approvedAt: new Date()
+      },
+      $unset: { 
+        feedback: ""           // Remove old rejection messages
+      }
+    },
+    { new: true }
+  );
+
+  if (!approvedUser) {
+    throw new apiError(500, "Failed to approve account. Please try again.");
+  }
+
+  // 6. Response
+  res.status(200).json(
+    new apiResponse(
+      200, 
+      { userId: approvedUser.userId, status: approvedUser.status }, 
+      "Contributor account has been approved and access is locked."
+    )
+  );
+});
+
+const requestForSubmitModeratorsAccount = asyncHandler(async (req, res) => {
+  const { role, access: requesterAccess, userId: requesterUserId } = req.user;
+  
+  // 1. Identify Target Moderator
+  // Admin can provide 'moderatorUserId' in body; Moderator defaults to their own ID
+  const targetUserId = (role === "admin" && req.body.moderatorUserId) 
+    ? req.body.moderatorUserId 
+    :requesterUserId;
+
+  // 2. Authorization Guard
+  if (!requesterAccess) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  // Fetch the target moderator to get their specific userId
+  const targetModerator = await User.findOne(targetUserId);
+  if (!targetModerator || targetModerator.role !== "moderator") {
+    throw new apiError(404, "Moderator account not found.");
+  }
+
+  // 3. Extract the last 8 digits of the target moderator's ID
+  const modIdSuffix = targetModerator.userId.slice(-8);
+
+  // 4. Find all contributors associated with this suffix
+  // Matches any userId ending with the 8-digit suffix (e.g., cse12345678)
+  const associatedContributors = await User.find({
+    role: "contributor",
+    userId: { $regex: `${modIdSuffix}$` }
+  });
+
+  if (associatedContributors.length === 0) {
+    throw new apiError(404, "No departmental contributor accounts found for verification.");
+  }
+
+  // 5. Verify all contributors are 'approved'
+  const unapprovedUsers = associatedContributors.filter(
+    (user) => user.status !== "approved"
+  );
+
+  if (unapprovedUsers.length > 0) {
+    throw new apiError(
+      400, 
+      `Validation failed. ${unapprovedUsers.length} departmental accounts are not yet approved.`
+    );
+  }
+
+  // 6. Update Moderator Account (Always set access: false)
+  const updatedModerator = await User.findOneAndUpdate(
+    { userId: targetUserId },
+    { 
+      $set: { 
+        access: false,       // <--- Always false regardless of who hits the endpoint
+        status: 'pending',
+        submittedAt: new Date()
+      },
+        $unset: {
+          reviewedBy: "",
+          feedback: ""
+        } 
+    },
+    { new: true }
+  );
+
+  if(!updatedModerator) {
+    throw new apiError(500, "Something went wrong while submitting the moderator account");
+  }
+
+  // 7. Final Response
+  const message = role === "admin" 
+    ? "Admin has successfully submitted and locked this moderator account." 
+    : "Your account has been submitted and locked for review.";
+
+  res.status(200).json(new apiResponse(200, updatedModerator, message));
+});
+
+
+const cancelModeratorAccountSubmission = asyncHandler(async (req, res) => {
+  const requester = req.user;
+  const { feedback, userId } = req.body; // userId is the target's userId string
+
+  // 1. Basic Auth & Access Guard
+  if (!requester) {
+    throw new apiError(401, "Authentication required");
+  }
+
+  if (!requester.access) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  // 2. Identify Target and Authorization
+  // If no userId is provided in body, assume the requester is targeting themselves
+  const isTargetingSelf = !userId || userId === requester.userId;
+  const targetUserId = isTargetingSelf ? requester.userId : userId;
+
+  // 3. Permission Logic
+  if (!isTargetingSelf) {
+    // Only Admin can cancel someone else's submission
+    if (requester.role !== "admin") {
+      throw new apiError(403, "Only admins can cancel other users' submissions.");
+    }
+    // Admin MUST provide feedback when canceling others
+    if (!feedback || feedback.trim().length === 0) {
+      throw new apiError(400, "Feedback is required when canceling another user's submission.");
+    }
+  }
+
+  // 4. Build Update Object
+  const updateData = {
+    access: true,         // Restore login access
+    status: 'active',     // Revert status to active/editable
+    submittedAt: null     // Clear the submission timestamp
+  };
+
+  // Only attach feedback if it was provided (Admins canceling others)
+  if (feedback) {
+    updateData.feedback = feedback;
+  }else {
+    updateData.feedback = "" ; // Remove feedback if canceling self or no feedback provided
+  }
+
+  // 5. Atomic Update
+  // We filter by targetUserId and ensure the account is currently 'pending'
+  const updatedUser = await User.findOneAndUpdate(
+    { 
+      userId: targetUserId, 
+      status: 'pending' 
+    },
+    { 
+      $set: updateData 
+    },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new apiError(404, "Target user not found or account is not in 'pending' state.");
+  }
+
+  // 6. Response
+  const successMessage = isTargetingSelf 
+    ? "Your account submission has been canceled successfully." 
+    : `Submission for user ${targetUserId} has been canceled by Admin.`;
+
+  res.status(200).json(
+    new apiResponse(200, {}, successMessage)
+  );
+});
+
+const approveModeratorAccountSubmission = asyncHandler(async (req, res) => {
+  const { moderatorUserId } = req.body; 
+  const { role, access: requesterAccess, _id: adminId } = req.user;
+
+  // 1. Authorization Guard
+  if (!requesterAccess) {
+    throw new apiError(403, "Your account access is restricted.");
+  }
+
+  if (role !== "admin") {
+    throw new apiError(403, "Access denied. Only administrators can approve moderator accounts.");
+  }
+
+  // 2. Validate Input
+  // Added trim() to prevent whitespace issues
+  if (!moderatorUserId || moderatorUserId.trim().length !== 11) {
+    throw new apiError(400, "A valid 11-character Moderator User ID is required.");
+  }
+
+  const modIdSuffix = moderatorUserId.slice(-8);
+
+  // 3. Verify Associated Contributors
+  const associatedContributors = await User.find({
+    role: "contributor",
+    userId: { $regex: `${modIdSuffix}$` }
+  });
+
+  // Safety check: Ensure the sub-accounts actually exist
+  if (associatedContributors.length === 0) {
+    throw new apiError(404, "No departmental contributor accounts found for this Moderator ID.");
+  }
+
+  // 4. Check for any non-approved contributors
+  const unapprovedUsers = associatedContributors.filter(
+    (user) => user.status !== "approved"
+  );
+
+  if (unapprovedUsers.length > 0) {
+    throw new apiError(
+      400, 
+      `Approval failed. ${unapprovedUsers.length} departmental accounts are not yet approved.`
+    );
+  }
+
+  // 5. Final Approval Update
+  const approvedModerator = await User.findOneAndUpdate(
+    { 
+      userId: moderatorUserId, 
+      role: "moderator", 
+      status: "pending" 
+    },
+    { 
+      $set: { 
+        access: false,         // Locked as requested
+        status: 'approved',     
+        reviewedBy: adminId,    
+        approvedAt: new Date() // Recommended: add a timestamp for the approval
+      },
+      $unset: { 
+        feedback: ""            
+      }
+    },
+    { new: true }
+  );
+
+  if (!approvedModerator) {
+    throw new apiError(404, "Moderator account not found or is not in 'pending' state.");
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200, 
+      approvedModerator, 
+      "Moderator account has been approved and access is locked."
+    )
+  );
+});
+
+
+export {
+  createContributors,
+  createModerators,
+  updateUserInfo,
+  userLogin,
+  deleteContributor,
+  deleteModerator,
+  getAllContributors,
+  getAllModerators,
+  handleRefresh,
+  requestForSubmitContributorsAccount,
+  cancelContributorAccountSubmission,
+  approveContributorAccountSubmission,
+  requestForSubmitModeratorsAccount,
+  cancelModeratorAccountSubmission,
+  approveModeratorAccountSubmission
+};
