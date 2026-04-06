@@ -78,11 +78,19 @@ const AllCoursePage = () => {
 
   // Reset Filters
   const resetFilters = () => {
+    if(user?.role === "admin"){
     setFilters({
       title: '', instructorName: '', createdBy: '',
       courseCode: '', department: '', degree: '', year: '',status: '',
       semester: '', type: '', credits: '', format: ''
     });
+  } else {
+    setFilters({
+      title: '', instructorName: '', createdBy: '',
+      courseCode: '', department: '', degree: user?.degree || '', year: '', status: '',
+      semester: user?.semester || '', type: '', credits: '', format: ''
+    });
+  }
     setSort({
     sortField: "staringDate",
     sortOrder: "desc",

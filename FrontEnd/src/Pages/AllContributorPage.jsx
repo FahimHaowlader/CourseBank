@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { AiOutlineSearch, AiOutlinePlus } from "react-icons/ai";
 import { MdRefresh } from "react-icons/md";
 import { IoIosArrowDown } from "react-icons/io";
 import { LiaIdCardSolid } from "react-icons/lia";
 import Department from "../Components/Department";
 import GmailTableWithSort from "../Components/SelectAbleTable";
+import { useAuth } from "../Contexts/Auth.Context.jsx";
+import AddContributor from "../Components/AddContributor";
 
 const AllContributorPage = () => {
-  // 1. State Management for all filters
+ const { user } = useAuth();
+const [modal, setModal] = useState({ openModal: false, status: "" });
+  // 1. Initial State
   const [filters, setFilters] = useState({
-    contributorId: "", // Updated from moderatorId
+    contributorId: "",
     semester: "",
     degree: "",
     year: "",
@@ -18,36 +22,94 @@ const AllContributorPage = () => {
     department: ""
   });
 
+  const handleAddContributor = () => {
+    setModal({ openModal: true, status: "idle" });
+  };
+
+  // 2. Sync Profile Data on Load
+  useEffect(() => {
+    if (user) {
+      setFilters((prev) => ({
+        ...prev,
+        semester: user.role === "admin" ? "" : user.semester || "",
+        degree: user.role === "admin" ? "" : user.degree || "",
+        year: user.role === "admin" ? "" : user.year || "",
+      }));
+    }
+  }, [user]);
+
   const generateYearRange = (start) => {
     const current = new Date().getFullYear();
     return Array.from({ length: current - start + 1 }, (_, i) => current - i);
   };
   const years = generateYearRange(2025);
 
-  // 2. Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 3. Search Action
-  const handleSearch = () => {
-    console.log("Searching for Contributor Data:", filters);
-    // Logic for API call goes here
+  const handleFilterChangeIntoNumber = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value === "" ? "" : isNaN(value) ? value : +value,
+    }));
   };
 
-  // 4. Reset Action
+  const handleSearch = () => {
+    const { contributorId } = filters;
+
+  if (contributorId) {
+    const isValidFormat = /^[A-Za-z]{3}\d{8}$/.test(contributorId);
+
+    
+
+    if (user?.role === 'moderator') {
+      const inputSuffix = contributorId.slice(-8);
+      const userSuffix = user?.userId?.toString().slice(-8);
+
+      if (inputSuffix !== userSuffix) {
+        setFilters(prev => ({ ...prev, contributorId: '' }));
+        alert("As a moderator, you can do not have access to those contributors'courese.");
+        return; // 2. CRITICAL: Stop the function here
+      }
+    }
+
+    if (!isValidFormat) {
+      // 1. Clear the state for the UI
+      setFilters(prev => ({ ...prev, contributorId: '' }));
+      alert("Enter a valid Contributor ID (e.g., USER-123)");
+      return; // 2. CRITICAL: Stop the function here so the API isn't called
+    }
+  }
+    // Destructure contributorId out, and collect the rest of the filters
+const { contributorId: userId, ...remainingFilters } = filters;
+
+// Create the final params object
+const searchParams = {
+  ...remainingFilters,
+  userId // Now using userId instead
+};
+// Map contributorId to userId for API
+    console.log("Searching for Contributor Data:", searchParams);
+  };
+
   const handleReset = () => {
     setFilters({
       contributorId: "",
-      semester: "",
-      degree: "",
-      year: "",
+      semester: user?.role === "admin" ? "" : user?.semester || "",
+      degree: user?.role === "admin" ? "" : user?.degree || "",
+      year: user?.role === "admin" ? "" : user?.year || "",
       status: "",
       access: "",
       department: ""
     });
   };
+
+  // Helper to check if a field should be locked
+  const isLocked = user?.role !== "admin";
+  const lockedStyles = "cursor-not-allowed opacity-70 bg-gray-50 dark:bg-white/5";
 
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
@@ -80,21 +142,22 @@ const AllContributorPage = () => {
                   name="contributorId"
                   value={filters.contributorId}
                   onChange={handleChange}
-                  placeholder="e.g. CON-2026-001"
-                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border-0 focus:ring-2 focus:ring-primary focus:outline-none text-text-main dark:text-white placeholder-text-secondary text-sm transition-all"
+                  placeholder="e.g. CSE20260211"
+                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border-0 focus:ring-2 focus:ring-primary focus:outline-none text-text-main dark:text-white placeholder-text-secondary text-sm transition-all uppercase"
                 />
               </div>
             </label>
 
-            {/* Semester */}
-            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-6">
+          {/* Semester (NOW LOCKED FOR NON-ADMINS) */}
+            <label className={`flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-6 ${isLocked ? "cursor-not-allowed" : ""}`}>
               <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Semester</span>
-              <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
+              <div className={`relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors ${isLocked ? lockedStyles : ""}`}>
                 <select 
                   name="semester" 
                   value={filters.semester} 
                   onChange={handleChange}
-                  className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                  disabled={isLocked}
+                  className={`w-full h-11 pl-3 pr-10 rounded-lg bg-transparent border-0 focus:outline-none focus:ring-0 text-sm appearance-none ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   <option value="">All Semesters</option>
                   <option value="11">First Year 1st Semester</option>
@@ -110,11 +173,17 @@ const AllContributorPage = () => {
               </div>
             </label>
 
-            {/* Degree */}
-            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-5">
+            {/* Degree (NOW LOCKED FOR NON-ADMINS) */}
+            <label className={`flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-5 ${isLocked ? "cursor-not-allowed" : ""}`}>
               <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Degree</span>
-              <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select name="degree" value={filters.degree} onChange={handleChange} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+              <div className={`relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors ${isLocked ? lockedStyles : ""}`}>
+                <select 
+                  name="degree" 
+                  value={filters.degree} 
+                  onChange={handleChange}
+                  disabled={isLocked}
+                  className={`w-full h-11 pl-3 pr-10 rounded-lg bg-transparent border-0 focus:outline-none focus:ring-0 text-sm appearance-none ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}`}
+                >
                   <option value="">All Degrees</option>
                   <option value="bachelors">Bachelor</option>
                   <option value="masters">Master</option>
@@ -124,18 +193,23 @@ const AllContributorPage = () => {
               </div>
             </label>
 
-            {/* Year */}
-            <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-8 xl:col-span-5">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Year</span>
-              <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                <select name="year" value={filters.year} onChange={handleChange} className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer">
+            {/* Year (LOCKED FOR NON-ADMINS) */}
+            <label className={`flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-8 xl:col-span-5 ${isLocked ? "cursor-not-allowed" : ""}`}>
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Hsc Year</span>
+              <div className={`relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors ${isLocked ? lockedStyles : ""}`}>
+                <select 
+                  name="year" 
+                  value={filters.year} 
+                  onChange={handleFilterChangeIntoNumber}
+                  disabled={isLocked}
+                  className={`w-full h-11 pl-3 pr-10 rounded-lg bg-transparent border-0 focus:outline-none focus:ring-0 text-sm appearance-none ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}`}
+                >
                   <option value="">All Years</option>
                   {years.map((year) => <option key={year} value={year}>{year}</option>)}
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
               </div>
             </label>
-
             {/* Department */}
             <div className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-16 xl:col-span-6">
               <Department defaultText={"All Departments"} value={filters.department} onChange={handleChange} />
@@ -191,8 +265,12 @@ const AllContributorPage = () => {
                 </button>
 
                 {/* New Contributor Button */}
-                <button className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all shadow-sm shadow-primary/30 active:scale-95 order-3 cursor-pointer">
-                  <AiOutlinePlus className="text-[20px]" />
+                <button className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all shadow-sm shadow-primary/30 active:scale-95 order-3 cursor-pointer"
+                onClick={handleAddContributor}
+                >
+                  <AiOutlinePlus className="text-[20px]"
+                  
+                   />
                   <span className="whitespace-nowrap">New Contributor</span>
                 </button>
               </div>
@@ -367,9 +445,10 @@ const AllContributorPage = () => {
 </div>
         </div>
         {/* <GmailTableWithSort></GmailTableWithSort> */}
+        <AddContributor modal={modal} setModal={setModal} ></AddContributor>
       </main>
     </div>
   );
-};
+}
 
 export default AllContributorPage;

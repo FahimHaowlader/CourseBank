@@ -20,13 +20,15 @@ import SemesterDisplay from "../Components/semesterTransformer";
 import Pagination from "../Components/Pagination";
 import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
+import AddContributor from "../Components/AddContributor";
 // import Skeleton from "../Components/SkeletonCard";
 
 const CheckPage = () => {
   return (
     // <div className='min-h-screen' >
     <div className="min-h-screen">
-      <ElementDeleteConfirmation />
+      {/* <ElementDeleteConfirmation /> */}
+      <AddContributor onClose={() => console.log("Close Modal")} />
       {/* <h1 className='text-primary border p-6 rounded-xl'>Hello world </h1> */}
       {/* <SelectBox
   label="Year"

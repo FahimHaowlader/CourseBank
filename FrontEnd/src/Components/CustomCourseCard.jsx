@@ -44,7 +44,7 @@ const CustomCourseCard = ({ Course, setModal }) => {
         <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 group-hover:bg-white transition-colors"></span>
       </span>
       <span className="text-[11px] font-black tracking-widest uppercase">Review </span>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-3 h-3 translate-x-[-4px] opacity-100 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-3 h-3 -translate-x-1 opacity-100 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
       </svg>
     </Link>
