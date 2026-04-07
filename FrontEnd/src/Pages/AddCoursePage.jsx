@@ -58,6 +58,7 @@ const AddCoursePage = () => {
     description: "",
     instructorName: "",
     instructorDepartment: "",
+    hscYear:user.role === "admin" ? "" : userInfo?.year,
     // Assuming HSC year is one year after the starting year of the course
   });
 
@@ -94,6 +95,15 @@ const AddCoursePage = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+
+  const handleFilterChangeIntoNumber = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value === "" ? "" : isNaN(value) ? value : +value,
+    }));
+  };
+
   const handleInstructorDepartmentChange = (e) => {
     const { value } = e.target;
     setFormData({ ...formData, instructorDepartment: value });
@@ -154,9 +164,9 @@ const isHandbookValid = () => {
     const hasBook = isHandbookValid();
 
     if (hasBook)  {
-    courseData = { ...formData, hscYear: userInfo?.year,handbook, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }
+    courseData = { ...formData, handbook, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }
     } else {;  
-     courseData = { ...formData, hscYear: userInfo?.year, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
+     courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
     }
     // console.log("Course Data:", courseData);
  
@@ -481,6 +491,7 @@ const cleanAssessments = () => {
     description: "",
     instructorName: "",
     instructorDepartment: "",
+    hscYear:user.role === "admin" ? "" : userInfo?.year,
   });
   setHandbook("");
   setBooks([{ id: Date.now(), title: "", authorName: "", fileUrl: "" }]);
@@ -503,6 +514,12 @@ const handleTryAgain = () => {
   setModalStatus(null); // Close modal
   setErrorMessage("");
 };
+
+const years = (() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: current - 2025 + 1 }, (_, i) => current - i);
+  })();
+
 
 
   return (
@@ -533,7 +550,7 @@ const handleTryAgain = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="col-span-1 md:col-span-2 lg:col-span-4">
-                <label className="flex flex-col gap-1.5 w-full md:col-span-10">
+                <label className="flex flex-col gap-1.5 w-full md:col-span-1 lg:col-span-1">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400 ">
                     Course Title
                   </span>
@@ -552,6 +569,33 @@ const handleTryAgain = () => {
                     />
                   </div>
                 </label>
+               
+              </div>
+              <div className={`${user?.role === "admin" ? "col-span-1" : "hidden"}  `}>
+     <label className="flex flex-col gap-1.5 w-full md:col-span-1 lg:col-span-3">
+                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
+                 Hsc Year
+                </span>
+                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
+                  <select
+                    className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="hscYear"
+                    value={formData.hscYear}
+                    onChange={handleFilterChangeIntoNumber}
+                    required={user?.role === "admin" ? true : false}
+                  >
+                   <option value="">Select Year</option>
+{years.map((year) => (
+  <option key={year} value={(year)}>
+    {year}
+  </option>
+))}
+                  </select>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
+                    <IoIosArrowDown />
+                  </span>
+                </div>
+              </label>
               </div>
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full md:col-span-3">
@@ -803,7 +847,9 @@ const handleTryAgain = () => {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Provide a detailed overview of the course objectives, topics covered, and expected learning outcomes..."
-              ></textarea>
+                required
+              ></textarea>.
+
             </div>
           </div>
 
