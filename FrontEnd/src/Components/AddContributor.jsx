@@ -9,8 +9,7 @@ const AddContributor = ({ modal, setModal }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   
-  // Destructure from the modal object prop
-  
+  // Destructure visibility and status from the parent's state object
   const { openModal, status } = modal;
 
   const [formData, setFormData] = useState({
@@ -24,15 +23,18 @@ const AddContributor = ({ modal, setModal }) => {
   const lockedStyles = "cursor-not-allowed opacity-70 bg-gray-100 dark:bg-white/5 border-border-light dark:border-border-dark";
   const activeStyles = "bg-transparent border-border-light dark:border-border-dark focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 shadow-sm";
 
-  // Helper to update specific parts of the parent modal state
+  // Helper function to update the parent state object correctly
   const updateModal = (updates) => {
     setModal((prev) => ({ ...prev, ...updates }));
   };
 
   const handleClose = () => {
-    updateModal({ openModal: false, status: "idle" });
+    updateModal({ openModal: false });
+    // Small delay to allow the closing animation to finish before resetting the view
+    setTimeout(() => updateModal({ status: "idle" }), 300);
   };
 
+  // Sync user data for non-admins
   useEffect(() => {
     if (user && !isAdmin) {
       setFormData((prev) => ({
@@ -44,7 +46,7 @@ const AddContributor = ({ modal, setModal }) => {
     }
   }, [user, isAdmin]);
 
-  // Handle Escape key
+  // Handle Escape key to close modal
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") handleClose();
@@ -55,6 +57,7 @@ const AddContributor = ({ modal, setModal }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Allow changes only if admin, or if it's the department field
     if (isAdmin || name === "department") {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -63,6 +66,7 @@ const AddContributor = ({ modal, setModal }) => {
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
+    // Validate that all fields are selected
     const isFormIncomplete = Object.values(formData).some(val => val === "");
     if (isFormIncomplete) {
       updateModal({ status: "warning" });
@@ -71,12 +75,20 @@ const AddContributor = ({ modal, setModal }) => {
 
     setLoading(true);
     try {
-      // Simulate API
+      // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      updateModal({ status: "success" });
+      // Update parent status to success
+      updateModal({ status: "error" });
     } catch (err) {
+      // Update parent status to error
       updateModal({ status: "error" });
     } finally {
+      setFormData({
+        department: "",
+        year: user.role === "admin" ? "" : user.year , // Reset year only if admin
+        semester: user.role === "admin" ? "" : user.semester, // Reset semester only if admin
+        degree: user.role === "admin" ? "" : user.degree, // Reset degree only if admin
+      });
       setLoading(false);
     }
   };
@@ -84,7 +96,7 @@ const AddContributor = ({ modal, setModal }) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 2024 }, (_, i) => 2025 + i);
 
-  // Guard clause: check openModal property
+  // Guard clause: If the parent says the modal is closed, return null
   if (!openModal) return null;
 
   return (
@@ -95,14 +107,14 @@ const AddContributor = ({ modal, setModal }) => {
         onClick={handleClose} 
       />
 
-      {/* MODAL CONTENT */}
+      {/* MODAL CONTENT BOX */}
       <div 
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-2xl bg-white dark:bg-card-dark rounded-3xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in fade-in zoom-in duration-300"
       >
         
-        {/* --- 1. FORM STATE (IDLE) --- */}
-        {status === "idle" && (
+        {/* --- 1. FORM VIEW (IDLE OR INITIAL) --- */}
+        {(status === "idle" || status === "") && (
           <>
             <div className="px-6 py-5 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
               <div>
@@ -118,7 +130,7 @@ const AddContributor = ({ modal, setModal }) => {
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-text-secondary dark:text-gray-400">Department</label>
+                {/* <label className="text-sm font-bold text-text-secondary dark:text-gray-400">Department</label> */}
                 <Department defaultText="Select Department" value={formData.department} onChange={handleChange} required={true} />
               </div>
 
@@ -126,7 +138,7 @@ const AddContributor = ({ modal, setModal }) => {
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-bold text-text-secondary dark:text-gray-400">Degree</label>
                   <div className={`relative border rounded-xl transition-all duration-200 ${!isAdmin ? lockedStyles : activeStyles}`}>
-                    <select name="degree" value={formData.degree} onChange={handleChange} disabled={!isAdmin} className="w-full h-12 px-4 bg-transparent border-0 focus:ring-0 text-sm appearance-none outline-none cursor-pointer" required>
+                    <select name="degree" value={formData.degree} onChange={handleChange} disabled={!isAdmin} className={`w-full h-12 px-4 bg-transparent border-0 focus:ring-0 text-sm appearance-none outline-none ${user.role === "admin" ? "cursor-pointer":"cursor-not-allowed"}`} required>
                       <option value="">Select Degree</option>
                       <option value="bachelors">Bachelor</option>
                       <option value="masters">Master</option>
@@ -139,7 +151,7 @@ const AddContributor = ({ modal, setModal }) => {
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-bold text-text-secondary dark:text-gray-400">HSC Year</label>
                   <div className={`relative border rounded-xl transition-all duration-200 ${!isAdmin ? lockedStyles : activeStyles}`}>
-                    <select name="year" value={formData.year} onChange={handleChange} disabled={!isAdmin} className="w-full h-12 px-4 bg-transparent border-0 focus:ring-0 text-sm appearance-none outline-none cursor-pointer" required>
+                    <select name="year" value={formData.year} onChange={handleChange} disabled={!isAdmin} className={`w-full h-12 px-4 bg-transparent border-0 focus:ring-0 text-sm appearance-none outline-none ${user.role === "admin" ? "cursor-pointer":"cursor-not-allowed"}`} required>
                       <option value="">Select Year</option>
                       {years.map((y) => <option key={y} value={y}>{y}</option>)}
                     </select>
@@ -150,7 +162,7 @@ const AddContributor = ({ modal, setModal }) => {
                 <div className="flex flex-col gap-2 md:col-span-2">
                   <label className="text-sm font-bold text-text-secondary dark:text-gray-400">Semester</label>
                   <div className={`relative border rounded-xl transition-all duration-200 ${!isAdmin ? lockedStyles : activeStyles}`}>
-                    <select name="semester" value={formData.semester} onChange={handleChange} disabled={!isAdmin} className="w-full h-12 px-4 bg-transparent border-0 focus:ring-0 text-sm appearance-none outline-none cursor-pointer" required>
+                    <select name="semester" value={formData.semester} onChange={handleChange} disabled={!isAdmin} className={`w-full h-12 px-4 bg-transparent border-0 focus:ring-0 text-sm appearance-none outline-none ${user.role === "admin" ? "cursor-pointer":"cursor-not-allowed"}`} required>
                       <option value="">Select Semester</option>
                       <option value="11">First Year 1st Semester</option>
                       <option value="12">First Year 2nd Semester</option>
@@ -160,6 +172,8 @@ const AddContributor = ({ modal, setModal }) => {
                       <option value="32">Third Year 2nd Semester</option>
                       <option value="41">Fourth Year 1st Semester</option>
                       <option value="42">Fourth Year 2nd Semester</option>
+                      <option value="51">Fifth Year 1est Semester</option>
+                      <option value="52">Fifth Year 2nd Semester</option>
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary"><IoIosArrowDown /></span>
                   </div>
@@ -169,14 +183,14 @@ const AddContributor = ({ modal, setModal }) => {
               <div className="pt-5 mt-10 flex items-center justify-end gap-3 border-t border-border-light dark:border-border-dark">
                 <button type="button" onClick={handleClose} className="px-6 py-2.5 rounded-xl border border-border-light dark:border-border-dark font-semibold text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer">Cancel</button>
                 <button type="submit" disabled={loading} className="px-10 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 disabled:opacity-70 cursor-pointer">
-                  {loading ? "Saving..." : "Save Contributor"}
+                  {loading ? "Adding..." : "Add Contributor"}
                 </button>
               </div>
             </form>
           </>
         )}
 
-        {/* --- 2. SUCCESS MODE --- */}
+        {/* --- 2. SUCCESS VIEW --- */}
         {status === "success" && (
           <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8 animate-in zoom-in duration-300">
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/20 text-teal-600">
@@ -195,7 +209,7 @@ const AddContributor = ({ modal, setModal }) => {
           </div>
         )}
 
-        {/* --- 3. ERROR MODE --- */}
+        {/* --- 3. ERROR VIEW --- */}
         {status === "error" && (
           <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8 animate-in zoom-in duration-300">
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
@@ -209,14 +223,18 @@ const AddContributor = ({ modal, setModal }) => {
               <button onClick={handleClose} className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300 cursor-pointer hover:bg-gray-50 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSubmit} className="flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-600 transition-colors">
+              {/* Resetting the status to idle allows the user to see the form again */}
+              <button 
+                onClick={() => updateModal({ status: "idle" })} 
+                className="flex-1 rounded-xl bg-orange-500 py-4 text-xl font-semibold text-white flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-600 transition-colors"
+              >
                 <MdRefresh size={24} /> Retry
               </button>
             </div>
           </div>
         )}
 
-        {/* --- 4. WARNING MODE --- */}
+        {/* --- 4. WARNING VIEW --- */}
         {status === "warning" && (
           <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8 animate-in zoom-in duration-300">
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-500">
@@ -224,9 +242,12 @@ const AddContributor = ({ modal, setModal }) => {
             </div>
             <div className="space-y-4">
               <h3 className="text-4xl font-bold text-text-main dark:text-white">Incomplete!</h3>
-              <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Please fill all fields.</p>
+              <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Please fill all fields before saving.</p>
             </div>
-            <button onClick={() => updateModal({ status: "idle" })} className="w-full rounded-xl bg-amber-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-amber-600 transition-colors cursor-pointer">
+            <button 
+              onClick={() => updateModal({ status: "idle" })} 
+              className="w-full rounded-xl bg-amber-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-amber-600 transition-colors cursor-pointer"
+            >
               Go Back
             </button>
           </div>
