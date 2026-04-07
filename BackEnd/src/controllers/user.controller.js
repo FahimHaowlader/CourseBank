@@ -499,7 +499,7 @@ const getAllModerators = asyncHandler(async (req, res) => {
   const [totalModerators, moderators] = await Promise.all([
     User.countDocuments(filter),
     User.find(filter)
-      .select("+password +access +status -approvedCourseCount -myCourseCount -feedback") // Include password, access, and status; exclude course counts for cleaner response
+      .select("+password +access +status ") // Include password, access, and status; exclude course counts for cleaner response
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
