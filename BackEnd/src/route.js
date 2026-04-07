@@ -3,7 +3,23 @@ import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseB
 updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview,administrativeCourseSearch, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
 
 
-import { handleRefresh, updateUserInfo, userLogin, deleteUser, getAllUserSearch,requestForSubmitAccount , cancelAccountSubmission} from "./controllers/user.controller.js";
+import {
+  createContributors,
+  createModerators,
+  updateUserInfo,
+  userLogin,
+  deleteContributor,
+  deleteModerator,
+  getAllContributors,
+  getAllModerators,
+  handleRefresh,
+  requestForSubmitContributorsAccount,
+  cancelContributorAccountSubmission,
+  approveContributorAccountSubmission,
+  requestForSubmitModeratorsAccount,
+  cancelModeratorAccountSubmission,
+  approveModeratorAccountSubmission
+} from "./controllers/user.controller.js";
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
 import {upload} from "./middlewares/multer.middleware.js";
@@ -101,15 +117,39 @@ router.route('/delete-course/:courseId').delete(deleteCourse);
 
 // router.route('/create-user').post(createUser);
 
+router.route('/create-contributor').post(createContributors);   
+
+router.route('/create-moderator').post(createModerators);
+
+router.route('/delete-contributor/:userId').delete(deleteContributor);
+
+router.route('/delete-moderator/:userId').delete(deleteModerator);
+
+router.route('/get-all-contributors').post(getAllContributors);
+
+router.route('/get-all-moderators').post(getAllModerators);
+
 router.route('/update-user-info/:userId').patch(updateUserInfo);
 
-router.route('/delete-user/:userId').delete(deleteUser);
+router.route('/request-submit-contributor-account').post(requestForSubmitContributorsAccount);
 
-router.route('/search-users').post( getAllUserSearch);
+router.route('/cancel-contributor-account-submission').post(cancelContributorAccountSubmission);
 
-router.route('/submit-account').post(requestForSubmitAccount);
+router.route('/approve-contributor-account-submission').post(approveContributorAccountSubmission);
 
-router.route('/cancel-account-submission').post(cancelAccountSubmission);
+router.route('/request-submit-moderator-account').post(requestForSubmitModeratorsAccount);
+
+router.route('/cancel-moderator-account-submission').post(cancelModeratorAccountSubmission);
+
+router.route('/approve-moderator-account-submission').post(approveModeratorAccountSubmission);
+
+// router.route('/delete-user/:userId').delete(deleteUser);
+
+// router.route('/search-users').post( getAllUserSearch);
+
+// router.route('/submit-account').post(requestForSubmitAccount);
+
+// router.route('/cancel-account-submission').post(cancelAccountSubmission);
 
 
 

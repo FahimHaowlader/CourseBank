@@ -372,12 +372,12 @@ const deleteModerator = asyncHandler(async (req, res) => {
 const getAllContributors= asyncHandler(async (req, res) => {
   const { parameter } = req.body;
   const { role, access: requesterAccess, year: adminYear, semester: adminSemester, degree: adminDegree } = req.user;
-
   // 1. Pagination Setup
   // Use query parameters or body parameters; default to page 1 and limit 15
   const page = parseInt(req.body.page) || 1;
-  const limit = 15;
+  const limit = 12;
   const skip = (page - 1) * limit;
+  // console.log("Search Parameter Received:", parameter,page);
 
   // 2. Authorization Guard
   if (!requesterAccess) {
@@ -436,7 +436,8 @@ const getAllContributors= asyncHandler(async (req, res) => {
       .limit(limit)
       .sort({ createdAt: -1 }) // Show newest users first
   ]);
-
+// console.log("Total Contributors Found:", totalContributors);
+// console.log("Contributors on Current Page:", contributors);
   // 6. Response with Metadata
   res.status(200).json(
     new apiResponse(
@@ -467,7 +468,7 @@ const getAllModerators = asyncHandler(async (req, res) => {
 
   // 2. Pagination Setup (15 per page)
   const page = parseInt(req.body.page) || 1;
-  const limit = 15;
+  const limit = 12;
   const skip = (page - 1) * limit;
 
   // 3. Build the Filter

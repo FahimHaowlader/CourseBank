@@ -24,7 +24,7 @@ const verifyJwt = asyncHandler(async (req, _res, next) => {
   }
 
   const user = await User.findById(decodedToken._id).select(
-    "-password -refreshToken +department +semester +degree +reviewedBy +year "
+    "-password -refreshToken +department +semester +degree +reviewedBy"
   );
 
   if (!user) {
