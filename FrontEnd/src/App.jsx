@@ -19,6 +19,7 @@ import AddCoursePage from "./Pages/AddCoursePage.jsx";
 import AdminPage from "./Pages/AdminPage.jsx";
 import AllCoursePage from "./Pages/AllCoursePage.jsx";
 import AllContributorPage from "./Pages/AllContributorPage.jsx";
+import AllModeratorPage from "./Pages/AllModeratorPage.jsx";
 
 function App() {
   const router = createBrowserRouter([
@@ -85,6 +86,7 @@ function App() {
 </RoleProtectedRoute>
     ) },
     { path: "/contributors", element: <AllContributorPage /> },
+    { path: "/moderators", element: <AllModeratorPage /> },
     {
       path: "*",
       element: <h1 className="text-center text-3xl mt-20">404 Not Found</h1>,
