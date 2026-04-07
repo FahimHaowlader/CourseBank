@@ -286,9 +286,9 @@ const createCourse = asyncHandler(async (req, res, next) => {
     throw new apiError(400, "Course data is required");
   }
 
-  const { title, courseCode, startingDate, instructorName, type, format, department, semester, degree } = data;
+  const { title, courseCode, startingDate, instructorName, type, format, department, semester, degree, hscYear } = data;
 
-  if (!title || !courseCode || !startingDate || !instructorName || !type || !format || !department || !semester || !degree) {
+  if (!title || !courseCode || !startingDate || !instructorName || !type || !format || !department || !semester || !degree || !hscYear) {
     throw new apiError(400, "All required course fields must be provided");
   }
 
