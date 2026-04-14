@@ -257,8 +257,8 @@ const AllContributorPage = () => {
 
             <div className="col-span-1 sm:col-span-2 md:col-span-12 xl:col-span-10 mt-4 md:mt-auto">
               <div className="flex flex-col sm:flex-row items-center justify-start xl:justify-end gap-3 w-full sm:h-11">
-                <button onClick={handleReset} className="w-full sm:w-auto min-w-48 flex items-center justify-center gap-2 px-5 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors font-semibold active:scale-95 cursor-pointer"><MdRefresh className="text-[20px]" /> Reset Filters</button>
-                <button onClick={triggerManualSearch} disabled={loading} className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-8 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer">
+                <button onClick={handleReset} className="w-full sm:w-auto min-w-48 flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors font-semibold active:scale-95 cursor-pointer"><MdRefresh className="text-[20px]" /> Reset Filters</button>
+                <button onClick={triggerManualSearch} disabled={loading} className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer">
                   {loading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" /> : <AiOutlineSearch className="text-[20px]" />}
                   <span>Search</span>
                 </button>
