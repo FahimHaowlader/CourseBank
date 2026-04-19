@@ -91,7 +91,6 @@ const userSchema = new mongoose.Schema(
     approvedAt: {
       type: Date,
       set: (value) => new Date(value),
-      select: false,
     },
     feedback: {
       type: String,

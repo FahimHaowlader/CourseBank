@@ -241,14 +241,17 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
   const { userId: queryUserId } = req.params;
   const submittedAccount = req.user?.status === "approved";
 
-  // Auth check
+  // Auth checks
   if (!requesterId) {
     throw new apiError(401, "Unauthorized");
   }
 
-  if (submittedAccount) {
-    throw new apiError(403, "Your account has been approved.");
-  }
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+ if (submittedAccount && req.user.approvedAt && new Date(req.user.approvedAt) < thirtyDaysAgo) {
+    throw new apiError(403, "Your account was approved more than 30 days ago.");
+}
 
   let filter = {};
   // console.log("Role:", role);

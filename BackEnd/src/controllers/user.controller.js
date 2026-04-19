@@ -208,10 +208,18 @@ const userLogin = asyncHandler(async (req, res) => {
     throw new apiError(401, "Invalid userId or password");
   }
   // console.log("User found:", dbUser);
+
+  // Calculate the cutoff (30 days ago)
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); 
+
+
   // Check if user has access
-  if (!dbUser.access && dbUser.status === 'approved') {
-    throw new apiError(403, "Your account does not have access");
-  }
+  
+  // This throws the error ONLY if the date is FURTHER in the past than 30 days
+if (!dbUser.access && dbUser.status === 'approved' && dbUser?.approvedAt && new Date(dbUser.approvedAt) < thirtyDaysAgo) {
+    throw new apiError(403, "Access to this account is currently restricted.");
+}
 
   // Check password
   const isPasswordValid = await dbUser.isPasswordCorrect(password);
@@ -528,10 +536,13 @@ const getAllModerators = asyncHandler(async (req, res) => {
              throw new apiError(401, "User not found"); 
         }
 
-        if (!user.access && user.status === 'approved') {
-            throw new apiError(403, "Your account does not have access");
-        }
-        
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // Check if they lack access AND (are approved BUT it's been more than 30 days)
+if (!user.access && user.status === 'approved' && new Date(user.approvedAt) < thirtyDaysAgo) {
+    throw new apiError(403, "Your account access has expired as it was approved over 30 days ago.");
+}
         res.status(200).json({
             success: true,
             data: { user },
