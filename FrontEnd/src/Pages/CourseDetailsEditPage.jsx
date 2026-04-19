@@ -16,7 +16,7 @@ import { IoCloudDoneOutline } from "react-icons/io5";
 import { MdRefresh } from "react-icons/md";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { IoMdCheckmarkCircle } from "react-icons/io";
-import { IoMdClose } from "react-icons/io";
+import { IoMdClose , IoMdCheckmark} from "react-icons/io";
 import { MdRestartAlt,MdOutlineCancel,MdDelete } from "react-icons/md";
 
 
@@ -122,7 +122,7 @@ const CourseDetailsEditPage = () => {
 
   };
 
-  const AppleSpinner = () => (
+  const AppleSpinner = ({text}) => (
     /* Apply text-white to the container to color both the text and the SVG */
     <div className="flex items-center justify-center gap-2 text-white">
       <svg
@@ -152,7 +152,7 @@ const CourseDetailsEditPage = () => {
         ))}
       </svg>
       {/* The text now inherits the white color from the container */}
-      <span>Deleting...</span>
+      <span>{text}...</span>
     </div>
   );
 
@@ -283,6 +283,17 @@ const successfulDeleteAcknowledgement = () => {
       setSubmitModal((prev) => ({ ...prev, status: "submit-error", loading: false }));
     }
   };
+
+  const handleApproveClick = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true }));
+
+    setTimeout(() => {}, 1000)
+     setSubmitModal((prev) => ({ ...prev, loading: false, status: "approved-error" }));
+    
+    console.log(submitModal)
+  };
+
+
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
@@ -966,7 +977,7 @@ const successfulDeleteAcknowledgement = () => {
        
           <div className="flex flex-col gap-4 w-full sm:flex-row lg:flex-col">
             {/* 1. Finalize & Submit Button */}
-             {course.status === "draft" && (
+             {course.status === "draft" &&  (
             <button
               type="button"
               onClick={handleFinalizeClick}
@@ -980,7 +991,7 @@ const successfulDeleteAcknowledgement = () => {
             </button>
                )}
 
-               {course.status === "pending" && (
+               {course.status === "pending"  && (
           <button
             type="button"
             onClick={() => {
@@ -1006,11 +1017,36 @@ const successfulDeleteAcknowledgement = () => {
           </button>
         )}
 
-
+        {course.status === "pending" && user.role !== "contributor" && (
+  <button
+    type="button"
+    onClick={() => {
+      setSubmitModal((prev) => ({
+        ...prev,
+        openModal: true,
+        status: "approved", // Changed from "cancel" to "approved"
+      }));
+    }}
+    className="group flex w-full items-center justify-center gap-3 rounded-xl 
+       bg-primary-dark hover:bg-primary-hover
+       text-white font-bold 
+       border border-emerald-400/30
+       shadow-lg shadow-emerald-900/20 
+       transition-all duration-200 
+       transform active:scale-[0.97] cursor-pointer py-3"
+  >
+    <IoMdCheckmark
+      size={22}
+      className="transition-transform group-hover:scale-110"
+    />
+    <span className="tracking-tight">Accept Submission</span>
+  </button>
+)}
+           
 
             {/* 2. Delete Course Button */}
             {
-              course.status !== "approved" && (
+              course.status !== "approved" && user.role === "contributor" && (
             
             <button
               type="button"
@@ -1061,7 +1097,7 @@ const successfulDeleteAcknowledgement = () => {
             onClick={() => handleDeleteCourse(course._id)}
           >
             {modal.status === "loading" ? (
-              <AppleSpinner />
+              <AppleSpinner text={"Deleting"} />
             ) : (
               <span className="flex justify-center items-center gap-2">
                 <MdDeleteOutline size={26} /> Delete
@@ -1224,7 +1260,7 @@ const successfulDeleteAcknowledgement = () => {
             Not Now
           </button>
           <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleFinalSubmit}>
-            {submitModal.loading ? <AppleSpinner /> : "Confirm Submit"}
+            {submitModal.loading ? <AppleSpinner text={"Submitting"} /> : "Confirm Submit"}
           </button>
         </div>
       </div>
@@ -1321,7 +1357,7 @@ const successfulDeleteAcknowledgement = () => {
             Keep Review
           </button>
           <button disabled={submitModal.loading} className="flex-1 bg-rose-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-rose-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleConfirmCancel}>
-            {submitModal.loading ? <AppleSpinner /> : "Confirm Cancel"}
+            {submitModal.loading ? <AppleSpinner text={"Cancelling"} /> : "Confirm Cancel"}
           </button>
         </div>
       </div>
@@ -1381,6 +1417,92 @@ const successfulDeleteAcknowledgement = () => {
           <button 
             className="w-full py-4 rounded-xl bg-orange-500 text-white text-xl font-semibold hover:bg-orange-600 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
             onClick={() => setSubmitModal(prev => ({ ...prev, status: "cancel", loading: false }))}
+          >
+            <MdRefresh size={28} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "approved" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={!submitModal.loading ? closeModal : null}></div>
+    <div className="relative w-full max-w-3xl rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">
+          <IoMdCheckmarkCircle size={64} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Approve Submission?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            Confirming this will publish these courses and make them live for students. This action will be logged.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button disabled={submitModal.loading} className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 cursor-pointer" onClick={closeModal}>
+            Cancel
+          </button>
+          <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleApproveClick}>
+            {submitModal.loading ? <AppleSpinner text={"Approving"} /> : "Confirm Approval"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "approved-success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Approval Complete</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            The courses have been successfully approved and published. The contributor has been notified.
+          </p>
+        </div>
+        <button 
+          className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" 
+          onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "approved-error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Approval Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            There was an error while trying to approve this content. Please try again or contact system administration.
+          </p>
+        </div>
+        <div className="flex flex-col-reverse sm:flex-row w-full gap-4 mt-8">
+          <button 
+            className="w-full py-4 rounded-xl border border-border-light bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 cursor-pointer" 
+            onClick={closeModal}
+          >
+            Close
+          </button>
+          <button 
+            className="w-full py-4 rounded-xl bg-rose-500 text-white text-xl font-semibold hover:bg-rose-600 shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+            onClick={() => setSubmitModal(p => ({ ...p, status: "approved", loading: false }))}
           >
             <MdRefresh size={28} />
             Try Again

@@ -14,6 +14,7 @@ import PrivateApi from '../Hooks/PrivateApi.jsx';
 
 import SkeletonCard from '../Components/SkeletonCard.jsx';
 import Pagination from '../Components/Pagination.jsx';
+import { Link } from 'react-router';
 
 const AllCoursePage = () => {
   const {user} = useAuth(); // Assuming you have a useAuth hook for authentication context
@@ -168,10 +169,10 @@ const AllCoursePage = () => {
             <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
               Explore Courses
             </h1>
-            <button className="flex cursor-pointer items-center gap-2 px-4 md:px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
+            <Link to='/add-course' className="flex cursor-pointer items-center gap-2 px-4 md:px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
               <AiOutlinePlus />
               Add <span className='hidden sm:block'>Course</span>
-            </button>
+            </Link>
           </div>
           <p className="mt-0.5 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-0.5">
             Search and explore courses by semester, teacher, and category to plan your academic journey.
