@@ -74,10 +74,10 @@ const CustomCourseCard = ({ Course, setModal }) => {
 
     // 2. MODERATOR logic
     if (role === 'moderator') {
-      if (status === 'draft') {
+      if (status === 'draft' && user?.status === 'active') {
         return isOwner ? <ActionButtons /> : null;
       }
-      if (status === 'pending') {
+      if (status === 'pending' && user?.status === 'active') {
         return isOwner ? <ActionButtons /> : <ReviewButton />;
       }
       if (status === 'approved') return <ApprovedBadge />;
@@ -85,7 +85,8 @@ const CustomCourseCard = ({ Course, setModal }) => {
 
     // 3. CONTRIBUTOR logic
     if (role === 'contributor') {
-      if (status === 'draft' || status === 'pending') {
+      
+      if ((status === 'draft' || status === 'pending') && user?.status === 'active') {
         return isOwner ? <ActionButtons /> : null;
       }
       if (status === 'approved') return <ApprovedBadge />;
@@ -160,6 +161,7 @@ const CustomCourseCard = ({ Course, setModal }) => {
         </Link>
 
         {/* Dynamic Status Logic */}
+       
         {renderStatusActions()}
       </div>
     </article>

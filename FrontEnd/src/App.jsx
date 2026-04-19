@@ -20,6 +20,7 @@ import AdminPage from "./Pages/AdminPage.jsx";
 import AllCoursePage from "./Pages/AllCoursePage.jsx";
 import AllContributorPage from "./Pages/AllContributorPage.jsx";
 import AllModeratorPage from "./Pages/AllModeratorPage.jsx";
+import ModeratorPage from "./Pages/ModeratorPage.jsx";
 
 function App() {
   const router = createBrowserRouter([
@@ -28,7 +29,9 @@ function App() {
     {
       path: "/check-page",
       element: (
-        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+        <RoleProtectedRoute
+          allowedRoles={["contributor", "moderator", "admin"]}
+        >
           <CheckPage />
         </RoleProtectedRoute>
       ),
@@ -37,29 +40,37 @@ function App() {
     { path: "/courses", element: <CoursePage /> },
     { path: "/course/:id", element: <CourseDetailsPage /> },
     { path: "/login", element: <LoginPage /> },
-    { 
-      path: "/my-courses", 
-      element: <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
-      <ContributorCoursePage />
-      </RoleProtectedRoute>
-     },
-     {
+    {
+      path: "/my-courses",
+      element: (
+        <RoleProtectedRoute
+          allowedRoles={["contributor", "moderator", "admin"]}
+        >
+          <ContributorCoursePage />
+        </RoleProtectedRoute>
+      ),
+    },
+    {
       path: "/my-course/edit/:id",
       element: (
         <CourseProvider>
-        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
-          <CourseDetailsEditPage />
-        </RoleProtectedRoute>
+          <RoleProtectedRoute
+            allowedRoles={["contributor", "moderator", "admin"]}
+          >
+            <CourseDetailsEditPage />
+          </RoleProtectedRoute>
         </CourseProvider>
       ),
-     },
+    },
     {
       path: "/my-course/:id",
       element: (
-        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+        <RoleProtectedRoute
+          allowedRoles={["contributor", "moderator", "admin"]}
+        >
           <CourseDetailsPage />
         </RoleProtectedRoute>
-      ),  
+      ),
     },
     {
       path: "/edit/:id",
@@ -73,20 +84,26 @@ function App() {
     {
       path: "/add-course",
       element: (
-        <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+        <RoleProtectedRoute
+          allowedRoles={["contributor", "moderator", "admin"]}
+        >
           <AddCoursePage />
         </RoleProtectedRoute>
       ),
     },
 
     { path: "/admin", element: <AdminPage /> },
-    { path: "/all", element: (
-      <RoleProtectedRoute allowedRoles={["moderator", "admin"]}>
-    <AllCoursePage />
-</RoleProtectedRoute>
-    ) },
+    {
+      path: "/all",
+      element: (
+        <RoleProtectedRoute allowedRoles={["moderator", "admin"]}>
+          <AllCoursePage />
+        </RoleProtectedRoute>
+      ),
+    },
     { path: "/contributors", element: <AllContributorPage /> },
     { path: "/moderators", element: <AllModeratorPage /> },
+    {path: "/moderator-dashboard", element: <ModeratorPage />},
     {
       path: "*",
       element: <h1 className="text-center text-3xl mt-20">404 Not Found</h1>,

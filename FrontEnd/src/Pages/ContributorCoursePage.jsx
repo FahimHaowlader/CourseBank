@@ -132,7 +132,7 @@ const ContributorCoursePage = () => {
   const handleConfirmCancel = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
-      await PrivateApi.post(`/cancel-account-submission`);
+      await PrivateApi.post(`/cancel-contributor-account-submission`);
       // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
       
       // FIXED: Refresh user context so user.status becomes 'active' again
@@ -158,7 +158,7 @@ const ContributorCoursePage = () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
       // throw new Error("Testing submit error handling"); // <-- Temporary line to test error modal
-      const res = await PrivateApi.post(`/submit-account`);
+      const res = await PrivateApi.post(`/request-submit-contributor-account`);
       
       // FIXED: Refresh user context so user.status becomes 'pending'
       if (refreshUser) await refreshUser();
@@ -170,6 +170,7 @@ const ContributorCoursePage = () => {
         loading: false,
       }));
     } catch (error) {
+      // console.log("Error submitting account:", error);
       setSubmitModal((prev) => ({ ...prev, status: "submit-error" ,loading: false}));
     }
   };
