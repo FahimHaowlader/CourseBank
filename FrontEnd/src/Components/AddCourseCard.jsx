@@ -6,7 +6,7 @@ const AddCourseCard = () => {
   const navigate = useNavigate();
 
   return (
-  <div className="group  relative bg-transparent rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/60 dark:border-primary/20 dark:hover:border-primary/50 flex flex-col justify-center items-center h-full min-h-96 cursor-pointer hover:bg-primary/5 transition-all duration-300"
+  <div className="group  relative bg-transparent rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/60 dark:border-primary/20 dark:hover:border-primary/50 flex flex-col justify-center items-center h-full min-h-92 cursor-pointer hover:bg-primary/5 transition-all duration-300"
     onClick={() => navigate('/add-course')}
   >
             <div className="flex flex-col items-center gap-3 text-primary/80 group-hover:text-primary transition-colors ">
