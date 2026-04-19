@@ -344,7 +344,7 @@ const successfulDeleteAcknowledgement = () => {
 
   {/* Actions - shrink-0 ensures buttons don't get squished by the title */}
   <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-    {course.status === "draft" && (
+    { (course.status === "draft" || user.role === "admin") && (
       <button
         className="flex w-full lg:w-auto cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
         onClick={handleUpdateInfo}
@@ -365,11 +365,12 @@ const successfulDeleteAcknowledgement = () => {
                   Instructor Info
                 </h2>
                 {
-                  course.status === "draft" && (   <div
-                  className="flex flex-col sm:items-center material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
-                  onClick={handleUpdateInstructorInfo}
-                >
-                  <FiEdit2 size={22} />
+                  (course.status === "draft" || user.role === "admin") && (
+                    <div
+                      className="flex flex-col sm:items-center material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                      onClick={handleUpdateInstructorInfo}
+                    >
+                      <FiEdit2 size={22} />
                 </div>)
                 }
              
@@ -432,7 +433,7 @@ const successfulDeleteAcknowledgement = () => {
                 </h2>
                 {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
                         {
-                  course.status === "draft" && (
+                  (course.status === "draft" || user.role === "admin") && (
                         
                 <div
                   className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
@@ -470,7 +471,7 @@ const successfulDeleteAcknowledgement = () => {
                   </div>
                 </div>
                     {
-                  course.status === "draft" && (
+                  (course.status === "draft" || user.role === "admin") && (
                    
                 <button
                   className="flex w-full lg:w-auto  cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
@@ -527,7 +528,7 @@ const successfulDeleteAcknowledgement = () => {
                           </div>
                         </div>
                         {
-                          course.status === "draft" && (<button
+                          (course.status === "draft" || user.role === "admin") && (<button
                           className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -548,7 +549,7 @@ const successfulDeleteAcknowledgement = () => {
                         
                       </div>
                     ))}
-                    {course.status === "draft" && (
+                    {(course.status === "draft" || user.role === "admin") && (
                       <div
                         onClick={handleUpdateMaterial}
                         className="cursor-pointer"
@@ -557,7 +558,7 @@ const successfulDeleteAcknowledgement = () => {
                       </div>
                     )}
                   </>
-                ) : course.status === "draft" ? (
+                ) : (course.status === "draft" || user.role === "admin")  ? (
                   /* FIXED: Wrapped in col-span-full to ensure it spans the whole grid width */
                   <div className="col-span-full">
                     <AddFirstElement
@@ -612,7 +613,7 @@ const successfulDeleteAcknowledgement = () => {
                           </div>
                         </div>
                         {
-                          course.status === "draft" && (   <button
+                          (course.status === "draft" || user.role === "admin")  && (   <button
                           className="text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 ml-2"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -634,14 +635,14 @@ const successfulDeleteAcknowledgement = () => {
                       </div>
                     ))}
                     {
-                      course.status === "draft" && (
+                      (course.status === "draft" || user.role === "admin") && (
                         <div onClick={handleUpdateBook} className="cursor-pointer">
                           <AddElement />
                         </div>
                       )
                     }
                   </>
-                ) : (
+                ) :  (
                   /* Empty State - Takes full width automatically in space-y-4 */
                   <AddFirstElement title={"book"} onAdd={handleUpdateBook} />
                 )}
@@ -681,7 +682,7 @@ const successfulDeleteAcknowledgement = () => {
                             </div>
                           </div>
                           {
-                            course.status === "draft" && ( <button
+                            (course.status === "draft" || user.role === "admin")  && ( <button
                             className="text-slate-400 cursor-pointer hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
                              onClick={(e) => {
                             e.stopPropagation();
@@ -703,7 +704,7 @@ const successfulDeleteAcknowledgement = () => {
                         </div>
                       ))}
                       {
-                        course.status === "draft" && (
+                        (course.status === "draft" || user.role === "admin") && (
                           <div onClick={handleUpdateTask} className="cursor-pointer">
                             <AddElement />
                           </div>
@@ -713,7 +714,7 @@ const successfulDeleteAcknowledgement = () => {
                     </>
                   
                   ) : (
-                      course.status === "draft" ? (
+                      (course.status === "draft" || user.role === "admin")  ? (
                       <div className="col-span-full">
                       <AddFirstElement
                         title={"task"}
@@ -788,7 +789,7 @@ const successfulDeleteAcknowledgement = () => {
                                   </div>
                                 </div>
                                 {
-                                  course.status === "draft" && (<button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                  (course.status === "draft" || user.role === "admin")  && (<button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
                                    onClick={(e) => {
                             e.stopPropagation();
                             setDeleteModal({
@@ -809,7 +810,7 @@ const successfulDeleteAcknowledgement = () => {
                               </div>
                             ))}
                             {
-                              course.status === "draft" && (
+                              (course.status === "draft" || user.role === "admin") && (
                                 <div
                             onClick={handleUpdateAssessment}
                             className="cursor-pointer"
@@ -882,7 +883,7 @@ const successfulDeleteAcknowledgement = () => {
                                   </div>
                                 </div>
                                 {
-                                  course.status === "draft" && (<button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                  (course.status === "draft" || user.role === "admin")  && (<button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
                                         onClick={(e) => {
                             e.stopPropagation();
                             setDeleteModal({
@@ -903,7 +904,7 @@ const successfulDeleteAcknowledgement = () => {
                               </div>
                             ))}
                         {
-                          course.status === "draft" && (
+                          (course.status === "draft" || user.role === "admin") && (
                             <div
                             onClick={handleUpdateAssessment}
                             className="cursor-pointer"
@@ -1060,6 +1061,23 @@ const successfulDeleteAcknowledgement = () => {
               <span className="tracking-wide">Delete Course</span>
             </button>
               )}
+            {
+              user.role === "admin" && (
+            
+            <button
+              type="button"
+              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
+              onClick={handleCourseDelete}
+              >
+              <MdDeleteOutline
+                size={22}
+                className="text-rose-100/90 transition-transform duration-300 group-hover:rotate-12"
+              />
+              <span className="tracking-wide">Delete Course</span>
+            </button>
+              )}
+
+
           </div>
      
 
