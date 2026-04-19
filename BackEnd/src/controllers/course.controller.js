@@ -201,32 +201,29 @@ const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
   const isOwner = course.createdBy.toString() === userId.toString();
   const isAdmin = userRole === 'admin';
 
+  // Ensure userId is a string
+  const uid = req.user?.userId?.toString();
 
- // Ensure userId is a string
-const uid = req.user.userId.toString();
-
-
-
-// 1. Check Year (index 3 to 6)
-const matchesYear = uid.substring(3, 7) === course.hscYear.toString();
+  // 1. Check Year (index 3 to 6)
+  const matchesYear = uid.substring(3, 7) === course?.hscYear?.toString();
+  
 
 // 2. Check Program Level (index 7 and 8)
 const programCode = uid.substring(7, 9);
 let matchesProgram = false;
 
-if (programCode === '01' && course.degree === 'bachelors') {
+if (programCode === '01' && course?.degree === 'bachelors') {
     matchesProgram = true;
-} else if (programCode === '02' && course.degree === 'masters') {
+} else if (programCode === '02' && course?.degree === 'masters') {
     matchesProgram = true;
-} else if (programCode === '03' && course.degree === 'phd') {
+} else if (programCode === '03' && course?.degree === 'phd') {
     matchesProgram = true;
 }
 
 
 
 // 3. Check Semester (index 9 and 10)
-const matchesSemester = uid.substring(9, 11) === course.semester.toString();
-
+const matchesSemester = uid.substring(9, 11) === course?.semester?.toString();
 
 
 // Final Moderator Logic
