@@ -31,15 +31,24 @@ const AllCoursePage = () => {
     status: '',
     courseCode: '',
     department: '',
-    degree: user?.degree || '',
+    degree: user.role === "moderator" ? user?.degree || '' : '',
     year: '',
-    semester: user?.semester || '',
+    semester: user.role === "moderator" ?  user?.semester || '' : '',
     type: '',
     credits: '',
     format: ''
   });
   // console.log("Initial Filters State:", filters); // Debugging line to check initial filters state
+      useEffect(() => {
+    // 1. Try scrolling the window
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
+    // 2. Safety: Try scrolling the HTML element (for some mobile browsers)
+    document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+
+    // 3. Optional: If you have a specific container that scrolls, use:
+    // document.getElementById('main-container').scrollTo({ top: 0 });
+  }, [page]);
   // if (user) {
    const [sort, setSort] = useState({
     sortField: "staringDate",
