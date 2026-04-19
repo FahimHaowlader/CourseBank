@@ -568,7 +568,7 @@ const requestForSubmitContributorsAccount = asyncHandler(async (req, res) => {
   if (!requesterAccess) {
     throw new apiError(403, "Your account access is restricted.");
   }
-
+  // console.log("Submission Request by:", role, "for userId:", targetUserId);
   // Fetch the target contributor from DB
   const targetUser = await User.findOne({ userId: targetUserId }).select("+approvedCourseCount +myCourseCount +status +access +year +semester +degree");
   if (!targetUser || targetUser.role !== 'contributor') {
@@ -641,14 +641,17 @@ const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
     throw new apiError(401, "Authentication required");
   }
 
-  if (!requester.access) {
+  // 2. Identify Target (Staff can provide a userId, Contributors default to self)
+  const isStaff = ["admin", "moderator"].includes(requester.role);
+  const isTargetingSelf = !userId || userId === requester?.userId;
+  const targetUserId = isTargetingSelf ? requester.userId : userId;
+  // console.log("Cancel Submission Request by:", requester.role, "for userId:", targetUserId, "with feedback:", isTargetingSelf);
+  if (!requester.access && !isTargetingSelf) {
     throw new apiError(403, "Your account access is restricted.");
   }
 
-  // 2. Identify Target (Staff can provide a userId, Contributors default to self)
-  const isStaff = ["admin", "moderator"].includes(requester.role);
-  const isTargetingSelf = !userId || userId === requester.userId;
-  const targetUserId = isTargetingSelf ? requester.userId : userId;
+
+  
 
   // 3. Permission & Scope Guards
   if (!isTargetingSelf) {

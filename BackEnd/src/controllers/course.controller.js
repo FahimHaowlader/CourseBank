@@ -195,11 +195,47 @@ const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
   if (!course) {
     throw new apiError(404, "Course not found");
   }
+  console.log("Course Creator ID:", course);  
 
   // 3. Define Logic Flags
   const isOwner = course.createdBy.toString() === userId.toString();
   const isAdmin = userRole === 'admin';
-  
+
+
+ // Ensure userId is a string
+const uid = req.user.userId.toString();
+
+
+
+// 1. Check Year (index 3 to 6)
+const matchesYear = uid.substring(3, 7) === course.hscYear.toString();
+
+// 2. Check Program Level (index 7 and 8)
+const programCode = uid.substring(7, 9);
+let matchesProgram = false;
+
+if (programCode === '01' && course.degree === 'bachelors') {
+    matchesProgram = true;
+} else if (programCode === '02' && course.degree === 'masters') {
+    matchesProgram = true;
+} else if (programCode === '03' && course.degree === 'phd') {
+    matchesProgram = true;
+}
+
+
+
+// 3. Check Semester (index 9 and 10)
+const matchesSemester = uid.substring(9, 11) === course.semester.toString();
+
+
+
+// Final Moderator Logic
+const isModerator = 
+    userRole === 'moderator' && 
+    matchesYear && 
+    matchesProgram && 
+    matchesSemester;
+
   // Calculate if the course is older than 1 year
   const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
   const isExpired = Date.now() - new Date(course.createdAt).getTime() > oneYearInMs;
@@ -209,7 +245,7 @@ const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
   // --- PERMISSION & LOCK LOGIC ---
 
   // Rule 1: Identity & General Access
-  if (!isAdmin && !(isOwner && hasAccess)) {
+  if (!isAdmin && !(isOwner && hasAccess) && !(isModerator && hasAccess))  {
     throw new apiError(403, "You do not have permission to edit this course or your access is disabled.");
   }
 
