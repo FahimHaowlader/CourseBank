@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router";
 
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
@@ -10,8 +11,8 @@ import {
   MdDelete,
   MdRestartAlt,
   MdOutlineCancel,
+  MdCheckCircleOutline
 } from "react-icons/md";
-
 import { IoCloudDoneOutline } from "react-icons/io5";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { FiCheck } from "react-icons/fi";
@@ -23,10 +24,15 @@ import AddCourseCard from "../Components/AddCourseCard";
 import SkeletonCard from "../Components/SkeletonCard.jsx";
 
 const ContributorCoursePage = () => {
-  // Destructure refreshUser from your Auth Context to sync data after API calls
+  const { userId } = useParams();
+
   const { user, refreshUser } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState([]);
+  const [contributor, setContributor] = useState({});
+  const [feedback, setFeedback] = useState("");
+
   const [submitModal, setSubmitModal] = useState({
     openModal: false,
     id: null,
@@ -49,17 +55,20 @@ const ContributorCoursePage = () => {
     const fetchContributorCourses = async () => {
       try {
         const response = await PrivateApi.get(
-          `/courses-by-creator/${user.userId}`,
+          `/courses-by-creator/${userId}`,
         );
-        setCourses(response.data.data);
+        setCourses(response.data.data.courses);
+        setContributor(response.data.data.contributor);
       } catch (error) {
         console.log("Error fetching contributor's courses:", error);
       } finally {
         setLoading(false);
       }
     };
-    if (user) fetchContributorCourses();
-  }, [user]);
+    if (userId) fetchContributorCourses();
+  }, [userId]);
+
+  
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -121,9 +130,9 @@ const ContributorCoursePage = () => {
     </div>
   );
 
-  const myCourseCount = user?.myCourseCount || 0;
+  const myCourseCount = contributor?.myCourseCount || 0;
 
-  const approvedCourseCount = user?.approvedCourseCount || 0;
+  const approvedCourseCount = contributor?.approvedCourseCount || 0;
 
   const handleFinalizeClick = () => {
     if (myCourseCount <= 2 || myCourseCount !== approvedCourseCount) {
@@ -153,13 +162,18 @@ const ContributorCoursePage = () => {
   const handleConfirmCancel = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
+      if (user.role === "contributor") {
       await PrivateApi.post(`/cancel-contributor-account-submission`);
+      } else{
+        await PrivateApi.post(`/cancel-contributor-account-submission`,{contributorUserId:userId,feedback });
+      }
       // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
 
       // FIXED: Refresh user context so user.status becomes 'active' again
       if (refreshUser) await refreshUser();
 
       setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
+      setContributor((prev) => ({...prev,status:"active",feedback})); // Immediate UI update for better UX
     } catch (error) {
       setSubmitModal((prev) => ({ ...prev, status: "cancel-error" }));
     } finally {
@@ -168,18 +182,39 @@ const ContributorCoursePage = () => {
   };
 
   const handleCancelClick = () => {
+    if(user.role === "contributor"){
     setSubmitModal({
       openModal: true,
       status: "cancel",
       loading: false,
     });
+    } else{
+      setSubmitModal({
+        openModal: true,
+        status: "feedback",
+        loading: false,
+      });
+    }
   };
+
+  useEffect(() => {
+  if (modal.openModal || submitModal.openModal) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'unset';
+  }
+}, [modal.openModal, submitModal.openModal]);
 
   const handleFinalSubmit = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
+    let res ;
     try {
       // throw new Error("Testing submit error handling"); // <-- Temporary line to test error modal
-      const res = await PrivateApi.post(`/request-submit-contributor-account`);
+      if (user.role === "contributor") {
+         res = await PrivateApi.post(`/request-submit-contributor-account`);
+      } else{
+         res = await PrivateApi.post(`/request-submit-contributor-account`,{contributorUserId:userId});
+      }
 
       // FIXED: Refresh user context so user.status becomes 'pending'
       if (refreshUser) await refreshUser();
@@ -190,6 +225,7 @@ const ContributorCoursePage = () => {
         status: "submit-success",
         loading: false,
       }));
+      setContributor((prev) => ({...prev, status : "pending",feedback:""})); // Immediate UI update for better UX
     } catch (error) {
       // console.log("Error submitting account:", error);
       setSubmitModal((prev) => ({
@@ -199,6 +235,32 @@ const ContributorCoursePage = () => {
       }));
     }
   };
+  
+  const handleDeleteClick = async () => { };
+
+  const handleAcceptClick = async () => { 
+    setSubmitModal((prev) => ({ ...prev, status: "approved", loading: false, openModal: true   }));
+   };
+
+  const handleGiveFeedback = async () => {
+    setSubmitModal((prev) => ({ ...prev,status: "cancel", loading: false, openModal: true }));
+  };
+
+  const handleApproveClick = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true }));
+    if (user?.role === "contributor") {
+      return 
+    }
+    const today = new Date().toDateString();
+    try {
+      await PrivateApi.post(`/approve-contributor-account-submission`,{contributorUserId:userId });
+      if (refreshUser) await refreshUser();
+      setSubmitModal((prev) => ({ ...prev, status: "approved-success", loading: false }));
+      setContributor((prev) => ({...prev, status : "approved",feedback: "Your contributor account submission was approved on "+today+". You can now log in and see your courses for 30 days. If you have any questions, please contact to the moderators."})); // Immediate UI update for better UX
+    } catch (error) {
+      setSubmitModal((prev) => ({ ...prev, status: "submit-error", loading: false }));
+    }
+  }
 
   if (loading) {
     return (
@@ -209,8 +271,7 @@ const ContributorCoursePage = () => {
       </div>
     );
   }
-
-  const handleDeleteClick = async () => { };
+console.log("Contributor Status in JSX:", contributor.status);
 
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
@@ -243,11 +304,11 @@ const ContributorCoursePage = () => {
               setModal={setModal}
             />
           ))}
-          {user.status === "active" && <AddCourseCard />}
+          {user.status === "active" && user.role === "contributor" && <AddCourseCard />}
         </div>
 
         <div className="mt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          {user.feedback ? (
+          {(user.role === "contributor" && user?.feedback) || (user.role !== "contributor" && contributor?.feedback) ? (
             <div className="p-4 bg-amber-50 border-l-4 w-full border-amber-500 rounded-r-lg shadow-sm">
               <div className="flex items-center mb-2">
                 <svg
@@ -262,15 +323,17 @@ const ContributorCoursePage = () => {
                 </h3>
               </div>
               <p className="text-amber-900 text-sm leading-relaxed">
-                The course description is well-written...
+                {
+                  `${user.role === "contributor" ? user?.feedback : contributor?.feedback}`
+                }
               </p>
             </div>
           ) : (
             <div className=""></div>
           )}
 
-          <div className="flex flex-col gap-5 justify-end w-full lg:w-auto">
-            {user.status === "active" && (
+          <div className="flex flex-col gap-3 justify-end w-full lg:w-auto">
+            {contributor.status === "active" && (
               <button
                 className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
                            bg-emerald-600 hover:bg-emerald-700 
@@ -291,7 +354,7 @@ const ContributorCoursePage = () => {
                 </span>
               </button>
             )}
-            {user.status === "pending" && (
+            {contributor.status === "pending" && (
               <button
                 className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
              bg-rose-600 hover:bg-rose-700/90 
@@ -306,11 +369,11 @@ const ContributorCoursePage = () => {
                 <span className="flex items-center justify-center">
                   <MdOutlineCancel size={22} />
                 </span>
-                <span className="tracking-tight">Cancel Submission</span>
+                <span className="tracking-tight">{`${user.role === "contributor" ? "Cancel Submission":"Reject Submission"}`} </span>
               </button>
             )}
 
-            {user.status === "pending" && (
+            {contributor.status === "pending" && user.role !=="contributor" && (
   <button
     className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
     bg-emerald-600 hover:bg-emerald-700/90 
@@ -329,7 +392,7 @@ const ContributorCoursePage = () => {
   </button>
 )}
 
-            {user?.status === "approved" && (
+            {contributor.status === "approved" && (
               <div className="w-full lg:min-w-100 group relative">
                 {/* Decorative Glow Effect */}
                 <div className="absolute -inset-0.5 bg-linear-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
@@ -353,7 +416,7 @@ const ContributorCoursePage = () => {
                 </button>
               </div>
             )}
-            {user?.role !=="contributor" && (
+            {user?.role !=="contributor" && contributor.status !== "approved" && (
       <div className="w-full lg:min-w-100 group relative">
   <button
     onClick={handleDeleteClick}
@@ -385,7 +448,7 @@ const ContributorCoursePage = () => {
             )}
 
           </div>
-        </div>
+        </div> 
 
         {/* --- MODALS --- */}
 
@@ -660,7 +723,7 @@ const ContributorCoursePage = () => {
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
-                      Submission Failed
+                      Approval Failed
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
                       We couldn't process your request. Please check your
@@ -690,6 +753,57 @@ const ContributorCoursePage = () => {
                 </div>
               )}
 
+              {/* --- MODERATOR FEEDBACK MODAL --- */}
+ {/* --- MODERATOR FEEDBACK MODAL --- */}
+{submitModal.status === "feedback" && (
+  <div className="flex flex-col items-center gap-4 sm:gap-6">
+    {/* Icon: Using a refined Steel Blue (Hex: #3b82f6-ish but muted) */}
+    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shrink-0">
+      <svg className="w-10 h-10 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+      </svg>
+    </div>
+
+    <div className="space-y-2 text-center">
+      <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+        Submission Feedback
+      </h3>
+      <p className="text-base sm:text-xl text-secondary-text dark:text-gray-400 font-body">
+        Please describe the changes needed for this submission.
+      </p>
+    </div>
+
+    {/* Textarea: Styled with your 'card' and 'border' variables */}
+    <div className="w-full relative">
+      <textarea
+        rows={4}
+        className="w-full p-4 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-main dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none text-base sm:text-lg font-body"
+        placeholder="Type your feedback here..."
+        value={feedback}
+        onChange={(e) => setFeedback(e.target.value)}
+      />
+    </div>
+
+    <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-2">
+      <button
+        disabled={submitModal.loading}
+        className="w-full rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-3 sm:py-4 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        onClick={closeModal}
+      >
+        Cancel
+      </button>
+      
+      {/* Primary Action Button: Refined Blue */}
+      <button
+        disabled={submitModal.loading || feedback?.trim().length < 10 }
+        className="w-full rounded-xl bg-blue-600 py-3 sm:py-4 text-lg font-semibold text-white shadow-md shadow-blue-900/20 hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900/40 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all active:scale-95 cursor-pointer font-display"
+        onClick={handleGiveFeedback}
+      >
+        {submitModal.loading ? <AppleSpinner /> : "Give Feedback"}
+      </button>
+    </div>
+  </div>
+)}
               {/* --- cencel SUBMISSION MODAL --- */}
               {submitModal.status === "cancel" && (
                 <div className="flex flex-col items-center gap-6 sm:gap-8">
@@ -843,9 +957,9 @@ const ContributorCoursePage = () => {
                       onClick={handleApproveClick}
                     >
                       {submitModal.loading ? (
-                        <AppleSpinner text="Approving..." />
+                        <AppleSpinner text="Confirming..." />
                       ) : (
-                        "Confirm Approval"
+                        "Confirm Submission"
                       )}
                     </button>
                   </div>

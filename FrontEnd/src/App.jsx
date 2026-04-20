@@ -41,7 +41,7 @@ function App() {
     { path: "/course/:id", element: <CourseDetailsPage /> },
     { path: "/login", element: <LoginPage /> },
     {
-      path: "/my-courses",
+      path: "/:userId/my-courses",
       element: (
         <RoleProtectedRoute
           allowedRoles={["contributor", "moderator", "admin"]}
