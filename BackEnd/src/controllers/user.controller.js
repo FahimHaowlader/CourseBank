@@ -266,7 +266,7 @@ if (!dbUser.access && dbUser.status === 'approved' && dbUser?.approvedAt && new 
 
 
 const deleteContributor = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
+  const { contributorUserId } = req.params;
   const role = req.user?.role;
   const access = req.user?.access;
 
@@ -282,12 +282,12 @@ const deleteContributor = asyncHandler(async (req, res) => {
 
   if (role === "moderator") {
     // Safety check: ensure both IDs exist and are long enough
-    if (!userId || !req.user.userId || userId.length < 11 || req.user.userId.length < 11) {
+    if (!contributorUserId || !req.user.userId || contributorUserId.length < 11 || req.user.userId.length < 11) {
       throw new apiError(400, "Invalid User ID format for departmental verification");
     }
 
     // Extracting the 4th to 11th character (Indices 3 to 11)
-    const targetAccess = userId.substring(3, 11);
+    const targetAccess = contributorUserId.substring(3, 11);
     const moderatorAccess = req.user.userId.substring(3, 11);
 
     if (targetAccess !== moderatorAccess) {
@@ -296,12 +296,12 @@ const deleteContributor = asyncHandler(async (req, res) => {
   }
 
    // Validate userId format
-   if (!userId || userId.length !== 11) {
+   if (!contributorUserId || contributorUserId.length !== 11) {
      throw new apiError(400, "Invalid User ID format");
    }
    
    // Check if user exists
-   const userToDelete = await User.findOne({ userId });
+   const userToDelete = await User.findOne({ userId: contributorUserId });
    if (!userToDelete) {
      throw new apiError(404, "User not found");
    }
@@ -317,7 +317,7 @@ const deleteContributor = asyncHandler(async (req, res) => {
    }
 
    // All checks passed, proceed to delete the user
-   const deletedUser = await User.findOneAndDelete({ userId });
+   const deletedUser = await User.findOneAndDelete({ userId : contributorUserId });
 
    if (!deletedUser) {
      throw new apiError(500, "Something went wrong while deleting the user");
@@ -560,6 +560,7 @@ const requestForSubmitContributorsAccount = asyncHandler(async (req, res) => {
   
   // 1. Identify Target Contributor
   // If Admin/Mod, they provide contributorId in body. If Contributor, use their own ID.
+  
   const targetUserId = (role !== "contributor" && req.body.contributorUserId) 
     ? req.body.contributorUserId 
     : requesterUserId;
@@ -569,23 +570,21 @@ const requestForSubmitContributorsAccount = asyncHandler(async (req, res) => {
     throw new apiError(403, "Your account access is restricted.");
   }
   // console.log("Submission Request by:", role, "for userId:", targetUserId);
+  
+  // 3. Moderator Scope Guard
+  // Moderators can only submit contributors from their own Year/Semester/Degree
+  if (role === "moderator") {
+     const contributorSuffix = targetUserId.slice(-8);
+      const moderatorSuffix = requesterUserId.slice(-8);
+      if (contributorSuffix !== moderatorSuffix) {
+      throw new apiError(403, "Moderators can only submit contributors within their own semester scope.");
+    }
+  }
+
   // Fetch the target contributor from DB
   const targetUser = await User.findOne({ userId: targetUserId }).select("+approvedCourseCount +myCourseCount +status +access +year +semester +degree");
   if (!targetUser || targetUser.role !== 'contributor') {
     throw new apiError(404, "Contributor account not found.");
-  }
-
-  // 3. Moderator Scope Guard
-  // Moderators can only submit contributors from their own Year/Semester/Degree
-  if (role === "moderator") {
-    const isSameScope = 
-      targetUser.year === modYear && 
-      targetUser.semester === modSemester && 
-      targetUser.degree === modDegree;
-
-    if (!isSameScope) {
-      throw new apiError(403, "Moderators can only submit contributors within their own semester scope.");
-    }
   }
 
   // 4. Status & Pre-Condition Checks
@@ -632,9 +631,15 @@ const requestForSubmitContributorsAccount = asyncHandler(async (req, res) => {
   res.status(200).json(new apiResponse(200, {}, message));
 });
 
+
+
+
+
 const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
   const requester = req.user;
-  const { feedback, userId } = req.body || {};
+  const { feedback, contributorUserId } = req.body || {};
+
+  console.log("Cancel Submission Request Body:", req.body);
 
   // 1. Basic Auth & Access Guard
   if (!requester) {
@@ -643,15 +648,12 @@ const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
 
   // 2. Identify Target (Staff can provide a userId, Contributors default to self)
   const isStaff = ["admin", "moderator"].includes(requester.role);
-  const isTargetingSelf = !userId || userId === requester?.userId;
-  const targetUserId = isTargetingSelf ? requester.userId : userId;
-  // console.log("Cancel Submission Request by:", requester.role, "for userId:", targetUserId, "with feedback:", isTargetingSelf);
+  const isTargetingSelf = !contributorUserId || contributorUserId === requester?.userId;
+  const targetUserId = isTargetingSelf ? requester.userId : contributorUserId;
+
   if (!requester.access && !isTargetingSelf) {
     throw new apiError(403, "Your account access is restricted.");
   }
-
-
-  
 
   // 3. Permission & Scope Guards
   if (!isTargetingSelf) {
@@ -710,6 +712,8 @@ const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
     throw new apiError(404, "Target user not found or account is not in 'pending' state.");
   }
 
+
+
   // 7. Response
   const successMessage = isTargetingSelf 
     ? "Your account submission has been canceled successfully." 
@@ -724,20 +728,31 @@ const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
 const approveContributorAccountSubmission = asyncHandler(async (req, res) => {
   const { contributorUserId } = req.body;
   const { role, _id: reviewerId, userId: reviewerUserId, access: requesterAccess } = req.user;
-
+console.log("Approval Request Body:", req.body);  
   // 1. Authorization Guard
   if (!requesterAccess) {
     throw new apiError(403, "Your account access is restricted.");
-  }
-
-  if (role !== "admin" && role !== "moderator") {
-    throw new apiError(403, "Unauthorized: Only admins or moderators can approve contributors.");
   }
 
   // 2. Validate Target Input
   if (!contributorUserId || contributorUserId.trim().length !== 11) {
     throw new apiError(400, "A valid 11-character Contributor User ID is required.");
   }
+
+  if (role !== "admin" && role !== "moderator") {
+    throw new apiError(403, "Unauthorized: Only admins or moderators can approve contributors.");
+  }
+
+  if (role === "moderator"){
+    const contributorSuffix = contributorUserId.slice(-8);
+      const moderatorSuffix = reviewerUserId.slice(-8);
+      if (contributorSuffix !== moderatorSuffix) {
+        throw new apiError(403, "Moderators can only manage contributors within their own batch.");
+      }
+
+  }
+
+  console.log("hi")
 
   // 3. Find the Target Contributor
   const targetContributor = await User.findOne({ 
@@ -761,20 +776,8 @@ const approveContributorAccountSubmission = asyncHandler(async (req, res) => {
     throw new apiError(400, "All uploaded courses must be approved before the contributor can be approved.");
   }
 
-  
-
-
-  // 4. Suffix Matching Logic for Moderators
-  if (role === "moderator") {
-    const contributorSuffix = targetContributor.userId.slice(-8);
-    const moderatorSuffix = reviewerUserId.slice(-8);
-
-    if (contributorSuffix !== moderatorSuffix) {
-      throw new apiError(403, "Moderators can only approve contributors from their own department/batch.");
-    }
-  }
-
-  // 5. Final Approval Update
+  const today = new Date().toDateString();
+  // 4. Final Approval Update
   const approvedUser = await User.findOneAndUpdate(
     { 
       userId: contributorUserId, 
@@ -785,11 +788,9 @@ const approveContributorAccountSubmission = asyncHandler(async (req, res) => {
         access: false,         // Set access false as per your flow (final lock)
         status: "approved", 
         reviewedBy: reviewerId,
-        approvedAt: new Date()
+        approvedAt: new Date(),
+         feedback: "Your contributor account submission was approved on "+today+". You can now log in and see your courses for 30 days. If you have any questions, please contact to the moderators."
       },
-      $unset: { 
-        feedback: ""           // Remove old rejection messages
-      }
     },
     { new: true }
   );
@@ -798,7 +799,7 @@ const approveContributorAccountSubmission = asyncHandler(async (req, res) => {
     throw new apiError(500, "Failed to approve account. Please try again.");
   }
 
-  // 6. Response
+  // 5. Response
   res.status(200).json(
     new apiResponse(
       200, 

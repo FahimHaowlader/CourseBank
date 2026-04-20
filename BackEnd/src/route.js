@@ -59,7 +59,7 @@ router.route('/administrative-course-search').post(administrativeCourseSearch);
 
 // router.route('/co').post(userCourseSearch2);
 
-router.route('/courses-by-creator/:creatorId').get(getCourseByCreatorId);
+router.route('/courses-by-creator/:userId').get(getCourseByCreatorId);
 
 router.route('/course-details-for-edit/:courseId').get(fullCourseDetailsForEdit);
 
@@ -117,13 +117,13 @@ router.route('/delete-course/:courseId').delete(deleteCourse);
 
 // router.route('/create-user').post(createUser);
 
-router.route('/create-contributor').post(createContributors);   
+router.route('/create-contributor-account').post(createContributors);   
 
-router.route('/create-moderator').post(createModerators);
+router.route('/create-moderator-account').post(createModerators);
 
-router.route('/delete-contributor/:userId').delete(deleteContributor);
+router.route('/delete-contributor-account/:contributorUserId').delete(deleteContributor);
 
-router.route('/delete-moderator/:userId').delete(deleteModerator);
+router.route('/delete-moderator-account/:moderatorUserId').delete(deleteModerator);
 
 router.route('/get-all-contributors').post(getAllContributors);
 

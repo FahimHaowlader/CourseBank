@@ -273,10 +273,18 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
   const role = req.user?.role;
   const { userId: queryUserId } = req.params;
   const submittedAccount = req.user?.status === "approved";
-
-  // Auth checks
+  const hasAccess = req.user?.access === true;
+  let contributor = req.user;
   if (!requesterId) {
     throw new apiError(401, "Unauthorized");
+  }
+
+  if(role !== "contributor" && !hasAccess){
+    throw new apiError(403, "Your account access is restricted. You cannot view courses.");
+  }
+
+  if(role === "contributor" && queryUserId && queryUserId !== req.user?.userId){
+    throw new apiError(403, "Contributors can only view their own courses");
   }
 
   const thirtyDaysAgo = new Date();
@@ -286,6 +294,14 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
     throw new apiError(403, "Your account was approved more than 30 days ago.");
 }
 
+if(role === "moderator" && queryUserId){
+  const userLastDegits = queryUserId.slice(-8);
+  const moderatorLastDigits = req.user?.userId?.slice(-8);
+  if (userLastDegits !== moderatorLastDigits) {
+    throw new apiError(403, "Moderators can only view courses of users with matching last 8 digits in their userId");
+  }
+}
+
   let filter = {};
   // console.log("Role:", role);
 
@@ -293,16 +309,29 @@ const getCourseByCreatorId = asyncHandler(async (req, res,next) => {
     // Moderators can only see their own courses
     filter.createdBy = requesterId;
   } else if (role === "admin" || role === "moderator") {
+    const user = await User.findOne({ userId: queryUserId }).select('_id status feedback approvedCourseCount myCourseCount');
+    console.log("Queried User:", user);
+    if(!user) { 
+      throw new apiError(404, "User not found");
+    } 
+    const queryId =  user?._id;
+    contributor = user;
+
     // Admin sees courses of queryUserId if provided, otherwise their own courses
-    filter.createdBy = queryUserId || requesterId;
+    filter.createdBy = queryId;
   } else {
     throw new apiError(403, "Forbidden");
   }
-  // console.log("Filter:", filter);
+  
   const courses = await Course.find(filter);
 
+  const responseData = {
+    courses,
+    contributor
+  }
+
   res.status(200).json(
-   new apiResponse(200, courses, "Courses fetched successfully")
+   new apiResponse(200, responseData, "Courses fetched successfully")
   );
 });
 
