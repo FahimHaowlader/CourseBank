@@ -22,6 +22,8 @@ import PrivateApi from "../Hooks/PrivateApi.jsx";
 import CustomCourseCard from "../Components/CustomCourseCard";
 import AddCourseCard from "../Components/AddCourseCard";
 import SkeletonCard from "../Components/SkeletonCard.jsx";
+import UserNotFoundSection from "../Components/UserNotFoundSection.jsx";
+
 
 const ContributorCoursePage = () => {
   const { userId } = useParams();
@@ -32,6 +34,7 @@ const ContributorCoursePage = () => {
   const [courses, setCourses] = useState([]);
   const [contributor, setContributor] = useState({});
   const [feedback, setFeedback] = useState("");
+  const [error, setError] = useState(null);
 
   const [submitModal, setSubmitModal] = useState({
     openModal: false,
@@ -61,6 +64,7 @@ const ContributorCoursePage = () => {
         setContributor(response.data.data.contributor);
       } catch (error) {
         console.log("Error fetching contributor's courses:", error);
+        setError(error.response?.data?.message || "Failed to load courses");
       } finally {
         setLoading(false);
       }
@@ -236,7 +240,28 @@ const ContributorCoursePage = () => {
     }
   };
   
-  const handleDeleteClick = async () => { };
+  const handleDeleteClick = async () => {
+    if (user?.role !== "contributor") {
+      setSubmitModal((prev) => ({ ...prev, status: "delete", loading: false, openModal: true }));
+   };
+  };
+
+  const handleDeleteAccount = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true })); 
+    if (user?.role === "contributor") {
+      return
+    }
+         setTimeout(() => {
+    },3000)
+    try {
+      await PrivateApi.delete(`/delete-contributor-account/${userId}`);
+      if (refreshUser) await refreshUser();
+      setSubmitModal((prev) => ({ ...prev, status: "delete-success", loading: false }));
+    } catch (error) {
+      setSubmitModal((prev) => ({ ...prev, status: "delete-error", loading: false }));
+    }
+  };
+
 
   const handleAcceptClick = async () => { 
     setSubmitModal((prev) => ({ ...prev, status: "approved", loading: false, openModal: true   }));
@@ -271,7 +296,11 @@ const ContributorCoursePage = () => {
       </div>
     );
   }
-console.log("Contributor Status in JSX:", contributor.status);
+
+  if (error || (!contributor && !loading)) {
+  return <UserNotFoundSection />;
+}
+
 
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
@@ -285,16 +314,53 @@ console.log("Contributor Status in JSX:", contributor.status);
               View, add, and manage all your courses in one place.
             </p>
           </div>
-          {courses.length > 0 && (
+          {user.role === "contributor" && (
             <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center mb-6 pl-1">
               You have{" "}
               <span className="font-bold text-text-main dark:text-white">
                 {courses.length}
               </span>{" "}
-              {courses.length === 1 ? "course" : "courses"}
+              {courses.length === 1 || 0 ? "course" : "courses"}
             </div>
           )}
         </div>
+        {
+            user?.role !== "contributor" && courses.length <=0 && (
+             /* This should replace your course grid when courses.length === 0 */
+<div className="w-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-border-light dark:border-border-dark rounded-[2.5rem] bg-card-light/50 dark:bg-card-dark/30 px-6">
+  
+  {/* Icon with a soft Teal glow */}
+  <div className="relative mb-8">
+    <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150"></div>
+    <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/10 text-primary">
+      <svg 
+        className="w-12 h-12" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth="1.5" 
+          d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" 
+        />
+      </svg>
+    </div>
+  </div>
+
+  {/* Typography using your Lexend (display) and Noto Sans (body) */}
+  <div className="text-center  space-y-3">
+    <h3 className="text-2xl sm:text-3xl font-bold text-text-main dark:text-white font-display">
+      Contributor Curriculum is Empty
+    </h3>
+    <p className="text-base sm:text-lg text-secondary-text dark:text-gray-400 font-body leading-relaxed">
+      Contributor haven't shared any courses yet. Once they do, you'll see them here.
+    </p>
+  </div>
+</div>
+
+            )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {courses.map((course) => (
@@ -304,7 +370,8 @@ console.log("Contributor Status in JSX:", contributor.status);
               setModal={setModal}
             />
           ))}
-          {user.status === "active" && user.role === "contributor" && <AddCourseCard />}
+          
+          {contributor?.status === "active" && user?.role === "contributor" && <AddCourseCard />}
         </div>
 
         <div className="mt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -410,18 +477,48 @@ console.log("Contributor Status in JSX:", contributor.status);
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                   </span>
 
-                  <span className="tracking-tight uppercase text-sm">
+                  <span className="tracking-tight  text-base">
                     Account Submitted Successfully
                   </span>
                 </button>
               </div>
             )}
-            {user?.role !=="contributor" && contributor.status !== "approved" && (
+            {/* {user?.role !=="contributor"  && (
       <div className="w-full lg:min-w-100 group relative">
   <button
     onClick={handleDeleteClick}
     // Added 'flex justify-center' here to center the contents
-    className="relative w-full overflow-hidden px-6 py-3 rounded-2xl
+    className="relative w-full overflow-hidden px-6 py-3 rounded-xl
+    bg-rose-50/50 dark:bg-rose-950/10 
+    hover:bg-rose-100 dark:hover:bg-rose-950/20
+    text-rose-600 dark:text-rose-400 
+    border border-rose-200/50 dark:border-rose-800/30
+    backdrop-blur-md shadow-xs
+    transition-all duration-500 ease-out group cursor-pointer
+    flex items-center justify-center gap-3"
+  >
+    {/* Sliding Background Element *
+    <div className="absolute inset-0 w-2 bg-rose-500 transition-all duration-500 ease-out group-hover:w-full opacity-0 group-hover:opacity-5"></div>
+
+    {/* Modern Icon: Sits directly on button background *
+    <MdOutlineDeleteSweep 
+      size={24} 
+      className="relative transition-transform duration-300 group-hover:scale-110" 
+    />
+    
+    {/* Text *
+    <p className="relative text-base font-extrabold leading-tight">
+      Delete Account
+    </p>
+  </button>
+</div>
+            )} */}
+            {user?.role !=="contributor"  && (
+      <div className="w-full lg:min-w-100 group relative">
+  <button
+    onClick={handleDeleteClick}
+    // Added 'flex justify-center' here to center the contents
+    className="relative w-full overflow-hidden px-6 py-3 rounded-xl
     bg-rose-50/50 dark:bg-rose-950/10 
     hover:bg-rose-100 dark:hover:bg-rose-950/20
     text-rose-600 dark:text-rose-400 
@@ -440,7 +537,7 @@ console.log("Contributor Status in JSX:", contributor.status);
     />
     
     {/* Text */}
-    <p className="relative text-base font-extrabold leading-tight">
+    <p className="relative text-base font-extrabold leading-tight ">
       Delete Account
     </p>
   </button>
@@ -1046,10 +1143,10 @@ console.log("Contributor Status in JSX:", contributor.status);
 
     <div className="space-y-4 text-center">
       <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
-        Delete Profile?
+        Delete Contrinutor?
       </h3>
       <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-        This action is <span className="text-rose-600 font-bold uppercase">permanent</span>. All your associated data will be removed from our servers immediately.
+        This action is <span className="text-rose-600 font-bold uppercase">permanent</span>.Contributor account will be removed, but your courses will stay live and move to the moderator pool. Are you sure you want to proceed?
       </p>
     </div>
 
@@ -1064,7 +1161,7 @@ console.log("Contributor Status in JSX:", contributor.status);
       <button
         disabled={submitModal.loading}
         className="w-full rounded-xl bg-rose-600 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 flex justify-center items-center cursor-pointer transition-all active:scale-95"
-        onClick={handleDeleteClick}
+        onClick={handleDeleteAccount}
       >
         {submitModal.loading ? (
           <AppleSpinner text="Deleting..." />
