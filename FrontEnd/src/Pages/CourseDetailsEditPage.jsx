@@ -1355,6 +1355,56 @@ const successfulDeleteAcknowledgement = () => {
   </div>
 )}
 
+{submitModal.status === "feedback" && (
+  <div className="flex flex-col items-center gap-4 sm:gap-6">
+    {/* Icon: Using a soft Sky Blue theme */}
+    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-500 dark:text-sky-400 shrink-0">
+      <svg className="w-10 h-10 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+      </svg>
+    </div>
+
+    <div className="space-y-2 text-center">
+      <h3 className="text-2xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 font-display">
+        Submission Feedback
+      </h3>
+      <p className="text-base sm:text-xl text-slate-500 dark:text-slate-400 font-body">
+        Please describe the changes needed for this submission.
+      </p>
+    </div>
+
+    {/* Textarea: Border and Focus rings updated to Sky */}
+    <div className="w-full relative">
+      <textarea
+        rows={4}
+        className="w-full p-4 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-main dark:text-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-400 transition-all outline-none resize-none text-base sm:text-lg font-body"
+        placeholder="Type your feedback here..."
+        value={feedback}
+        onChange={(e) => setFeedback(e.target.value)}
+      />
+    </div>
+
+    <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-2">
+      <button
+        disabled={submitModal.loading}
+        className="w-full rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-3 sm:py-4 text-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-sky-50/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        onClick={closeModal}
+      >
+        Cancel
+      </button>
+      
+      {/* Primary Action Button: Sky Blue-500 */}
+      <button
+        disabled={submitModal.loading || feedback?.trim().length < 10 }
+        className="w-full rounded-xl bg-sky-500 py-3 sm:py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/20 hover:bg-sky-600 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all active:scale-[0.98] cursor-pointer font-display"
+        onClick={handleGiveFeedback}
+      >
+        {submitModal.loading ? <AppleSpinner /> : "Give Feedback"}
+      </button>
+    </div>
+  </div>
+)} 
+
 {/* --- 3. CANCEL CONFIRMATION MODAL --- */}
 {submitModal.openModal && submitModal.status === "cancel" && (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">

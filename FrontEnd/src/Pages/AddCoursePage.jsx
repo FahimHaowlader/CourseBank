@@ -168,7 +168,7 @@ const isHandbookValid = () => {
     } else {;  
      courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
     }
-    // console.log("Course Data:", courseData);
+    console.log("Course Data:", courseData);
  
 
     try {
@@ -422,6 +422,9 @@ const handleAssessmentDateChange = (id, date) => {
     )
   );
 };
+
+
+console.log("Assessments before cleaning:", assessments); 
 
   // Clean assessments before sending
 const cleanAssessments = () => {

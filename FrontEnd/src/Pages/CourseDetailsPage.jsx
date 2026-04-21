@@ -22,10 +22,12 @@ import NoElement from "../Components/NoElement";
 import SemesterDisplay from "../Components/semesterTransformer";
 import { DepartmentMap } from "../Components/DepartmentMap";
 import PublicApi  from "../Hooks/PublicApi.jsx";
+import CourseNotFound from "../Components/CourseNotFound";
 
 const CourseDetailsPage = () => {
   const [course, setCourse] =useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { id } = useParams();
   // console.log("Course ID from URL:", id); 
 
@@ -48,6 +50,7 @@ const CourseDetailsPage = () => {
         setCourse(response.data.data);
       } catch (error) {
         console.error("Error fetching course data:", error);
+        setError(error.data?.message || "An error occurred while fetching course details.");
       } finally {
         setLoading(false);
       }
@@ -56,9 +59,44 @@ const CourseDetailsPage = () => {
     
   }, []);
 
+  const handleShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent("Check out this course on CourseBank!");
+    
+    // On Mobile, this opens the native tray with FB, WhatsApp, Telegram, etc.
+    if (navigator.share) {
+      navigator.share({
+        title: 'CourseBank',
+        text: 'Check out this course!',
+        url: window.location.href,
+      }).catch(console.error);
+    } else {
+      // On Desktop: Open a fallback (Defaulting to WhatsApp or a prompt)
+      const choice = window.confirm("Share via WhatsApp? (Cancel to copy link instead)");
+      if (choice) {
+        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert("Link copied to clipboard!");
+      }
+    }
+  }
+  
+
+  const handleDownload = (link) => {
+    console.log("Download link:", link); // Debugging line to check the link value
+  if (!link) return;
+  // '_blank' opens in a new tab
+  window.open(link, '_blank', 'noopener,noreferrer');
+};
+
 
   if (loading){
     return <CourseDetailsSkeleton />;
+  }
+
+  if (error){
+    return <CourseNotFound />;
   }
 // console.log("Course data after loading:", course);
   return (
@@ -112,7 +150,9 @@ const CourseDetailsPage = () => {
             
 
             <div className="flex items-center gap-3 shrink-0">
-              <button className="flex w-full lg:w-auto justify-center cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+              <button className="flex w-full lg:w-auto justify-center cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+              onClick={handleShare}
+              >
                 <span className="material-symbols-outlined text-lg">
                   <GrShareOption />
                 </span>
@@ -185,7 +225,9 @@ const CourseDetailsPage = () => {
               </div>
               {
                 course.handbook ? (
-                  <button className="flex w-full lg:w-auto justify-center cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
+                  <button className="flex w-full lg:w-auto justify-center cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+                  onClick={() => handleDownload(course.handbook)}
+                  >
                 <span className="material-symbols-outlined text-lg">
                   <MdOutlineFileDownload size={26} />
                 </span>
@@ -224,7 +266,9 @@ const CourseDetailsPage = () => {
                       </p> */}
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(material.fileUrl)}
+                  >
                     <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
@@ -264,7 +308,9 @@ const CourseDetailsPage = () => {
                       </p> */}
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                  <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(book.fileUrl)}
+                  >
                     <MdOutlineFileDownload size={26} />
                   </span>
                 </div>
@@ -300,7 +346,9 @@ const CourseDetailsPage = () => {
                         </p> */}
                       </div>
                     </div>
-                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                    onClick={() => handleDownload(task.fileUrl)}
+                    >
                       <MdOutlineFileDownload size={26} />
                     </span>
                   </div>
@@ -337,20 +385,22 @@ const CourseDetailsPage = () => {
                       </span>
                       <div className="space-y-1">
                          <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
-                            {assessment.type}
+                             {assessment.type}
                         </p>
                         <div className="flex items-center gap-5"  >
                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')}
+                         Date : <span className="font-bold"> {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')} </span>
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                          {assessment.mark} mark
+                          mark : <span className="font-bold">{assessment.mark}</span>
                         </p>
                         
                         </div>
                       </div>
                     </div>
-                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                      onClick={() => handleDownload(assessment.fileUrl)}
+                    >
                       <MdOutlineFileDownload size={26} />
                     </span>
                   </div>
@@ -378,16 +428,18 @@ const CourseDetailsPage = () => {
                         </p>
                         <div className="flex items-center gap-5"  >
                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')}
+                           Date : <span className="font-bold"> {new Date(assessment.date).toLocaleDateString('en-GB').replace(/\//g, '-')} </span>
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                          {assessment.mark} mark
+                            mark : <span className="font-bold">{assessment.mark}</span>
                         </p>
                         
                         </div>
                       </div>
                     </div>
-                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                      onClick={() => handleDownload(assessment.fileUrl)}
+                    >
                       <MdOutlineFileDownload size={26} />
                     </span>
                   </div>
