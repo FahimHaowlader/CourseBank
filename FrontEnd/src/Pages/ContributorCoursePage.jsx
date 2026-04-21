@@ -43,6 +43,13 @@ const ContributorCoursePage = () => {
     loading: false,
   });
 
+   const [modal, setModal] = useState({
+    openModal: false,
+    id: null,
+    title: "",
+    status: "",
+  });
+
   useEffect(() => {
     // 1. Try scrolling the window
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -56,6 +63,7 @@ const ContributorCoursePage = () => {
 
   useEffect(() => {
     const fetchContributorCourses = async () => {
+      setLoading(true);
       try {
         const response = await PrivateApi.get(
           `/courses-by-creator/${userId}`,
@@ -73,17 +81,19 @@ const ContributorCoursePage = () => {
   }, [userId]);
 
   
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const [modal, setModal] = useState({
-    openModal: false,
-    id: null,
-    title: "",
-    status: "",
-  });
+    useEffect(() => {
+  if (modal.openModal || submitModal.openModal) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'unset';
+  }
+}, [modal.openModal, submitModal.openModal]);
+
+
 
   const cancelDeleteCourse = () => {
     setModal({ openModal: false, id: null, title: "", status: "" });
@@ -201,13 +211,6 @@ const ContributorCoursePage = () => {
     }
   };
 
-  useEffect(() => {
-  if (modal.openModal || submitModal.openModal) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = 'unset';
-  }
-}, [modal.openModal, submitModal.openModal]);
 
   const handleFinalSubmit = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
@@ -308,15 +311,15 @@ const ContributorCoursePage = () => {
         <div>
           <div className=" mb-5">
             <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight  font-extrabold">
-              My Courses
+              {`${user.role === "contributor" ? "My" : "Contributor"}`} Courses
             </h1>
             <p className="mt-0.5 text-lg text-secondary-text dark:text-gray-400 max-w-3xl pl-0.5">
               View, add, and manage all your courses in one place.
             </p>
           </div>
-          {user.role === "contributor" && (
+          {courses.length > 0  && (
             <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center mb-6 pl-1">
-              You have{" "}
+              {`${user.role === "contributor" ? "You" : "Contributor" }`} have{" "}
               <span className="font-bold text-text-main dark:text-white">
                 {courses.length}
               </span>{" "}
@@ -571,7 +574,7 @@ const ContributorCoursePage = () => {
                     <p className="text-xl text-text-secondary dark:text-gray-400">
                       Are you sure you want to delete{" "}
                       <span className="font-bold text-text-main dark:text-white">
-                        {modal.title}
+                        {modal.title} course
                       </span>
                       ?
                     </p>
@@ -696,7 +699,7 @@ const ContributorCoursePage = () => {
                     </h3>
                     <div className="text-base sm:text-xl text-text-secondary dark:text-gray-400 space-y-3">
                       <p>
-                        To finalize your account, you must meet the following:
+                        To finalize {`${user.role === "contributor" ? "your" : "contributor"}`} account, you must meet the following:
                       </p>
                       <ul className="text-left bg-slate-50 dark:bg-slate-800/50 p-4 sm:p-6 rounded-2xl border border-dashed border-amber-300 inline-block mx-auto w-full sm:w-auto">
                         {myCourseCount < 3 && (
@@ -707,7 +710,7 @@ const ContributorCoursePage = () => {
                               refix.
                             </li>
                             <li className="flex items-center gap-2 text-emerald-500 text-sm sm:text-base ml-5">
-                              ✓ Your current course count ({myCourseCount})
+                              ✓ {`${user.role === "contributor" ? "Your" : "Contributor"}`}  current course count ({myCourseCount})
                             </li>
                           </>
                         )}
@@ -720,7 +723,7 @@ const ContributorCoursePage = () => {
                                 account
                               </li>
                               <li className="flex items-center gap-2 text-emerald-500 text-sm sm:text-base ml-5">
-                                ✓Your approved count ({approvedCourseCount})
+                                ✓{`${user.role === "contributor" ? "Your" : "Contributor"}`}  approved count ({approvedCourseCount})
                               </li>
                             </>
                           )}
@@ -753,7 +756,7 @@ const ContributorCoursePage = () => {
                       <span className="font-bold text-text-main dark:text-white">
                         {myCourseCount} courses
                       </span>
-                      . You won't be able to edit them until the review is
+                      . {`${user.role === "contributor" ? "Your" : "Contributor"}`}  won't be able to edit them until the review is
                       complete.
                     </p>
                   </div>
@@ -793,8 +796,7 @@ const ContributorCoursePage = () => {
                       Submission Successful!
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      Your courses have been submitted for final review. We will
-                      notify you once complete.
+                      {`${user.role === "contributor" ? "Your" : "Contributor"}`} account  have been submitted for final review. We will notify you once it complete.
                     </p>
                   </div>
                   <button
@@ -820,7 +822,7 @@ const ContributorCoursePage = () => {
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
-                      Approval Failed
+                     Submission Failed
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
                       We couldn't process your request. Please check your
@@ -854,27 +856,27 @@ const ContributorCoursePage = () => {
  {/* --- MODERATOR FEEDBACK MODAL --- */}
 {submitModal.status === "feedback" && (
   <div className="flex flex-col items-center gap-4 sm:gap-6">
-    {/* Icon: Using a refined Steel Blue (Hex: #3b82f6-ish but muted) */}
-    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shrink-0">
+    {/* Icon: Using a soft Sky Blue theme */}
+    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-500 dark:text-sky-400 shrink-0">
       <svg className="w-10 h-10 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
       </svg>
     </div>
 
     <div className="space-y-2 text-center">
-      <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+      <h3 className="text-2xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 font-display">
         Submission Feedback
       </h3>
-      <p className="text-base sm:text-xl text-secondary-text dark:text-gray-400 font-body">
+      <p className="text-base sm:text-xl text-slate-500 dark:text-slate-400 font-body">
         Please describe the changes needed for this submission.
       </p>
     </div>
 
-    {/* Textarea: Styled with your 'card' and 'border' variables */}
+    {/* Textarea: Border and Focus rings updated to Sky */}
     <div className="w-full relative">
       <textarea
         rows={4}
-        className="w-full p-4 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-main dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none text-base sm:text-lg font-body"
+        className="w-full p-4 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-main dark:text-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-400 transition-all outline-none resize-none text-base sm:text-lg font-body"
         placeholder="Type your feedback here..."
         value={feedback}
         onChange={(e) => setFeedback(e.target.value)}
@@ -884,24 +886,23 @@ const ContributorCoursePage = () => {
     <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-2">
       <button
         disabled={submitModal.loading}
-        className="w-full rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-3 sm:py-4 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        className="w-full rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-3 sm:py-4 text-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-sky-50/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         onClick={closeModal}
       >
         Cancel
       </button>
       
-      {/* Primary Action Button: Refined Blue */}
+      {/* Primary Action Button: Sky Blue-500 */}
       <button
         disabled={submitModal.loading || feedback?.trim().length < 10 }
-        className="w-full rounded-xl bg-blue-600 py-3 sm:py-4 text-lg font-semibold text-white shadow-md shadow-blue-900/20 hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900/40 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all active:scale-95 cursor-pointer font-display"
+        className="w-full rounded-xl bg-sky-500 py-3 sm:py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/20 hover:bg-sky-600 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all active:scale-[0.98] cursor-pointer font-display"
         onClick={handleGiveFeedback}
       >
         {submitModal.loading ? <AppleSpinner /> : "Give Feedback"}
       </button>
     </div>
   </div>
-)}
-              {/* --- cencel SUBMISSION MODAL --- */}
+)}       {/* --- cencel SUBMISSION MODAL --- */}
               {submitModal.status === "cancel" && (
                 <div className="flex flex-col items-center gap-6 sm:gap-8">
                   {/* Icon: Using a Warning/Undo style icon */}
@@ -914,11 +915,11 @@ const ContributorCoursePage = () => {
                       Cancel Submission?
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      This will move your account back to{" "}
+                      This will move {`${user.role === "contributor" ? "your" : "contributor"}`} account back to{" "}
                       <span className="font-bold text-rose-600">
                         Active mode
                       </span>
-                      . Your account will no longer be under review, and you
+                      . {`${user.role === "contributor" ? "Your" : "Contributor"}`} account will no longer be under review, and you
                       will need to submit again later.
                     </p>
                   </div>
@@ -944,7 +945,7 @@ const ContributorCoursePage = () => {
                       ) : (
                         <>
                           <MdOutlineCancel size={24} />
-                          Confirm Cancel
+                           Cancel Submission
                         </>
                       )}
                     </button>
@@ -963,12 +964,12 @@ const ContributorCoursePage = () => {
                       Submission Cancelled
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      Your request has been withdrawn. Your account is now back
+                      {`${user.role === "contributor" ? "Your" : "Contributor"}`}  request has been withdrawn. {`${user.role === "contributor" ? "Your" : "Contributor"}`}  account is now back
                       in{" "}
                       <span className="font-bold text-rose-600">
                         Active mode
                       </span>{" "}
-                      and you can edit your courses again.
+                      and you can edit {`${user.role === "contributor" ? "your" : "contributor"}`}  courses again.
                     </p>
                   </div>
                   <button
@@ -997,7 +998,7 @@ const ContributorCoursePage = () => {
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
                       We encountered an error while trying to withdraw your
-                      submission. Your account is still under review.
+                      submission. {`${user.role === "contributor" ? "Your" : "Contributor"}`}  account is still under review.
                     </p>
                   </div>
                   <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
@@ -1035,8 +1036,7 @@ const ContributorCoursePage = () => {
                       Approve Submission?
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      You are about to approve these courses. This will publish
-                      them live and notify the contributor.
+                      You are about to approve the account. This will notify the contributor.
                     </p>
                   </div>
 
@@ -1075,7 +1075,7 @@ const ContributorCoursePage = () => {
                       Approval Successful!
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      The courses have been officially approved and are now
+                      The account have been officially approved and the courses are now
                       visible in the curriculum.
                     </p>
                   </div>
@@ -1146,7 +1146,7 @@ const ContributorCoursePage = () => {
         Delete Contrinutor?
       </h3>
       <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-        This action is <span className="text-rose-600 font-bold uppercase">permanent</span>.Contributor account will be removed, but your courses will stay live and move to the moderator pool. Are you sure you want to proceed?
+        This action is <span className="text-rose-600 font-bold uppercase">permanent</span>.Contributor account will be removed, but contributor courses will stay live and move to the moderator pool. Are you sure you want to proceed?
       </p>
     </div>
 
@@ -1166,7 +1166,7 @@ const ContributorCoursePage = () => {
         {submitModal.loading ? (
           <AppleSpinner text="Deleting..." />
         ) : (
-          "Confirm Delete"
+          "Delete Contributor"
         )}
       </button>
     </div>
@@ -1183,7 +1183,7 @@ const ContributorCoursePage = () => {
         Account Deleted
       </h3>
       <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-        Your profile has been successfully removed. We're sorry to see you go.
+        Contributor account has been successfully removed. We're sorry to see you go.
       </p>
     </div>
     <button
@@ -1205,7 +1205,7 @@ const ContributorCoursePage = () => {
         Deletion Failed
       </h3>
       <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-        We encountered a security error while trying to delete your profile. Please try again.
+        We encountered a security error while trying to delete the contributor account . Please try again.
       </p>
     </div>
     <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
