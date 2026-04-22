@@ -175,7 +175,7 @@ const isHandbookValid = () => {
       setLoading(true);
       // Replace with your API endpoint
       // console.log("Sending course data to API:", courseData);
-      const response = await PrivateApi.post("/create-course", courseData);
+      // const response = await PrivateApi.post("/create-course", courseData);
       // console.log("Course created successfully:", response.data);
       setModalStatus('success');
       // Optionally, reset form or redirect user

@@ -175,6 +175,14 @@ const AddAssessment = () => {
                     onChange={(e) => setFormData({...formData, fileUrl: e.target.value})}
                   />
                 </div>
+                <div className="h-5 mt-1"> 
+                                  {!urlOk && formData.fileUrl.length > 0 && (
+                                    <p className="text-xs text-orange-500 flex items-center gap-1.5 font-medium animate-in fade-in duration-200">
+                                      <BsExclamationCircleFill size={14} />
+                                      Please provide a valid Google URL.
+                                    </p>
+                                  )}
+                                </div>
               </div>
 
               {/* ACTION BUTTONS AT BOTTOM RIGHT */}
