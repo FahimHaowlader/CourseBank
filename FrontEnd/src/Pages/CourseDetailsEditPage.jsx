@@ -17,7 +17,7 @@ import { MdRefresh } from "react-icons/md";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { IoMdClose , IoMdCheckmark} from "react-icons/io";
-import { MdRestartAlt,MdOutlineCancel,MdDelete } from "react-icons/md";
+import { MdRestartAlt,MdOutlineCancel,MdDelete,MdOutlineDeleteSweep } from "react-icons/md";
 
 
 import AddElement from "../Components/AddElement";
@@ -80,6 +80,7 @@ const CourseDetailsEditPage = () => {
     setDeleteItem,
     error,
   } = useCourse();
+const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize feedback state with course feedback or empty string
 
 
    useEffect(() => {
@@ -100,6 +101,7 @@ const CourseDetailsEditPage = () => {
   const nonFinalAssessments = course.assessments
     ? course.assessments.filter((assessment) => assessment.type !== "final")
     : [];
+
   const handleFinalizeClick = () => {
     if(finalAssessment.length <= 0 || nonFinalAssessments.length <= 0 || !(course.handbook) ||  course.books.length <= 0 ){
     setSubmitModal({
@@ -157,10 +159,10 @@ const CourseDetailsEditPage = () => {
   );
 
   const [submitModal, setSubmitModal] = useState({
-    openModal: false,
+    openModal: true,
     id: null,
     title: "Submit for Review", // Default title
-    status: "", // 'confirm', 'loading', 'success', 'error', 'final-submit'
+    status: "warning", // 'confirm', 'loading', 'success', 'error', 'final-submit'
   });
 
   const [modal,setModal] = useState({
@@ -198,6 +200,8 @@ const CourseDetailsEditPage = () => {
   const handleConfirmCancel = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
+
+      if(user.role === "contributor"){
       // await PrivateApi.post(`/cancel-account-submission`);
       // // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
       
@@ -205,10 +209,10 @@ const CourseDetailsEditPage = () => {
       // if (refreshUser) await refreshUser();
       // console.log("Cancelling course submission with ID:", course._id);
       const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`);
-        if(res.data.success){
-          setCourse(prev => ({ ...prev, status: "draft" }));
-        }
-
+      } else {
+        const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`,{feedback: feedback.trim()});
+      }
+      setCourse(prev => ({ ...prev, status: "draft",feedback: feedback.trim() }));
       setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
     } catch (error) {
       setSubmitModal((prev) => ({ ...prev, status: "cancel-error" }));
@@ -241,8 +245,7 @@ const CourseDetailsEditPage = () => {
       // await PrivateApi.delete(`/delete-course/${courseId}`);
       // setCourses((prevCourses) => prevCourses.filter((course) => course._id !== courseId));
       const res = await PrivateApi.delete(`/delete-course/${courseId}`);
-        
-
+      
       setModal((prev) => ({ ...prev, status: "success" })); 
     } catch (error) {
       setModal((prev) => ({ ...prev, status: "error" }));
@@ -261,6 +264,7 @@ const successfulDeleteAcknowledgement = () => {
   const handleFinalSubmit = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
+      
       // console.log("Submitting course for review with ID:", course._id);
       // Replace with your actual submission endpoint
       // await PrivateApi.post(`/submit-all-courses`);
@@ -269,9 +273,9 @@ const successfulDeleteAcknowledgement = () => {
       // throw new Error("Simulated submission error"); // Uncomment to test error handling
       const res = await PrivateApi.post(`/submit-course-for-review/${course._id}`);
       
-       if(res.data.success){
-          setCourse(prev => ({ ...prev, status: "pending" }));
-       }
+       
+          setCourse(prev => ({ ...prev, status: "pending",feedback: "" }));
+       
 
       setSubmitModal({
         openModal: true,
@@ -287,11 +291,49 @@ const successfulDeleteAcknowledgement = () => {
   const handleApproveClick = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
 
-    setTimeout(() => {}, 1000)
+    try {
+      // Simulate API call to approve the course
+       await PrivateApi.post(`/accept-course-submission/${course._id}`);
+      setCourse(prev => ({ ...prev, status: "approved" }));
+      setSubmitModal((prev) => ({ ...prev, loading: false, status: "approved-success" }));
+    } catch (error) {
      setSubmitModal((prev) => ({ ...prev, loading: false, status: "approved-error" }));
-    
-    console.log(submitModal)
+    } finally {
+      setSubmitModal((prev) => ({ ...prev, loading: false }));
+    }
+
   };
+
+  const handleGiveFeedback = async () => {
+    setSubmitModal((prev) => ({ ...prev, status: "cancel" , openModal: true }));
+  }
+
+const handleDownload = (link) => {
+    console.log("Download link:", link); // Debugging line to check the link value
+  if (!link) return;
+  // '_blank' opens in a new tab
+  window.open(link, '_blank', 'noopener,noreferrer');
+};
+
+const handleCancelSubmission = async () => {  
+   setSubmitModal({
+              openModal: false,
+              status: "",
+              loading: false,
+            });
+    if (user.role === "moderator") {
+    navigate(-1); 
+  }  
+          
+}
+
+const handleApproveSubmission = async () => {
+            setSubmitModal({ openModal: false, status: "", loading: false })
+             if(user.role === "moderator") {
+              // Refresh the page or fetch updated data to reflect the approved course
+              navigate(-1); // This will reload the current page
+           }
+}
 
 
 
@@ -470,6 +512,8 @@ const successfulDeleteAcknowledgement = () => {
                     </p>
                   </div>
                 </div>
+                <div className="flex flex-col w-full lg:w-auto lg:flex-row gap-3 sm:justify-center justify-end sm:items-center item" >
+    
                     {
                   (course.status === "draft" || user.role === "admin") && (
                    
@@ -484,6 +528,7 @@ const successfulDeleteAcknowledgement = () => {
                       </span>
                       Edit
                     </>
+
                   ) : (
                     <>
                       <span className="material-symbols-outlined ">
@@ -494,11 +539,25 @@ const successfulDeleteAcknowledgement = () => {
                   )}
                 </button>
                 )}
+                {
+                  course.handbook && (
+                     <button className="flex w-full lg:w-auto justify-center cursor-pointer text-lg items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+                  onClick={() => handleDownload(course.handbook)}
+                  >
+                <span className="material-symbols-outlined text-lg">
+                  <MdOutlineFileDownload size={26} />
+                </span>
+                Download <span className="hidden sm:block">PDF</span>
+              </button>)
+                }
+
                 <UpdateHandbook
                   handbookModal={handbookModal}
                   setHandbookModal={setHandbookModal}
                 />
+
               </div>
+                </div>
             </section>
             {/*  Course Materials Section */}
             <section>
@@ -527,6 +586,12 @@ const successfulDeleteAcknowledgement = () => {
                             </h4>
                           </div>
                         </div>
+                           <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(material.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
+                        
                         {
                           (course.status === "draft" || user.role === "admin") && (<button
                           className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 cursor-pointer"
@@ -546,7 +611,8 @@ const successfulDeleteAcknowledgement = () => {
                           <MdDeleteOutline size={26} />
                         </button>)
                         }
-                        
+
+                     
                       </div>
                     ))}
                     {(course.status === "draft" || user.role === "admin") && (
@@ -612,9 +678,14 @@ const successfulDeleteAcknowledgement = () => {
                             </p>
                           </div>
                         </div>
+                         <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(book.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
                         {
                           (course.status === "draft" || user.role === "admin")  && (   <button
-                          className="text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 ml-2"
+                          className="text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteModal({
@@ -633,7 +704,9 @@ const successfulDeleteAcknowledgement = () => {
                         }
                       
                       </div>
+                      
                     ))}
+                    
                     {
                       (course.status === "draft" || user.role === "admin") && (
                         <div onClick={handleUpdateBook} className="cursor-pointer">
@@ -681,6 +754,11 @@ const successfulDeleteAcknowledgement = () => {
                               </h4>
                             </div>
                           </div>
+                           <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(task.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
                           {
                             (course.status === "draft" || user.role === "admin")  && ( <button
                             className="text-slate-400 cursor-pointer hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
@@ -776,18 +854,24 @@ const successfulDeleteAcknowledgement = () => {
                                     <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
                                       {assessment.type || "Untitled Assessment"}
                                     </p>
-                                    <div className="flex items-center gap-5">
+                                    <div className="flex items-center gap-3 sm:gap-5">
                                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        {new Date(assessment.date)
+                                         Data : <span className="font-bold"> {new Date(assessment.date)
                                           .toLocaleDateString("en-GB")
-                                          .replace(/\//g, "-")}
+                                          .replace(/\//g, "-")}</span>
                                       </p>
                                       <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                                        {assessment.mark} mark
+                                        mark : <span className="font-bold">{assessment.mark}</span> 
                                       </p>
                                     </div>
                                   </div>
                                 </div>
+                                <div className="flex justify-center items-center">
+                                 <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(assessment.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
                                 {
                                   (course.status === "draft" || user.role === "admin")  && (<button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
                                    onClick={(e) => {
@@ -807,6 +891,7 @@ const successfulDeleteAcknowledgement = () => {
                                 </button> )
                                 }
                                 
+                              </div>
                               </div>
                             ))}
                             {
@@ -870,18 +955,26 @@ const successfulDeleteAcknowledgement = () => {
                                     <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
                                       {assessment.type || "Untitled Assessment"}
                                     </p>
-                                    <div className="flex items-center gap-5">
+                                    <div className="flex items-center gap-3 sm:gap-5">
                                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        {new Date(assessment.date)
+                                        Date : <span className="font-bold">{new Date(assessment.date)
                                           .toLocaleDateString("en-GB")
-                                          .replace(/\//g, "-")}
+                                          .replace(/\//g, "-")}</span>
                                       </p>
                                       <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                                        {assessment.mark} mark
+                                        mark : <span className="font-bold">{assessment.mark}</span>
                                       </p>
                                     </div>
                                   </div>
                                 </div>
+                                <div className="flex justify-center items-center">
+
+                                
+                                 <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(assessment.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
                                 {
                                   (course.status === "draft" || user.role === "admin")  && (<button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
                                         onClick={(e) => {
@@ -900,6 +993,7 @@ const successfulDeleteAcknowledgement = () => {
                                   <MdDeleteOutline size={26} />
                                 </button>)
                                 }
+                                </div>
                                 
                               </div>
                             ))}
@@ -952,7 +1046,7 @@ const successfulDeleteAcknowledgement = () => {
 
         {/* --- RESTORED FEEDBACK & SUBMIT SECTION --- */}
         <div className="my-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          {user.feedback ? (
+          {course.feedback ? (
             <div className="p-4 bg-amber-50 border-l-4 w-full border-amber-500 rounded-r-lg shadow-sm">
               <div className="flex items-center mb-2">
                 <svg
@@ -967,7 +1061,7 @@ const successfulDeleteAcknowledgement = () => {
                 </h3>
               </div>
               <p className="text-amber-900 text-sm leading-relaxed">
-                {user.feedback}
+                {course.feedback}
               </p>
             </div>
           ) : (
@@ -996,11 +1090,23 @@ const successfulDeleteAcknowledgement = () => {
           <button
             type="button"
             onClick={() => {
+              console.log("Current User Role:", user.role); 
+              if(user.role === "contributor"){
               setSubmitModal((prev)=> ({
                 ...prev,
                 openModal: true,
                 status: "cancel",
               }));
+            } else {
+                  setSubmitModal((prev)=> ({
+                ...prev,
+                openModal: true,
+                status: "feedback",
+              }))
+            }
+
+            console.log("Submit Modal State:", submitModal)
+
             }}
             className="group flex w-full items-center justify-center gap-3 rounded-xl 
                bg-amber-500 hover:bg-amber-600 
@@ -1130,21 +1236,32 @@ const successfulDeleteAcknowledgement = () => {
 
 {/* 2. SUCCESS MODAL */}
 {modal.openModal && modal.status === "success" && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    {/* Backdrop */}
     <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
-    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
-      <div className="flex flex-col items-center gap-8">
-        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 dark:bg-primary-dark text-primary">
-          <IoMdCheckmarkCircle size={56} />
+    
+    {/* Modal Card */}
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-6 sm:gap-8">
+        
+        {/* Icon: Rose Theme for Delete Success */}
+        <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdOutlineDeleteSweep className="text-[40px] sm:text-[56px]" />
         </div>
-        <div className="space-y-4">
-          <h3 className="text-4xl font-bold text-text-main dark:text-white">Successfully Deleted!</h3>
-          <p className="text-xl text-text-secondary dark:text-gray-400">
-            The course has been removed successfully.
+
+        {/* Text Content */}
+        <div className="space-y-4 text-center">
+          <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+            Successfully Deleted!
+          </h3>
+          <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+            The course has been <span className="text-rose-600 font-bold uppercase">permanently removed</span> from the system. This action has been successfully logged.
           </p>
         </div>
+
+        {/* Action Button: Styled as the "Delete" primary action */}
         <button 
-          className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-lg font-semibold hover:bg-primary-hover shadow-sm transition-all active:scale-[0.98] cursor-pointer" 
+          className="w-full mt-4 py-3 sm:py-4 rounded-xl bg-rose-600 text-white text-lg sm:text-xl font-semibold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all active:scale-95 cursor-pointer font-display" 
           onClick={successfulDeleteAcknowledgement}
         >
           Done
@@ -1278,7 +1395,7 @@ const successfulDeleteAcknowledgement = () => {
             Not Now
           </button>
           <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleFinalSubmit}>
-            {submitModal.loading ? <AppleSpinner text={"Submitting"} /> : "Confirm Submit"}
+            {submitModal.loading ? <AppleSpinner text={"Submitting"} /> : "Submit"}
           </button>
         </div>
       </div>
@@ -1355,55 +1472,65 @@ const successfulDeleteAcknowledgement = () => {
   </div>
 )}
 
-{submitModal.status === "feedback" && (
-  <div className="flex flex-col items-center gap-4 sm:gap-6">
-    {/* Icon: Using a soft Sky Blue theme */}
-    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-500 dark:text-sky-400 shrink-0">
-      <svg className="w-10 h-10 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-      </svg>
-    </div>
+{submitModal.openModal && submitModal.status === "feedback" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div 
+      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" 
+      onClick={!submitModal.loading ? closeModal : null}
+    ></div>
 
-    <div className="space-y-2 text-center">
-      <h3 className="text-2xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 font-display">
-        Submission Feedback
-      </h3>
-      <p className="text-base sm:text-xl text-slate-500 dark:text-slate-400 font-body">
-        Please describe the changes needed for this submission.
-      </p>
-    </div>
+    {/* Reduced padding from p-14 to p-10 to keep it from stretching too far */}
+    <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-card-dark p-8 sm:p-10 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-6">
+        
+        {/* Slightly smaller icon container to save vertical space */}
+        <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-sky-50 dark:bg-sky-900/20 text-sky-500">
+          <svg className="w-12 h-12 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+        </div>
 
-    {/* Textarea: Border and Focus rings updated to Sky */}
-    <div className="w-full relative">
-      <textarea
-        rows={4}
-        className="w-full p-4 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-main dark:text-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-400 transition-all outline-none resize-none text-base sm:text-lg font-body"
-        placeholder="Type your feedback here..."
-        value={feedback}
-        onChange={(e) => setFeedback(e.target.value)}
-      />
-    </div>
+        <div className="space-y-2 w-full">
+          <h3 className="text-2xl sm:text-3xl font-bold text-text-main dark:text-white font-display">
+            Request Changes
+          </h3>
+          <p className="text-base sm:text-lg text-text-secondary dark:text-gray-400 font-body">
+            Provide feedback to help the user improve this submission.
+          </p>
+        </div>
 
-    <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-2">
-      <button
-        disabled={submitModal.loading}
-        className="w-full rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-3 sm:py-4 text-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-sky-50/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-        onClick={closeModal}
-      >
-        Cancel
-      </button>
-      
-      {/* Primary Action Button: Sky Blue-500 */}
-      <button
-        disabled={submitModal.loading || feedback?.trim().length < 10 }
-        className="w-full rounded-xl bg-sky-500 py-3 sm:py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/20 hover:bg-sky-600 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all active:scale-[0.98] cursor-pointer font-display"
-        onClick={handleGiveFeedback}
-      >
-        {submitModal.loading ? <AppleSpinner /> : "Give Feedback"}
-      </button>
+        {/* Constrained textarea height */}
+        <div className="w-full">
+          <textarea
+            rows={3} 
+            className="w-full p-4 rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-slate-800/50 text-text-main dark:text-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none resize-none text-base font-body"
+            placeholder="What needs to be changed?"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+          />
+        </div>
+
+        <div className="flex w-full gap-4 mt-2">
+          <button 
+            disabled={submitModal.loading} 
+            className="flex-1 py-3 sm:py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 cursor-pointer" 
+            onClick={closeModal}
+          >
+            Cancel
+          </button>
+          
+          <button 
+            disabled={submitModal.loading || feedback?.trim().length < 10} 
+            className="flex-1 bg-sky-600 py-3 sm:py-4 rounded-xl text-lg font-semibold text-white hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 transition-all active:scale-95 cursor-pointer flex justify-center items-center" 
+            onClick={handleGiveFeedback}
+          >
+            {submitModal.loading ? <AppleSpinner text={"Sending"} /> : "Send Feedback"}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-)} 
+)}
 
 {/* --- 3. CANCEL CONFIRMATION MODAL --- */}
 {submitModal.openModal && submitModal.status === "cancel" && (
@@ -1425,7 +1552,7 @@ const successfulDeleteAcknowledgement = () => {
             Keep Review
           </button>
           <button disabled={submitModal.loading} className="flex-1 bg-rose-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-rose-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleConfirmCancel}>
-            {submitModal.loading ? <AppleSpinner text={"Cancelling"} /> : "Confirm Cancel"}
+            {submitModal.loading ? <AppleSpinner text={"Cancelling"} /> : "Cancel"}
           </button>
         </div>
       </div>
@@ -1436,19 +1563,37 @@ const successfulDeleteAcknowledgement = () => {
 {/* --- 4. CANCEL SUCCESS MODAL --- */}
 {submitModal.openModal && submitModal.status === "cancel-success" && (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
-    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    {/* Backdrop */}
+    <div 
+      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" 
+      onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+    ></div>
+
+    {/* Modal Card */}
     <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
-      <div className="flex flex-col items-center gap-8">
-        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <IoMdCheckmarkCircle size={56} />
+      <div className="flex flex-col items-center gap-6 sm:gap-8">
+        
+        {/* Icon: Rose Theme */}
+        <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdRestartAlt className="text-[40px] sm:text-[56px]" />
         </div>
-        <div className="space-y-4">
-          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Cancelled</h3>
-          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-            Your request has been withdrawn successfully. You can edit your courses again.
+
+        {/* Text Content */}
+        <div className="space-y-2">
+          <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+            Submission Cancelled
+          </h3>
+          <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+            {user.role === "contributor" ? "Your" : "Contributor"} request has been withdrawn. {user.role === "contributor" ? "Your" : "Contributor"} account is now back in{" "}
+            <span className="font-bold text-rose-600">Active mode</span> and you can edit {user.role === "contributor" ? "your" : "contributor"} courses again.
           </p>
         </div>
-        <button className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}>
+
+        {/* Action Button */}
+        <button
+          className="w-full mt-4 py-3 sm:py-4 rounded-xl bg-rose-600 text-lg sm:text-xl text-white font-semibold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all active:scale-95 cursor-pointer font-display"
+          onClick={handleCancelSubmission}
+        >
           Done
         </button>
       </div>
@@ -1514,7 +1659,7 @@ const successfulDeleteAcknowledgement = () => {
             Cancel
           </button>
           <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleApproveClick}>
-            {submitModal.loading ? <AppleSpinner text={"Approving"} /> : "Confirm Approval"}
+            {submitModal.loading ? <AppleSpinner text={"Approving"} /> : "Approve"}
           </button>
         </div>
       </div>
@@ -1538,7 +1683,7 @@ const successfulDeleteAcknowledgement = () => {
         </div>
         <button 
           className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" 
-          onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+          onClick={handleApproveSubmission}
         >
           Done
         </button>

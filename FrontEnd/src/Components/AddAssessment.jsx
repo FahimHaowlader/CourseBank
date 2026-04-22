@@ -75,7 +75,7 @@ const AddAssessment = () => {
     if (!formData.date || !course?.startingDate) return false;
     const selected = new Date(formData.date).setHours(0, 0, 0, 0);
     const start = new Date(course.startingDate).setHours(0, 0, 0, 0);
-    return selected < start;
+    return selected <= start;
   };
 
   const urlOk = isUrlValid(formData.fileUrl);

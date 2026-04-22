@@ -39,7 +39,7 @@ const ContributorCoursePage = () => {
   const [submitModal, setSubmitModal] = useState({
     openModal: false,
     id: null,
-    status: "",
+    status: "", // 'warning', 'submit', 'cancel', 'cancel-success', 'cancel-error', 'submit-success', 'submit-error', 'approved', 'approved-success', 'approved-error', 'delete'
     loading: false,
   });
 
@@ -179,7 +179,7 @@ const ContributorCoursePage = () => {
       if (user.role === "contributor") {
       await PrivateApi.post(`/cancel-contributor-account-submission`);
       } else{
-        await PrivateApi.post(`/cancel-contributor-account-submission`,{contributorUserId:userId,feedback });
+        await PrivateApi.post(`/cancel-contributor-account-submission`,{contributorUserId:userId,feedback : feedback.trim() });
       }
       // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
 
@@ -406,10 +406,10 @@ const ContributorCoursePage = () => {
             {contributor.status === "active" && (
               <button
                 className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
-                           bg-emerald-600 hover:bg-emerald-700 
-                           text-emerald-50 font-bold 
-                           border border-emerald-500/20
-                           shadow-sm shadow-emerald-900/20 
+                           bg-primary hover:bg-primary-hover 
+                           text-white font-bold 
+                           border border-primary/20
+                           shadow-sm shadow-primary/20 
                            transition-all duration-200 
                            transform active:scale-[0.97] 
                            flex items-center justify-center gap-3 cursor-pointer"
@@ -607,35 +607,43 @@ const ContributorCoursePage = () => {
           )}
 
         {/* 2. SUCCESS MODAL */}
-        {modal.openModal && modal.status === "success" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
-            <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
-              <div className="flex h-28 w-28 mx-auto items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 mb-8">
-                <IoMdCheckmarkCircle size={56} />
-              </div>
-              <div className="space-y-4 mb-8">
-                <h3 className="text-4xl font-bold text-text-main dark:text-white">
-                  Successfully Deleted!
-                </h3>
-                <p className="text-xl text-text-secondary dark:text-gray-400">
-                  The course{" "}
-                  <span className="font-bold text-text-main dark:text-white">
-                    {modal.title}
-                  </span>{" "}
-                  was removed.
-                </p>
-              </div>
-              <button
-                className="w-full py-4 rounded-xl bg-emerald-600 text-white text-lg font-semibold hover:bg-emerald-700 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
-                onClick={cancelDeleteCourse}
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        )}
+          {modal.openModal && modal.status === "success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    {/* Backdrop */}
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    
+    {/* Modal Card */}
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-6 sm:gap-8">
+        
+        {/* Icon: Rose Theme for Delete Success */}
+        <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdOutlineDeleteSweep className="text-[40px] sm:text-[56px]" />
+        </div>
 
+        {/* Text Content */}
+        <div className="space-y-4 text-center">
+          <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+            Successfully Deleted!
+          </h3>
+          <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+            The course has been <span className="text-rose-600 font-bold uppercase">permanently removed</span> from the system. This action has been successfully logged.
+          </p>
+        </div>
+
+        {/* Action Button: Styled as the "Delete" primary action */}
+        <button 
+          className="w-full mt-4 py-3 sm:py-4 rounded-xl bg-rose-600 text-white text-lg sm:text-xl font-semibold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all active:scale-95 cursor-pointer font-display" 
+          onClick={cancelDeleteCourse}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+    
         {/* 3. DELETION ERROR MODAL */}
         {modal.openModal && modal.status === "error" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -1066,7 +1074,7 @@ const ContributorCoursePage = () => {
               {submitModal.status === "approved-success" && (
                 <div className="flex flex-col items-center gap-6 sm:gap-8">
                   {/* Icon: Primary/Theme checkmark circle */}
-                  <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600">
+                  <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <IoMdCheckmarkCircle size={56} />
                   </div>
 
@@ -1081,7 +1089,7 @@ const ContributorCoursePage = () => {
                   </div>
 
                   <button
-                    className="w-full py-3 sm:py-4 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 shadow-sm transition-all active:scale-95 cursor-pointer"
+                    className="w-full py-3 sm:py-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover shadow-sm transition-all active:scale-95 cursor-pointer"
                     onClick={() =>
                       setSubmitModal({
                         openModal: false,

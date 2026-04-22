@@ -377,7 +377,7 @@ const CourseDetailsPage = () => {
                     Term Test Questions
                   </h3>
                   {
-                    course.assessments?.filter((assessment) => assessment.type !== 'final').length === 0 ? (<NoElement title={"term test question"} />)  : ( course.assessments?.filter((assessment) => assessment.name !== 'final').map((assessment) => (
+                    course.assessments?.filter((assessment) => assessment.type !== 'final').length === 0 ? (<NoElement title={"term test question"} />)  : ( course.assessments?.filter((assessment) => assessment.type !== 'final').map((assessment) => (
                       <div key={assessment._id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
@@ -416,7 +416,7 @@ const CourseDetailsPage = () => {
                     Final Exam Questions
                   </h3>
                   { 
-                    course.assessments?.filter((assessment) => assessment.type === 'final').length === 0 ? (<NoElement title={"final question"} />)  : ( course.assessments?.filter((assessment) => assessment.name === 'final').map((assessment) => (
+                    course.assessments?.filter((assessment) => assessment.type === 'final').length === 0 ? (<NoElement title={"final question"} />)  : ( course.assessments?.filter((assessment) => assessment.type === 'final').map((assessment) => (
                       <div key={assessment._id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">

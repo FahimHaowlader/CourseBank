@@ -177,27 +177,34 @@ const DeleteElement = () => {
       )}
 
       {/* 2. SUCCESS MODE */}
-      {deleteModal.status === "success" && (
-        <ModalWrapper>
-          <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
-            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20 text-teal-600">
-              <IoMdCheckmarkCircle size={56} />
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-4xl font-bold text-text-main dark:text-white">Successfully Deleted!</h3>
-              <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-            <span className="font-bold text-text-main dark:text-white">{deleteItem.name} </span> has been removed from your course successfully.
-              </p>
-            </div>
-            <button
-              onClick={handleClose}
-              className="w-full rounded-xl bg-teal-600 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-teal-700 transition-colors cursor-pointer"
-            >
-              Done
-            </button>
-          </div>
-        </ModalWrapper>
-      )}
+     {deleteModal.status === "success" && (
+  <ModalWrapper>
+    <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-6 sm:gap-8">
+      {/* Icon: Switched to Rose/Danger theme to match Delete design */}
+      <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+        <IoMdCheckmarkCircle className="text-[40px] sm:text-[56px]" />
+      </div>
+
+      {/* Text Content */}
+      <div className="space-y-4 text-center">
+        <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+          Successfully Deleted!
+        </h3>
+        <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+          <span className="font-bold text-text-main dark:text-white">{deleteItem.name}</span> has been removed from your course successfully.
+        </p>
+      </div>
+
+      {/* Primary Action Button: Styled like the 'Delete' button but for completion */}
+      <button
+        onClick={handleClose}
+        className="w-full rounded-xl bg-rose-600 px-8 py-3 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all active:scale-95 cursor-pointer font-display"
+      >
+        Done
+      </button>
+    </div>
+  </ModalWrapper>
+)}
 
       {/* 3. ERROR MODE */}
       {deleteModal.status === "error" && (
