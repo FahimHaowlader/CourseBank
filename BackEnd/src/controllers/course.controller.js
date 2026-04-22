@@ -11,6 +11,7 @@ import { ObjectId } from 'mongodb';
 // model
 import Course from '../models/course.model.js';
 import User from '../models/user.model.js';
+import { request } from 'express';
 
 // In-memory cache (shared across requests)
 const userQueryCache = {};
@@ -252,6 +253,10 @@ const isModerator =
   }
 
   // console.log("Course Status:", course.status);
+
+  if(isModerator && course.status === "draft"){
+    throw new apiError(403, "Course Locked: Draft courses cannot be edited by moderators.");
+  }
 
   // Rule 3: Status Lock (Pending/Approved) - Only blocks non-admins
   // If status is NOT 'draft', contributors/moderators cannot edit
@@ -1969,6 +1974,8 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
   const role = req.user?.role;
   const hasAccess = req.user?.access === true;
 
+  console.log("Submit Request - UserID:", userId, "Role:", role, "CourseID:", courseId);
+
   // 1. Authorization
   if (!hasAccess) {
     throw new apiError(403, "Forbidden: Access denied.");
@@ -1993,10 +2000,33 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
   
 
   // 2. Fetch the Full Course Document from DB
-  const course = await Course.findOne(query).select('handbook assessments');
+  const course = await Course.findOne(query).select('handbook hscYear semester degree assessments');
   if (!course) {
     throw new apiError(404, "Course not found in the database.");
   }
+  console.log("Course fetched for submission:", course);
+
+  if (role === "moderator") {
+  // Extracting from cse20230211
+  const idYear = Number(req.userId.slice(3, 7));    // "2023"
+  const degreeCode = req.userId.slice(7, 9);        // "02"
+  const idSemester = Number(req.userId.slice(-2));  // "11"
+
+  const degreeMap = {
+    "01": "bachelors",
+    "02": "masters",
+    "03": "phd"
+  };
+
+  const isSameYear = idYear === course.hscYear;
+  const isSameDegree = degreeMap[degreeCode] === course.degree;
+  const isSameSemester = idSemester === course.semester;
+
+  if (!isSameYear || !isSameDegree || !isSameSemester) {
+    // Using 403 Forbidden because the user is authenticated but unauthorized
+    throw new apiError(403, "Moderator credentials do not match course criteria");
+  }
+}
 
   // 3. Database Validation Logic (The "BD" checks)
   
@@ -2058,10 +2088,20 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
   // if (role !== "admin") {
   //   query.createdBy = userId;
   // }
+const updatedData = {
+  status: "pending",
+  submittedAt: new Date(),
+  isEditedSinceFeedback: false
+}
+
+if (role === "moderator" || role === "admin") {
+  // Moderators/Admins don't "trigger" the edited flag for themselves usually
+  updatedData.feedback = "";
+}
 
   const updatedCourse = await Course.findOneAndUpdate(
     query,
-    { $set: { status: "pending",submittedAt : new Date(),isEditedSinceFeedback :false } },
+    { $set: updatedData },
     { 
       new: true, 
       runValidators: true,
@@ -2095,6 +2135,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
     throw new apiError(403, "Forbidden: Your account access is restricted.");
   }
 
+
   if((role === "admin" || role === "moderator") && !feedback) {
     throw new apiError(400, "Feedback is required when canceling a submission as a Moderator or Admin.");
   }
@@ -2118,7 +2159,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
 // 1. Prepare the update object
   const updateFields = {
     status: "draft",
-    reviewedBy: userId,
+    
     // We'll set this dynamically below
   };
 
@@ -2126,17 +2167,25 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
   // If the user is a Moderator or Admin, they can edit ANY course.
   // If they are a regular user, they can only edit their OWN course.
   if (role === "moderator" || role === "admin") {
+
     // Moderators/Admins don't "trigger" the edited flag for themselves usually
     updateFields.isEditedSinceFeedback = false,
+    updateFields.reviewedBy = userId,
     updateFields.feedback = feedback; // Store the feedback from the moderator/admin
 
   } else {
     // If a regular user (CR/Student) edits, they must be the creator
     // IMPORTANT: When a user edits, we set this to TRUE 
     // so the Admin knows the feedback was addressed.
+   updateFields.feedback = '';
     updateFields.isEditedSinceFeedback = true;
   }
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
+    console.log("hi")
+
+   try {
  
   // 3. Revert Status to Draft
   const updatedCourse = await Course.findOneAndUpdate(
@@ -2148,10 +2197,10 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
     },
     { 
       new: true, 
-      select: "title status isEditedSinceFeedback feedback" 
+      select: "title hscYear semester degree status isEditedSinceFeedback feedback" 
     }
   );
-
+  console.log("Updated Course after Cancellation:", updatedCourse);
   // 4. Handle Failure
   if (!updatedCourse) {
     throw new apiError(
@@ -2160,13 +2209,49 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
     );
   }
 
-  res.status(200).json(
+
+ if (role === "moderator") {
+  // Extracting from cse20230211
+  const idYear = Number(req.user.userId.slice(3, 7));    // "2023"
+  const degreeCode = req.user.userId.slice(7, 9);        // "02"
+  const idSemester = Number(req.user.userId.slice(-2));  // "11"
+  console.log("ho")
+  const degreeMap = {
+    "01": "bachelors",
+    "02": "masters",
+    "03": "phd"
+  };
+
+  const isSameYear = idYear === updatedCourse.hscYear;
+  const isSameDegree = degreeMap[degreeCode] === updatedCourse.degree;
+  const isSameSemester = idSemester === updatedCourse.semester;
+
+  if (!isSameYear || !isSameDegree || !isSameSemester) {
+    // Using 403 Forbidden because the user is authenticated but unauthorized
+    throw new apiError(403, "Moderator credentials do not match course criteria");
+  }
+}
+console.log("Course cancellation successful, preparing response...");
+
+ res.status(200).json(
     new apiResponse(
       200, 
       { courseId: updatedCourse._id, newStatus: updatedCourse.status }, 
       "Submission cancelled. The course is now back in Draft mode for editing."
     )
   );
+  console.log("Response sent successfully.");
+   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+   }
+
+   await session.commitTransaction();
+   session.endSession();
+
+  
+ 
 });
 
 const acceptSubmission = asyncHandler(async (req, res) => {
@@ -2201,12 +2286,34 @@ const acceptSubmission = asyncHandler(async (req, res) => {
           feedback: "" 
         } 
       },
-      { new: true, session, select: "title status createdBy" }
+      { new: true, session, select: "title hscYear semester degree status createdBy" }
     );
 
     if (!approvedCourse) {
       throw new apiError(404, "Course not found or is not in 'pending' status.");
     }
+
+    if (role === "moderator") {
+  // Extracting from cse20230211
+  const idYear = Number(req.user.userId.slice(3, 7));    // "2023"
+  const degreeCode = req.user.userId.slice(7, 9);        // "02"
+  const idSemester = Number(req.user.userId.slice(-2));  // "11"
+
+  const degreeMap = {
+    "01": "bachelors",
+    "02": "masters",
+    "03": "phd"
+  };
+
+  const isSameYear = idYear === approvedCourse.hscYear;
+  const isSameDegree = degreeMap[degreeCode] === approvedCourse.degree;
+  const isSameSemester = idSemester === approvedCourse.semester;
+
+  if (!isSameYear || !isSameDegree || !isSameSemester) {
+    // Using 403 Forbidden because the user is authenticated but unauthorized
+    throw new apiError(403, "Moderator credentials do not match course criteria");
+  }
+}
 
     // 4. Update User Profile
     // Note: Since the course is now "Live", we usually keep it in 'myCourses' 
@@ -2223,6 +2330,8 @@ const acceptSubmission = asyncHandler(async (req, res) => {
     if (!updatedUser) {
       throw new apiError(404, "Creator of this course no longer exists.");
     }
+
+    
 
     // 5. COMMIT
     await session.commitTransaction();
