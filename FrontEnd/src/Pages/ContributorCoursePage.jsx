@@ -79,7 +79,7 @@ const ContributorCoursePage = () => {
     };
     if (userId) fetchContributorCourses();
   }, [userId]);
-
+const isOwner = contributor?._id?.toString() === user?._id?.toString();
   
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -196,7 +196,7 @@ const ContributorCoursePage = () => {
   };
 
   const handleCancelClick = () => {
-    if(user.role === "contributor"){
+    if(user.role === "contributor" || isOwner) {
     setSubmitModal({
       openModal: true,
       status: "cancel",
@@ -439,7 +439,7 @@ const ContributorCoursePage = () => {
                 <span className="flex items-center justify-center">
                   <MdOutlineCancel size={22} />
                 </span>
-                <span className="tracking-tight">{`${user.role === "contributor" ? "Cancel Submission":"Reject Submission"}`} </span>
+                <span className="tracking-tight">{`${isOwner ? "Cancel Submission":"Reject Submission"}`} </span>
               </button>
             )}
 

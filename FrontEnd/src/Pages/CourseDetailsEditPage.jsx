@@ -81,6 +81,8 @@ const CourseDetailsEditPage = () => {
     setDeleteItem,
     error,
   } = useCourse();
+const isOwner = course?.createdBy?.toString() === user?._id?.toString();
+
 const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize feedback state with course feedback or empty string
 
 
@@ -160,10 +162,10 @@ const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize fe
   );
 
   const [submitModal, setSubmitModal] = useState({
-    openModal: true,
+    openModal: false,
     id: null,
     title: "Submit for Review", // Default title
-    status: "warning", // 'confirm', 'loading', 'success', 'error', 'final-submit'
+    status: "", // 'confirm', 'loading', 'success', 'error', 'final-submit'
   });
 
   const [modal,setModal] = useState({
@@ -211,7 +213,7 @@ const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize fe
       // console.log("Cancelling course submission with ID:", course._id);
       const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`);
       } else {
-        const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`,{feedback: feedback.trim()});
+        const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`,{feedback: feedback.trim(), isOwner: isOwner});
       }
       setCourse(prev => ({ ...prev, status: "draft",feedback: feedback.trim() }));
       setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
@@ -322,7 +324,7 @@ const handleCancelSubmission = async () => {
               status: "",
               loading: false,
             });
-    if (user.role === "moderator") {
+    if (user.role === "moderator" && !isOwner) {
     navigate(-1); 
   }  
           
@@ -1098,8 +1100,8 @@ if(error && !isLoading) {
           <button
             type="button"
             onClick={() => {
-              console.log("Current User Role:", user.role); 
-              if(user.role === "contributor"){
+              
+              if(user.role === "contributor" || isOwner) {
               setSubmitModal((prev)=> ({
                 ...prev,
                 openModal: true,
@@ -1112,9 +1114,6 @@ if(error && !isLoading) {
                 status: "feedback",
               }))
             }
-
-            console.log("Submit Modal State:", submitModal)
-
             }}
             className="group flex w-full items-center justify-center gap-3 rounded-xl 
                bg-amber-500 hover:bg-amber-600 
@@ -1128,7 +1127,7 @@ if(error && !isLoading) {
               size={22}
               className="transition-transform group-hover:rotate-90"
             />
-            <span className="tracking-tight">{`${user.role === "contributo" ? "Cancel" : "Reject"}`} Submission</span>
+            <span className="tracking-tight">{`${isOwner ? "Cancel" : "Reject"}`} Submission</span>
           </button>
         )}
 
@@ -1176,7 +1175,7 @@ if(error && !isLoading) {
             </button>
               )}
             {
-              user.role === "admin" && (
+              (user.role === "admin" || isOwner) && (
             
             <button
               type="button"
@@ -1532,7 +1531,7 @@ if(error && !isLoading) {
             className="flex-1 bg-sky-600 py-3 sm:py-4 rounded-xl text-lg font-semibold text-white hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 transition-all active:scale-95 cursor-pointer flex justify-center items-center" 
             onClick={handleGiveFeedback}
           >
-            {submitModal.loading ? <AppleSpinner text={"Sending"} /> : "Send Feedback"}
+            {submitModal.loading ? <AppleSpinner text={"Sending"} /> : "Give Feedback"}
           </button>
         </div>
       </div>

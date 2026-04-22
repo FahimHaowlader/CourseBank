@@ -10,6 +10,7 @@ import SemesterDisplay from './semesterTransformer';
 import { useAuth } from '../Contexts/Auth.Context.jsx';
 
 const CustomCourseCard = ({ Course, setModal }) => {
+  
   const { user } = useAuth();
 
   // Helper for Edit/Delete Buttons (Admin / Owner access)

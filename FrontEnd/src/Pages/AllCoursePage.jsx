@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+
+
+
 import { AiOutlineSearch, AiOutlinePlus } from "react-icons/ai";
-import { MdOutlinePersonSearch, MdRefresh, MdOutlinePersonOutline } from "react-icons/md";
+import { MdOutlinePersonSearch, MdRefresh, MdOutlinePersonOutline,MdDelete,MdDeleteOutline,MdOutlineDeleteSweep } from "react-icons/md";
 import { BiHash } from "react-icons/bi";
 import { IoIosArrowDown, IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { BsPersonCheck } from "react-icons/bs";
+import { BsPersonCheck,BsExclamationCircleFill } from "react-icons/bs";
 import { LiaIdCardSolid } from "react-icons/lia";
 import axios from 'axios';
 import CustomCourseCard from '../Components/CustomCourseCard';
@@ -12,18 +15,55 @@ import { useAuth } from '../Contexts/Auth.Context.jsx';
 import semesterTransformer from '../Components/semesterTransformer.jsx';
 import PrivateApi from '../Hooks/PrivateApi.jsx';
 
+
 import SkeletonCard from '../Components/SkeletonCard.jsx';
 import Pagination from '../Components/Pagination.jsx';
 import { Link } from 'react-router';
 
 const AllCoursePage = () => {
+  
   const {user} = useAuth(); // Assuming you have a useAuth hook for authentication context
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCourses, setTotalCourses] = useState(0);
+    const [modal, setModal] = useState({
+      openModal: false,
+      id: null,
+      title: "",
+      status: "",
+    });
+
+
+  const AppleSpinner = () => (
+    <div className="flex items-center justify-center gap-2">
+      <svg className="animate-spin h-6 w-6 text-current" viewBox="0 0 24 24">
+        <style>{`
+          .spinner_blade { transform-origin: 12px 12px; animation: spinner_fade 1s linear infinite; }
+          @keyframes spinner_fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+        `}</style>
+        {[...Array(12)].map((_, i) => (
+          <rect
+            key={i}
+            className="spinner_blade"
+            x="11"
+            y="2"
+            width="2"
+            height="6"
+            rx="1"
+            style={{
+              transform: `rotate(${i * 30}deg)`,
+              animationDelay: `${(i - 12) * 0.083}s`,
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
 // console.log("User in AllCoursePage:", user); // Debugging line to check user data
   // Consolidated Search/Filter State
+
+  // Debugging line to check user role
   const [filters, setFilters] = useState({
     title: '',
     instructorName: '',
@@ -162,13 +202,43 @@ const AllCoursePage = () => {
   // Trigger fetch on Search click or Page/Sort change
   useEffect(() => {
     fetchCourses();
-  }, [page, sort]);
+  }, [page, sort,]);
 
   const generateYearRange = (start) => {
     const current = new Date().getFullYear();
     return Array.from({ length: current - start + 1 }, (_, i) => current - i);
   };
   const years = generateYearRange(2025);
+
+   const cancelDeleteCourse = () => {
+    setModal({ openModal: false, id: null, title: "", status: "" });
+  };
+  const doneDeleteCourse = (courseId, courseTitle) => {
+    setModal({ openModal: false, id: null, title: "", status: "" });
+     // Refresh the page to reflect the deleted course
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    setModal((prev) => ({ ...prev, status: "loading" }));
+    try {
+      // throw new Error("Testing delete error handling"); // <-- Temporary line to test error modal
+      await PrivateApi.delete(`/delete-course/${courseId}`);
+      setCourses((prevCourses) =>
+        prevCourses.filter((course) => course._id !== courseId),
+      );
+      setModal((prev) => ({ ...prev, status: "success" }));
+     fetchCourses();
+    } catch (error) {
+      setModal((prev) => ({ ...prev, status: "error" }));
+      console.error(`Error deleting course:`, error);
+    }
+  };
+
+  const retryDeleteCourse = (courseId) => {
+    setModal((prev) => ({ ...prev, status: "confirm" }));
+  };
+
+  
 
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
@@ -508,7 +578,7 @@ const AllCoursePage = () => {
 
           {!loading && courses && courses.length > 0
             ? courses.map((course) => (
-                <CustomCourseCard key={course._id} Course={course} />
+                <CustomCourseCard key={course._id} Course={course} setModal={setModal}/>
               ))
             : !loading && (
             <div className="col-span-full py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-dashed border-border-light dark:border-border-dark">
@@ -557,6 +627,135 @@ const AllCoursePage = () => {
           />
         )}
       </main>
+
+      {/* 1. DELETE CONFIRMATION / LOADING MODAL */}
+      {modal.openModal &&
+                (modal.status === "confirm" || modal.status === "loading") && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div
+                      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"
+                      onClick={modal.status !== "loading" ? cancelDeleteCourse : null}
+                    ></div>
+                    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-left shadow-2xl border border-border-light dark:border-border-dark">
+                      <div className="flex flex-col items-center gap-8 text-center">
+                        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 text-red-500">
+                          <MdDelete size={56} />
+                        </div>
+                        <div className="space-y-4">
+                          <h3 className="text-4xl font-bold text-text-main dark:text-white">
+                            Delete Course?
+                          </h3>
+                          <p className="text-xl text-text-secondary dark:text-gray-400">
+                            Are you sure you want to delete{" "}
+                            <span className="font-bold text-text-main dark:text-white">
+                              {modal.title} course
+                            </span>
+                            ?
+                          </p>
+                        </div>
+                        <div className="flex w-full gap-6 mt-8">
+                          <button
+                            disabled={modal.status === "loading"}
+                            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer"
+                            onClick={cancelDeleteCourse}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            disabled={modal.status === "loading"}
+                            className="flex-1 py-4 rounded-xl bg-red-500 text-white text-lg font-semibold hover:bg-red-600 disabled:bg-red-400 shadow-sm flex justify-center items-center transition-all active:scale-95 cursor-pointer"
+                            onClick={() => handleDeleteCourse(modal.id)}
+                          >
+                            {modal.status === "loading" ? (
+                              <AppleSpinner />
+                            ) : (
+                              <span className="flex justify-center items-center gap-2">
+                                <MdDeleteOutline size={26} /> Delete
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                 {/* 2. SUCCESS MODAL */}
+                          {modal.openModal && modal.status === "success" && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+                    
+                    {/* Modal Card */}
+                    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+                      <div className="flex flex-col items-center gap-6 sm:gap-8">
+                        
+                        {/* Icon: Rose Theme for Delete Success */}
+                        <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+                          <MdOutlineDeleteSweep className="text-[40px] sm:text-[56px]" />
+                        </div>
+                
+                        {/* Text Content */}
+                        <div className="space-y-4 text-center">
+                          <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+                            Successfully Deleted!
+                          </h3>
+                          <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+                            The course has been <span className="text-rose-600 font-bold uppercase">permanently removed</span> from the system. This action has been successfully logged.
+                          </p>
+                        </div>
+                
+                        {/* Action Button: Styled as the "Delete" primary action */}
+                        <button 
+                          className="w-full mt-4 py-3 sm:py-4 rounded-xl bg-rose-600 text-white text-lg sm:text-xl font-semibold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all active:scale-95 cursor-pointer font-display" 
+                          onClick={doneDeleteCourse}
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                    
+                        {/* 3. DELETION ERROR MODAL */}
+                        {modal.openModal && modal.status === "error" && (
+                          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"></div>
+                            <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+                              <div className="flex h-28 w-28 mx-auto items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500 mb-8">
+                                <BsExclamationCircleFill size={56} />
+                              </div>
+                              <div className="space-y-4 mb-8">
+                                <h3 className="text-4xl font-bold text-text-main dark:text-white">
+                                  Deletion Failed
+                                </h3>
+                                <p className="text-xl text-text-secondary dark:text-gray-400">
+                                  We encountered an issue while trying to delete{" "}
+                                  <span className="font-bold text-text-main dark:text-white">
+                                    {" "}
+                                    {modal.title}
+                                  </span>
+                                  . Please try again.
+                                </p>
+                              </div>
+                              <div className="flex w-full gap-6 mt-8">
+                                <button
+                                  className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer"
+                                  onClick={cancelDeleteCourse}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  className="flex-1 py-4 rounded-xl bg-orange-500 text-white text-lg font-semibold hover:bg-orange-600 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                                  onClick={() => retryDeleteCourse(modal.id)}
+                                >
+                                  <MdRefresh size={24} /> Retry
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
     </div>
   );
 };
