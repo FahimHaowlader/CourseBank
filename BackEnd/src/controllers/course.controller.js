@@ -254,7 +254,7 @@ const isModerator =
 
   // console.log("Course Status:", course.status);
 
-  if(isModerator && course.status === "draft"){
+  if(isModerator && course.status === "draft" && !hasAccess && !isOwner){
     throw new apiError(403, "Course Locked: Draft courses cannot be edited by moderators.");
   }
 
@@ -1944,7 +1944,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
     );
 
     // If for some reason the User doc is missing, abort the deletion
-    if (!updatedUser) {
+    if(role !== "admin" && !updatedUser) {
       throw new apiError(404, "User profile not found. Deletion aborted.");
     }
 
@@ -2008,9 +2008,9 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
 
   if (role === "moderator") {
   // Extracting from cse20230211
-  const idYear = Number(req.userId.slice(3, 7));    // "2023"
-  const degreeCode = req.userId.slice(7, 9);        // "02"
-  const idSemester = Number(req.userId.slice(-2));  // "11"
+  const idYear = Number(req.user.userId.slice(3, 7));    // "2023"
+  const degreeCode = req.user.userId.slice(7, 9);        // "02"
+  const idSemester = Number(req.user.userId.slice(-2));  // "11"
 
   const degreeMap = {
     "01": "bachelors",
@@ -2124,7 +2124,7 @@ if (role === "moderator" || role === "admin") {
 
 const cancelCourseSubmission = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const { feedback } = req.body || {};  // Optional feedback message when canceling
+  const { feedback,isOwner } = req.body || {};  // Optional feedback message when canceling
   const userId = req.user?._id;
   const role = req.user?.role;
   const hasAccess = req.user?.access === true;
@@ -2136,7 +2136,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
   }
 
 
-  if((role === "admin" || role === "moderator") && !feedback) {
+  if((role === "admin" || role === "moderator") && !feedback && !isOwner){ 
     throw new apiError(400, "Feedback is required when canceling a submission as a Moderator or Admin.");
   }
 
