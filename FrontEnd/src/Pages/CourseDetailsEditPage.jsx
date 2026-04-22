@@ -39,6 +39,7 @@ import NoElement from "../Components/NoElement";
 import { useAuth } from "../Contexts/Auth.Context";
 import ElementDeleteConfirmation from "../Components/ElementDeleteConformation";
 import PrivateApi from "../Hooks/PrivateApi";
+import CourseNotFound from "../Components/CourseNotFound";
 
 const CourseDetailsEditPage = () => {
   const navigate = useNavigate();
@@ -181,17 +182,17 @@ const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize fe
     });
   };
 
-  useEffect(() => {
+  // useEffect(() => {
     // If an error exists and we are no longer loading, redirect
-    if (error && !isLoading) {
-      navigate(from, {
-        replace: true,
-        state: {
-          message: typeof error === "string" ? error : "Course error occurred",
-        },
-      });
-    }
-  }, [error, isLoading, navigate, from]);
+  //   if (error && !isLoading) {
+  //     navigate(from, {
+  //       replace: true,
+  //       state: {
+  //         message: typeof error === "string" ? error : "Course error occurred",
+  //       },
+  //     });
+  //   }
+  // }, [error, isLoading, navigate, from]);
 
   const handleCourseDelete = () => {
     setModal({openModal: true, status:'confirm'})
@@ -334,6 +335,13 @@ const handleApproveSubmission = async () => {
               navigate(-1); // This will reload the current page
            }
 }
+
+if(error && !isLoading) {
+
+  return <CourseNotFound />
+}
+
+
 
 
 
@@ -1120,7 +1128,7 @@ const handleApproveSubmission = async () => {
               size={22}
               className="transition-transform group-hover:rotate-90"
             />
-            <span className="tracking-tight">Cancel Submission</span>
+            <span className="tracking-tight">{`${user.role === "contributo" ? "Cancel" : "Reject"}`} Submission</span>
           </button>
         )}
 
@@ -1335,7 +1343,7 @@ const handleApproveSubmission = async () => {
                   </h3>
                   <div className="text-xl text-text-secondary dark:text-gray-400 space-y-3">
                     <p>
-                      To finalize your submit, you must meet the following:
+                      To finalize {`${user.role === "contributor" ? "your":"the"}`} submit, you must meet the following:
                     </p>
                      <ul className="text-left bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-dashed border-amber-300 inline-block mx-auto space-y-.5 ">
             
@@ -1387,7 +1395,7 @@ const handleApproveSubmission = async () => {
         <div className="space-y-4">
           <h3 className="text-4xl font-bold text-text-main dark:text-white">Submit for Review?</h3>
           <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-            You are about to submit your courses to the moderator. Once submitted, you won't be able to edit them until the review process is complete.
+            You are about to submit {`${user.role === "contributor" ? "your" : "the"}`} courses to the moderator. Once submitted, you won't be able to edit them until the review process is complete.
           </p>
         </div>
         <div className="flex w-full gap-6 mt-8">
@@ -1415,7 +1423,7 @@ const handleApproveSubmission = async () => {
         <div className="space-y-4">
           <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Successful!</h3>
           <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-            Your courses have been submitted for final review. You will be notified once the moderator completes the evaluation.
+            {`${user.role === "contributor" ? "Your" : "The"}`} courses have been submitted for final review. You will be notified once the moderator completes the evaluation.
           </p>
         </div>
         <button className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}>
@@ -1446,7 +1454,7 @@ const handleApproveSubmission = async () => {
             Submission Failed
           </h3>
           <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
-            We couldn't process your course request. Please check your connection or schedule for conflicts and try again.
+            We couldn't process your request. Please check your connection or schedule for conflicts and try again.
           </p>
         </div>
 
@@ -1495,7 +1503,7 @@ const handleApproveSubmission = async () => {
             Request Changes
           </h3>
           <p className="text-base sm:text-lg text-text-secondary dark:text-gray-400 font-body">
-            Provide feedback to help the user improve this submission.
+            Provide feedback to help the creator improve this submission.
           </p>
         </div>
 
@@ -1544,7 +1552,7 @@ const handleApproveSubmission = async () => {
         <div className="space-y-4">
           <h3 className="text-4xl font-bold text-text-main dark:text-white">Cancel Submission?</h3>
           <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-            Your courses will no longer be under review, and you will need to submit again later.
+             {`${user.role === "contributor" ? "Your" : "The"}`} courses will no longer be under review, and creator will need to submit again later.
           </p>
         </div>
         <div className="flex w-full gap-6 mt-8">
@@ -1584,8 +1592,8 @@ const handleApproveSubmission = async () => {
             Submission Cancelled
           </h3>
           <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
-            {user.role === "contributor" ? "Your" : "Contributor"} request has been withdrawn. {user.role === "contributor" ? "Your" : "Contributor"} account is now back in{" "}
-            <span className="font-bold text-rose-600">Active mode</span> and you can edit {user.role === "contributor" ? "your" : "contributor"} courses again.
+            {user.role === "contributor" ? "Your" : "Contributor"} request has been withdrawn. {user.role === "contributor" ? "Your" : "The"} course is now back in{" "}
+            <span className="font-bold text-rose-600">Active mode</span> and you can edit {user.role === "contributor" ? "your" : "the"} courses again.
           </p>
         </div>
 
@@ -1615,7 +1623,7 @@ const handleApproveSubmission = async () => {
         <div className="space-y-4">
           <h3 className="text-4xl font-bold text-text-main dark:text-white">Cancellation Failed</h3>
           <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
-            We encountered an error while trying to withdraw your request. Your account is still under review. Please try again later.
+            We encountered an error while trying to withdraw your request. {user.role === "contributor" ? "Your" : "The"} course is still under review. Please try again later.
           </p>
         </div>
 
@@ -1651,7 +1659,7 @@ const handleApproveSubmission = async () => {
         <div className="space-y-4">
           <h3 className="text-4xl font-bold text-text-main dark:text-white">Approve Submission?</h3>
           <p className="text-xl text-text-secondary dark:text-gray-400">
-            Confirming this will publish these courses and make them live for students. This action will be logged.
+            Approving this will publish these courses and make them live for students. This action will be logged.
           </p>
         </div>
         <div className="flex w-full gap-6 mt-8">

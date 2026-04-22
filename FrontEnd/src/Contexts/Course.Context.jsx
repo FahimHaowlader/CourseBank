@@ -125,7 +125,8 @@ export const CourseProvider = ({ children }) => {
         handleDelete,
         error,
         deleteItem,
-        setDeleteItem
+        setDeleteItem,
+        setError
       }}
     >
       {children}
