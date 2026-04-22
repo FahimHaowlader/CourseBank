@@ -9,9 +9,11 @@ import { useAuth } from "../Contexts/Auth.Context.jsx";
 import AddContributor from "../Components/AddContributor";
 import PrivateApi from "../Hooks/PrivateApi.jsx";
 import Pagination from "../Components/Pagination.jsx";
+import AccessDeniedSection from "../Components/AccessDeniedSection.jsx";
 
 const AllContributorPage = () => {
   const { user } = useAuth();
+  const [error, setError] = useState(null);
   const [modal, setModal] = useState({ openModal: false, status: "" });
   
   const [deleteModal, setDeleteModal] = useState({ 
@@ -95,8 +97,10 @@ const AllContributorPage = () => {
       const response = await PrivateApi.post('/get-all-contributors', { parameter, page });
       setTotalDocs(response?.data?.data?.totalContributors);
       setContributors(response?.data?.data?.contributors || []);
+      setError(null);
     } catch (error) {
       console.error("API Error:", error);
+      setError(error?.response?.data?.message || "An error occurred while fetching contributors.");
     } finally {
       setLoading(false);
     }
@@ -118,8 +122,9 @@ const AllContributorPage = () => {
 
   const processDelete = async () => {
     setDeleteModal(prev => ({ ...prev, status: "loading" }));
+    console.log("Attempting to delete contributor with ID:", deleteModal.targetId);
     try {
-      await PrivateApi.delete(`/delete-contributor/${deleteModal.targetId}`);
+      await PrivateApi.delete(`/delete-contributor-account/${deleteModal.targetId}`);
       setDeleteModal(prev => ({ ...prev, status: "success" }));
       handleSearch();
     } catch (e) { 
@@ -128,14 +133,54 @@ const AllContributorPage = () => {
   };
 
   const handleShare = (item) => {
-    const text = `Contributor ID: ${item.userId}\nPassword: ${item.password}`;
-    if (navigator.share) {
-      navigator.share({ title: 'Contributor Details', text }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(text);
-    }
-  };
+  const text = `Contributor ID: ${item.userId}\nPassword: ${item.password}`;
+  // const url = window.location.href; // Optional: include your site URL
+  const encodedText = encodeURIComponent(text);
 
+  // 1. Try Native Share (Mobile/Supported Browsers)
+  if (navigator.share) {
+    navigator.share({
+      title: 'Contributor Details',
+      text: text,
+      // url: url,
+    })
+    .then(() => console.log('Successful share'))
+    .catch((error) => {
+      // If user cancels or it fails, fallback to clipboard
+      if (error.name !== 'AbortError') {
+        copyToClipboard(text);
+      }
+    });
+  } else {
+    // 2. Fallback: Manual Platform Links
+    // You can call a modal here or just open the most popular one (WhatsApp)
+    const shareLinks = {
+      // whatsapp: `https://wa.me/?text=${encodedText}`,
+      // telegram: `https://t.me/share/url?url=${url}&text=${encodedText}`,
+      // messenger: `fb-messenger://share/?link=${encodeURIComponent(url)}&app_id=YOUR_APP_ID`, // Requires FB App ID
+      // facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+
+      whatsapp: `https://wa.me/?text=${encodedText}`,
+    telegram: `https://t.me/share/url?url=&text=${encodedText}`,
+    // Messenger Desktop strictly requires a URL; 
+    // This link will open Messenger, but user will likely need to paste.
+    messenger: `fb-messenger://share/?link=${encodedText}`, 
+    // Facebook Feed strictly forbids pre-filled text via URL.
+    facebook: `https://www.facebook.com/sharer/sharer.php?quote=${encodedText}`
+    };
+
+    // Example: Defaulting to WhatsApp if native share is missing
+    window.open(shareLinks.whatsapp, '_blank');
+    
+    // Also copy to clipboard so they can paste it anywhere
+    copyToClipboard(text);
+  }
+};
+
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text);
+  alert("Details copied to clipboard! You can now paste them in Messenger or Telegram.");
+};
   const handleReset = () => {
     const defaultFilters = {
       contributorId: "",
@@ -155,6 +200,11 @@ const AllContributorPage = () => {
     const current = new Date().getFullYear();
     return Array.from({ length: current - 2025 + 1 }, (_, i) => current - i);
   })();
+
+
+  if (error) {
+    return <AccessDeniedSection />;
+  }
 
   const isLocked = user?.role !== "admin";
   const lockedStyles = "cursor-not-allowed opacity-70 bg-gray-50 dark:bg-white/5";
@@ -326,7 +376,7 @@ const AllContributorPage = () => {
                         <MdOutlineShare size={20} />
                         <span className="md:hidden">Share</span>
                       </button>
-                      <button onClick={() => confirmDelete(item._id)} className="w-full md:w-auto p-2 md:p-2.5 text-red-500 bg-red-50 md:bg-transparent hover:bg-red-500 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-bold border border-red-100 md:border-0 cursor-pointer">
+                      <button onClick={() => confirmDelete(item.userId)} className="w-full md:w-auto p-2 md:p-2.5 text-red-500 bg-red-50 md:bg-transparent hover:bg-red-500 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-bold border border-red-100 md:border-0 cursor-pointer">
                         <MdDeleteOutline size={20} />     
                         <span className="md:hidden">Delete</span>
                       </button>
@@ -358,7 +408,7 @@ const AllContributorPage = () => {
         </div>
 
         <Pagination page={page} setPage={setPage} totalDocs={totalDocs} />
-        <AddContributor modal={modal} setModal={setModal} />
+        <AddContributor modal={modal} setModal={setModal} handleSearch={handleSearch} />
 
         {/* --- DYNAMIC DELETE FEEDBACK MODAL --- */}
         {deleteModal.isOpen && (

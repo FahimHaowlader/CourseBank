@@ -4,8 +4,9 @@ import { MdClose, MdRefresh, MdWarning } from "react-icons/md";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import Department from "../Components/Department";
 import { useAuth } from "../Contexts/Auth.Context.jsx";
+import PrivateApi from "../Hooks/PrivateApi.jsx";
 
-const AddContributor = ({ modal, setModal }) => {
+const AddContributor = ({ modal, setModal,handleSearch }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   
@@ -63,6 +64,34 @@ const AddContributor = ({ modal, setModal }) => {
     }
   };
 
+  const generateEasyPassword = () => {
+  const consonants = "bcdfghjklmnpqrstvwxyz";
+  const vowels = "aeiou";
+  const numbers = "0123456789";
+  
+  let word = "";
+
+  // Create a pronounceable 5-letter pattern (C-V-C-V-C)
+  for (let i = 0; i < 5; i++) {
+    if (i % 2 === 0) {
+      word += consonants.charAt(Math.floor(Math.random() * consonants.length));
+    } else {
+      word += vowels.charAt(Math.floor(Math.random() * vowels.length));
+    }
+  }
+
+  // Add 3 random numbers at the end
+  let digits = "";
+  for (let i = 0; i < 3; i++) {
+    digits += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  }
+
+  return word + digits;
+};
+
+
+// Examples: "pinaf482", "metos913", "bakul527"
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
@@ -73,12 +102,33 @@ const AddContributor = ({ modal, setModal }) => {
       return;
     }
 
+    console.log("Submitting form with data:", formData);
+
+let degree ;
+switch (formData.degree) {
+  case "bachelors":
+    degree = "01";
+    break;
+  case "masters":
+    degree = "02";
+    break;
+  case "phd":
+    degree = "03";
+    break; 
+}
+
+const password = generateEasyPassword();
+const userId = `${formData.department}${formData.year}${degree}${formData.semester}`;
+
+const contributor = {...formData, password, userId };
+console.log("Generated contributor data:", contributor);
     setLoading(true);
     try {
       // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await PrivateApi.post('/create-contributor-account', {contributor});
       // Update parent status to success
-      updateModal({ status: "error" });
+      updateModal({ status: "success" });
+      handleSearch(); // Refresh the contributor list after adding a new one
     } catch (err) {
       // Update parent status to error
       updateModal({ status: "error" });
