@@ -48,7 +48,7 @@ const AddCoursePage = () => {
   const [formData, setFormData] = useState({
     title: "",
     courseCode: "",
-    startingDate: new Date().toISOString(),
+    startingDate: new Date(),
     format: "", 
     department: userInfo?.dept,
     semester : userInfo?.semester,
@@ -144,7 +144,7 @@ const isHandbookValid = () => {
 };
 
   const handleDateChange = (date) => {  
-    setFormData({ ...formData, startDate: new Date(date).toISOString() });  
+    setFormData({ ...formData, startingDate: new Date(date).toISOString() });  
   };
 
  const handleSubmit = async (e) => {
@@ -168,15 +168,16 @@ const isHandbookValid = () => {
     } else {;  
      courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
     }
-    console.log("Course Data:", courseData);
+    // console.log("Course Data:", courseData);
  
 
     try {
       setLoading(true);
       // Replace with your API endpoint
       // console.log("Sending course data to API:", courseData);
-      // const response = await PrivateApi.post("/create-course", courseData);
+      const response = await PrivateApi.post("/create-course", courseData);
       // console.log("Course created successfully:", response.data);
+      // throw new Error("Simulated API error"); // Simulate an error for testing
       setModalStatus('success');
       // Optionally, reset form or redirect user
     } catch (error) {
@@ -362,9 +363,9 @@ const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
    const [assessments, setAssessments] = useState([
     {
       id: Date.now(),
-      type: "Termtest-1",
+      type: "termtest-1",
       mark: "",
-      date: new Date(),
+     date: new Date(), // Standardize for next use
       fileUrl: "",
     },
   ]);
@@ -389,9 +390,9 @@ const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
     setAssessments((prev) => [
       {
         id: Date.now(),
-        type: "Termtest-1",
+        type: "termtest-1",
         mark: "",
-        date: new Date(),
+        date:  new Date(), // Standardize for next use
         fileUrl: "",
       },
       ...prev,
@@ -417,68 +418,62 @@ const handleAssessmentDateChange = (id, date) => {
   setAssessments(prev =>
     prev.map(a =>
       a.id === id
-        ? { ...a, date: new Date(date).toISOString() } // store as ISO
+        ? { ...a, date: new Date(date) } // store as ISO
         : a
     )
   );
 };
 
-
-console.log("Assessments before cleaning:", assessments); 
-
-  // Clean assessments before sending
 const cleanAssessments = () => {
-  // 1. Updated Regex to allow #, ?, and Google domains
-  const googleRegex = /^https?:\/\/[^\s]+$/i;
+  if (!formData.startingDate) return [];
 
-  const courseStartTimestamp = new Date(formData.startingDate).getTime();
+  // 1. Normalize both dates to Midnight for a fair comparison
+  const courseStart = new Date(formData.startingDate);
+  
 
   const cleaned = assessments
     .map((a) => ({
       ...a,
-      mark: Number(a.mark),
+      mark: a.mark !== "" ? Number(a.mark) : NaN,
     }))
     .filter((a) => {
-      const assessmentTimestamp = new Date(a.date).getTime();
+      const assessmentDate = new Date(a.date);
       
-      // IMPORTANT: Ensure 'a.link' matches the property name in your data
-      const urlValue = (a.link || a.fileUrl || "").trim();
+
+      // 2. USE >= INSTEAD OF >
+      // This allows assessments to happen ON the starting date
+      const isDateValid = assessmentDate.getTime() > courseStart.getTime();
+      console.log(`Assessment Date: ${assessmentDate.toISOString()}, Course Start: ${courseStart.toISOString()}, isDateValid: ${isDateValid}`); 
+      
+      const hasMark = !isNaN(a.mark);
 
       let isValidGoogleUrl = false;
       try {
-        const urlObj = new URL(urlValue);
-        // Requirement: Valid URL + Includes google.com
+        const urlObj = new URL((a.fileUrl || "").trim());
         isValidGoogleUrl = urlObj.hostname.includes("google.com");
-      } catch (e) {
+      } catch {
         isValidGoogleUrl = false;
       }
 
-      return (
-        a.type?.trim() &&
-        !isNaN(a.mark) &&
-        a.date &&
-        // Assessment date must be >= Course start date
-        assessmentTimestamp >= courseStartTimestamp && 
-        isValidGoogleUrl
-      );
+      return hasMark && isDateValid && isValidGoogleUrl;
     });
 
-  // console.log("Cleaned Assessments:", cleaned);
-
-  // 2. Reset UI state (Consistency check: using 'link' here)
-  setAssessments([
-    {
-      id: Date.now(),
-      type: "Termtest-1",
-      mark: "",
-      date: new Date(),
-      link: "", // Changed to 'link' to match your data object
-    },
-  ]);
+  // 3. Reset UI
+  setAssessments([{
+    id: Date.now(),
+    type: "termtest-1",
+    mark: "",
+    date: new Date(),
+    fileUrl: "",
+  }]);
 
   return cleaned;
 };
   
+
+
+
+
   const handleCancel = () => {  
   // Reset form data
   setFormData({
@@ -503,7 +498,7 @@ const cleanAssessments = () => {
   setAssessments([
     {
       id: Date.now(),
-      type: "Termtest-1",
+      type: "termtest-1",
       mark: "",
       date: new Date(),
       fileUrl: "",
