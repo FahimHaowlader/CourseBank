@@ -333,7 +333,7 @@ const deleteContributor = asyncHandler(async (req, res) => {
 });
 
 const deleteModerator = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
+  const { moderatorUserId } = req.params;
   const role = req.user?.role;
   const access = req.user?.access;
 
@@ -348,23 +348,14 @@ const deleteModerator = asyncHandler(async (req, res) => {
   }
 
    // Validate userId format
-   if (!userId || userId.length !== 11) {
+   if (!moderatorUserId || moderatorUserId.length !== 11) {
      throw new apiError(400, "Invalid User ID format");
    }
    
-   // Check if user exists
-   const userToDelete = await User.findOne({ userId });
-   if (!userToDelete) {
-     throw new apiError(404, "User not found");
-   }
-
-   // Prevent admins from deleting themselves
-   if (userToDelete._id.toString() === req.user._id.toString()) {
-     throw new apiError(403, "Admins cannot delete their own account");
-   }
+  
 
    // All checks passed, proceed to delete the user
-   const deletedUser = await User.findOneAndDelete({ userId });
+   const deletedUser = await User.findOneAndDelete({ userId: moderatorUserId });
 
    if (!deletedUser) {
      throw new apiError(500, "Something went wrong while deleting the user");
@@ -375,7 +366,97 @@ const deleteModerator = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "Moderator deleted successfully"));
 });
 
- 
+// const getModeratorByUserId = asyncHandler(async (req, res) => {
+//   const { moderatorUserId } = req.params;
+//   const { role, access, userId: requestorId } = req.user; // Rename for clarity
+  
+
+//   // 1. Authorization Check
+  
+//   if (!access ) {
+//     throw new apiError(403, "Your account access is restricted.");
+//   }
+
+//   // Allow only Admin or the Moderator themselves
+//   const isAdmin = role === "admin";
+//   const isSelf = role === "moderator" && moderatorUserId === requestorId;
+
+//   if (!isAdmin && !isSelf) {
+//     throw new apiError(403, "You are not authorized to view these details");
+//   }
+
+//   // 2. Validate format (Checks length and 'mod' prefix)
+//   if (!moderatorUserId || moderatorUserId.length !== 11 || !moderatorUserId.startsWith("mod")) {
+//     throw new apiError(400, "Invalid Moderator ID format");
+//   }
+
+//   // 3. Database Query
+//   const moderator = await User.findOne({ 
+//     userId: moderatorUserId, 
+//     role: "moderator" // Combined into query for performance
+//   }).select("-password");
+
+//   if (!moderator) {
+//     throw new apiError(404, "Moderator not found");
+//   }
+  
+//   res.status(200).json(
+//     new apiResponse(200, moderator, "Moderator details retrieved successfully")
+//   );
+// });
+
+
+const getModeratorByUserId = asyncHandler(async (req, res) => {
+  const { moderatorUserId } = req.params;
+  const { role, access, userId: requestorId } = req.user;
+
+  // 1. Validate ID format first (good practice to fail early)
+  if (!moderatorUserId || moderatorUserId.length !== 11 || !moderatorUserId.startsWith("mod")) {
+    throw new apiError(400, "Invalid Moderator ID format");
+  }
+
+  // 2. Fetch the Moderator first to check their approval date
+  const moderator = await User.findOne({ 
+    userId: moderatorUserId, 
+    role: "moderator" 
+  }).select("-password");
+
+  if (!moderator) {
+    throw new apiError(404, "Moderator not found");
+  }
+
+  // 3. Logic: Check if within 30-day "Grace Period"
+  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+  const isWithinGracePeriod = 
+    !moderator.approvedAt || 
+    (new Date() - new Date(moderator.approvedAt)) < thirtyDaysInMs;
+
+  // 4. Final Authorization Logic
+  const isAdmin = role === "admin";
+  const isSelf = moderatorUserId === requestorId;
+
+  if (isAdmin) {
+    // Admin MUST have access
+    if (!access) {
+      throw new apiError(403, "Admin access is restricted.");
+    }
+  } else if (isSelf) {
+    // Moderator checking themselves: 
+    // They can enter IF they have access OR they are within the 30-day grace period
+    if (!access && !isWithinGracePeriod) {
+      throw new apiError(403, "Your trial period has expired and your access is restricted.");
+    }
+  } else {
+    // Someone else entirely
+    throw new apiError(403, "You are not authorized to view these details");
+  }
+
+  // 5. Response
+  res.status(200).json(
+    new apiResponse(200, moderator, "Moderator details retrieved successfully")
+  );
+});
+
 
 const getAllContributors= asyncHandler(async (req, res) => {
   const { parameter } = req.body;
@@ -812,6 +893,7 @@ console.log("Approval Request Body:", req.body);
 const requestForSubmitModeratorsAccount = asyncHandler(async (req, res) => {
   const { role, access: requesterAccess, userId: requesterUserId } = req.user;
   
+
   // 1. Identify Target Moderator
   // Admin can provide 'moderatorUserId' in body; Moderator defaults to their own ID
   const targetUserId = (role === "admin" && req.body.moderatorUserId) 
@@ -823,12 +905,23 @@ const requestForSubmitModeratorsAccount = asyncHandler(async (req, res) => {
     throw new apiError(403, "Your account access is restricted.");
   }
 
-  // Fetch the target moderator to get their specific userId
-  const targetModerator = await User.findOne(targetUserId);
-  if (!targetModerator || targetModerator.role !== "moderator") {
-    throw new apiError(404, "Moderator account not found.");
+  if(role === "moderator" && targetUserId !== requesterUserId) {
+    throw new apiError(403, "Moderators can only submit their own accounts.");
   }
 
+  if (role === "admin" && !targetUserId && targetUserId.length !== 11) {
+    throw new apiError(400, "Admin must provide a valid moderatorUserId to submit.");
+  }
+ 
+  // Fetch the target moderator to get their specific userId
+  const targetModerator = await User.findOne({ userId: targetUserId , role: "moderator",});
+  if (!targetModerator || targetModerator.role !== "moderator") {
+    throw new apiError(404, "Moderator account does not found.");
+  }
+  if (targetModerator.status !== 'active') {
+    throw new apiError(400, "This account is already under review.");
+  }
+console.log("Target Moderator Found:", targetModerator.userId);
   // 3. Extract the last 8 digits of the target moderator's ID
   const modIdSuffix = targetModerator.userId.slice(-8);
 
@@ -840,22 +933,24 @@ const requestForSubmitModeratorsAccount = asyncHandler(async (req, res) => {
   });
 
   if (associatedContributors.length === 0) {
-    throw new apiError(404, "No departmental contributor accounts found for verification.");
+    throw new apiError(404, "No departmental contributor accounts found .");
   }
+
+  console.log(`Found ${associatedContributors.length} associated contributors for moderator ${targetUserId}`);
 
   // 5. Verify all contributors are 'approved'
   const unapprovedUsers = associatedContributors.filter(
     (user) => user.status !== "approved"
   );
-
+console.log(`Unapproved contributors count: ${unapprovedUsers.length}`);
   if (unapprovedUsers.length > 0) {
     throw new apiError(
       400, 
-      `Validation failed. ${unapprovedUsers.length} departmental accounts are not yet approved.`
+      `${unapprovedUsers.length} departmental accounts are not yet approved.`
     );
   }
-
-  // 6. Update Moderator Account (Always set access: false)
+  console.log("All associated contributors are approved. Proceeding with moderator submission." ,{ userId: targetUserId });
+  // 6. Update Moderator Account (Always set access: false)   
   const updatedModerator = await User.findOneAndUpdate(
     { userId: targetUserId },
     { 
@@ -887,14 +982,14 @@ const requestForSubmitModeratorsAccount = asyncHandler(async (req, res) => {
 
 const cancelModeratorAccountSubmission = asyncHandler(async (req, res) => {
   const requester = req.user;
-  const { feedback, userId } = req.body; // userId is the target's userId string
+  const { userId } = req.body; // userId is the target's userId string
 
   // 1. Basic Auth & Access Guard
   if (!requester) {
     throw new apiError(401, "Authentication required");
   }
 
-  if (!requester.access) {
+  if (!requester.access && userId !== requester.userId) {
     throw new apiError(403, "Your account access is restricted.");
   }
 
@@ -910,7 +1005,7 @@ const cancelModeratorAccountSubmission = asyncHandler(async (req, res) => {
       throw new apiError(403, "Only admins can cancel other users' submissions.");
     }
     // Admin MUST provide feedback when canceling others
-    if (!feedback || feedback.trim().length === 0) {
+    if (role === "admin" && (!feedback || feedback.trim().length === 0)) {
       throw new apiError(400, "Feedback is required when canceling another user's submission.");
     }
   }
@@ -923,8 +1018,8 @@ const cancelModeratorAccountSubmission = asyncHandler(async (req, res) => {
   };
 
   // Only attach feedback if it was provided (Admins canceling others)
-  if (feedback) {
-    updateData.feedback = feedback;
+  if (requester.role === "admin" && !isTargetingSelf) {
+    updateData.feedback = req.body.feedback;
   }else {
     updateData.feedback = "" ; // Remove feedback if canceling self or no feedback provided
   }
@@ -959,6 +1054,7 @@ const cancelModeratorAccountSubmission = asyncHandler(async (req, res) => {
 const approveModeratorAccountSubmission = asyncHandler(async (req, res) => {
   const { moderatorUserId } = req.body; 
   const { role, access: requesterAccess, _id: adminId } = req.user;
+ 
 
   // 1. Authorization Guard
   if (!requesterAccess) {
@@ -1042,6 +1138,7 @@ export {
   userLogin,
   deleteContributor,
   deleteModerator,
+  getModeratorByUserId,
   getAllContributors,
   getAllModerators,
   handleRefresh,

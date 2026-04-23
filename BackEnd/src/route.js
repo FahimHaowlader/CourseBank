@@ -11,6 +11,7 @@ import {
   deleteContributor,
   deleteModerator,
   getAllContributors,
+  getModeratorByUserId,
   getAllModerators,
   handleRefresh,
   requestForSubmitContributorsAccount,
@@ -128,6 +129,8 @@ router.route('/delete-moderator-account/:moderatorUserId').delete(deleteModerato
 router.route('/get-all-contributors').post(getAllContributors);
 
 router.route('/get-all-moderators').post(getAllModerators);
+
+router.route('/get-moderator-by-userId/:moderatorUserId').get(getModeratorByUserId);
 
 router.route('/update-user-info/:userId').patch(updateUserInfo);
 
