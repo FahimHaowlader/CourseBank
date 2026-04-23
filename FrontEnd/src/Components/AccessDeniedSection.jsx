@@ -1,33 +1,56 @@
+import React from 'react';
+
 const AccessDeniedSection = () => {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-background-light dark:bg-background-dark px-6">
       
       {/* --- ICON SECTION --- */}
       <div className="relative mb-8 sm:mb-10">
-        {/* Amber/Gold warning glow for access restricted */}
-        <div className="absolute inset-0 bg-amber-500/10 blur-3xl rounded-full scale-150"></div>
+        {/* Soft warning glow centered behind the lock */}
+        <div className="absolute inset-0 bg-rose-500/10 dark:bg-rose-500/5 blur-3xl rounded-full scale-150"></div>
         
         <div className="relative flex h-32 w-32 sm:h-44 sm:w-44 items-center justify-center rounded-full bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-2xl">
+          {/* Main SVG Container */}
           <svg 
-            className="w-16 h-16 sm:w-24 sm:h-24 text-text-secondary dark:text-gray-500" 
-            fill="none" 
-            stroke="currentColor" 
+            className="w-16 h-16 sm:w-24 sm:h-24" 
             viewBox="0 0 24 24"
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Shield Icon */}
+            {/* Shackle (Top curved part) - Subtle grey */}
             <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="1" 
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" 
-            />
-            {/* Red Lock Detail */}
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
+              d="M7 10V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V10" 
+              className="stroke-gray-400 dark:stroke-gray-600"
               strokeWidth="2" 
-              d="M12 11v3m0 0h.01m-1.01 0h.01" 
-              className="text-rose-500"
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+            />
+
+            {/* Lock Body - Solid Rose-500 */}
+            <rect 
+              x="5" 
+              y="10" 
+              width="14" 
+              height="11" 
+              rx="2.5" 
+              className="fill-rose-500"
+              strokeWidth="0"
+            />
+
+            {/* Keyhole Details (Knocked out of the rose body) */}
+            <circle 
+              cx="12" 
+              cy="14.5" 
+              r="1.5" 
+              className="fill-card-light dark:fill-card-dark"
+            />
+            <rect 
+              x="11.25" 
+              y="15.5" 
+              width="1.5" 
+              height="3.5" 
+              rx="0.75" 
+              className="fill-card-light dark:fill-card-dark"
             />
           </svg>
         </div>

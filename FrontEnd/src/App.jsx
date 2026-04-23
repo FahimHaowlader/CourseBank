@@ -103,7 +103,7 @@ function App() {
     },
     { path: "/contributors", element: <AllContributorPage /> },
     { path: "/moderators", element: <AllModeratorPage /> },
-    {path: "/moderator-dashboard", element: <ModeratorPage />},
+    {path: "/moderators/:moderatorUserId", element: <ModeratorPage />},
     {
       path: "*",
       element: <h1 className="text-center text-3xl mt-20">404 Not Found</h1>,

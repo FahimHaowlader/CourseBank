@@ -304,6 +304,15 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
   return <UserNotFoundSection />;
 }
 
+const handleReturnHome = () => {
+  setSubmitModal({
+    openModal: false,
+    id: null,
+    status: "", // 'warning', 'submit', 'cancel', 'cancel-success', 'cancel-error', 'submit-success', 'submit-error', 'approved', 'approved-success', 'approved-error', 'delete'
+    loading: false,
+  });
+   window.history.back()
+}
 
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
@@ -685,12 +694,12 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
 
         {/* Additional Success/Error modals follow the same pattern... */}
         {submitModal.openModal && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
               onClick={!submitModal.loading ? closeModal : null}
             ></div>
-            <div className="relative w-full max-w-3xl transform rounded-t-3xl sm:rounded-3xl bg-white dark:bg-card-dark p-6 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+            <div className="relative w-full max-w-3xl transform rounded-2xl sm:rounded-3xl bg-white dark:bg-card-dark p-6 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
               {/* 1. WARNING MODAL (Requirements Not Met) */}
               {submitModal.status === "warning" && (
                 <div className="flex flex-col items-center gap-6 sm:gap-8">
@@ -1181,28 +1190,6 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
   </div>
 )}
 
-{submitModal.status === "delete-success" && (
-  <div className="flex flex-col items-center gap-6 sm:gap-8 text-center">
-    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-      <IoMdCheckmarkCircle size={56} />
-    </div>
-    <div className="space-y-2">
-      <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
-        Account Deleted
-      </h3>
-      <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-        Contributor account has been successfully removed. We're sorry to see you go.
-      </p>
-    </div>
-    <button
-      className="w-full py-3 sm:py-4 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-semibold hover:opacity-90 shadow-sm transition-all cursor-pointer"
-      onClick={() => window.location.href = "/"} // Usually you redirect after deletion
-    >
-      Return to Home
-    </button>
-  </div>
-)}
-
 {submitModal.status === "delete-error" && (
   <div className="flex flex-col items-center gap-6 sm:gap-8">
     <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
@@ -1239,8 +1226,41 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
   </div>
 )}
             </div>
+
           </div>
         )}
+
+  {submitModal.openModal && submitModal.status === "delete-success" && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+              // onClick={!submitModal.loading ? closeModal : null}
+            ></div>
+            <div className="relative w-full max-w-3xl transform rounded-2xl sm:rounded-3xl bg-white dark:bg-card-dark p-6 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+          
+  <div className="flex flex-col items-center gap-6 sm:gap-8 text-center">
+    <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+      <IoMdCheckmarkCircle size={56} />
+    </div>
+    <div className="space-y-2">
+      <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
+        Account Deleted
+      </h3>
+      <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+        Contributor account has been successfully removed. We're sorry to see you go.
+      </p>
+    </div>
+    <button
+      className="w-full py-3 sm:py-4 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-semibold hover:opacity-90 shadow-sm transition-all cursor-pointer"
+      onClick={handleReturnHome} // Usually you redirect after deletion
+    >
+      Return to Home
+    </button>
+  </div>
+
+            </div>
+   </div>
+  )} 
       </main>
     </div>
   );
