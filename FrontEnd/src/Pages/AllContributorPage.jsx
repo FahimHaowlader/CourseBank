@@ -10,23 +10,22 @@ import AddContributor from "../Components/AddContributor";
 import PrivateApi from "../Hooks/PrivateApi.jsx";
 import Pagination from "../Components/Pagination.jsx";
 import AccessDeniedSection from "../Components/AccessDeniedSection.jsx";
+import { useParams } from "react-router";
 
 const AllContributorPage = () => {
+  const {moderatorUserId} = useParams();
   const { user } = useAuth();
   const [error, setError] = useState(null);
   const [modal, setModal] = useState({ openModal: false, status: "" });
-  
   const [deleteModal, setDeleteModal] = useState({ 
     isOpen: false, 
     status: "idle", 
     targetId: null 
   });
-
   const [contributors, setContributors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
-
   const [filters, setFilters] = useState({
     contributorId: "",
     semester: "",
@@ -37,6 +36,29 @@ const AllContributorPage = () => {
     department: ""
   });
 
+  if(moderatorUserId && user?.role === "moderator" && moderatorUserId !== user.userId) {
+    return <AccessDeniedSection />;
+  }
+
+  if (moderatorUserId) {
+  // Mapping object for degree codes
+  const degreeMap = {
+    "01": "Bachelors",
+    "02": "Masters",
+    "03": "PhD"
+  };
+
+  // 1. Extract the raw values using slice
+  const degreeCode = moderatorUserId.slice(7, 9);
+  const yearValue = moderatorUserId.slice(3, 7);
+  const semesterValue = moderatorUserId.slice(9, 11);
+
+  // 2. Assign to filters
+  // Look up the degree name; default to "Unknown" or the code itself if not found
+  filters.degree = degreeMap[degreeCode] || degreeCode || "";
+  filters.year = yearValue || "";
+  filters.semester = semesterValue || "";
+}
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -51,7 +73,9 @@ const AllContributorPage = () => {
   };
 
   useEffect(() => {
+  
     if (user) {
+      if(!moderatorUserId && user?.role === "admin") {
       setFilters((prev) => ({
         ...prev,
         semester: user?.role === "admin" ? "" : user.semester || "",
@@ -59,9 +83,11 @@ const AllContributorPage = () => {
         year: user?.role === "admin" ? "" : user.year || "",
       }));
     }
+  }
   }, [user]);
 
   const handleSearch = async (customFilters = null) => {
+      setLoading(true);
     const currentFilters = customFilters || filters;
     const { contributorId, access } = currentFilters;
 
@@ -81,7 +107,6 @@ const AllContributorPage = () => {
       }
     }
 
-    setLoading(true);
     const { contributorId: userId, ...remainingFilters } = currentFilters;
     const rawParams = { 
       ...remainingFilters, 
@@ -190,7 +215,27 @@ const copyToClipboard = (text) => {
       status: "",
       access: "",
       department: ""
-    };
+    }
+     if (moderatorUserId) {
+  // Mapping object for degree codes
+  const degreeMap = {
+    "01": "Bachelors",
+    "02": "Masters",
+    "03": "PhD"
+  };
+
+  // 1. Extract the raw values using slice
+  const degreeCode = moderatorUserId.slice(7, 9);
+  const yearValue = moderatorUserId.slice(3, 7);
+  const semesterValue = moderatorUserId.slice(9, 11);
+
+  // 2. Assign to filters
+  // Look up the degree name; default to "Unknown" or the code itself if not found
+  defaultFilters.degree = degreeMap[degreeCode] || degreeCode || "";
+  defaultFilters.year = yearValue || "";
+  defaultFilters.semester = semesterValue || "";
+}
+
     setFilters(defaultFilters);
     if (page === 1) handleSearch(defaultFilters);
     else setPage(1);
@@ -205,8 +250,9 @@ const copyToClipboard = (text) => {
   if (error) {
     return <AccessDeniedSection />;
   }
+  
 
-  const isLocked = user?.role !== "admin";
+  const isLocked = user?.role !== "admin" || moderatorUserId ;
   const lockedStyles = "cursor-not-allowed opacity-70 bg-gray-50 dark:bg-white/5";
 
   return (
@@ -403,7 +449,7 @@ const copyToClipboard = (text) => {
                   </button>
                 </div>
               )
-            )}
+            )}        
           </div>
         </div>
 
