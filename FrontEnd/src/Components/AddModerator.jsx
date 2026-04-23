@@ -6,14 +6,13 @@ import Department from "../Components/Department";
 import { useAuth } from "../Contexts/Auth.Context.jsx";
 import PrivateApi from "../Hooks/PrivateApi.jsx";
 
-const AddModerator = ({ modal, setModal }) => {
+const AddModerator = ({ modal, setModal,handleSearch }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   
   const { openModal, status } = modal;
 
   const [formData, setFormData] = useState({
-    department: "",
     year: "",
     semester: "",
     degree: "",
@@ -48,12 +47,32 @@ const AddModerator = ({ modal, setModal }) => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+ 
+   const generateEasyPassword = () => {
+  const consonants = "bcdfghjklmnpqrstvwxyz";
+  const vowels = "aeiou";
+  const numbers = "0123456789";
+  
+  let word = "";
 
-  const handleDepartmentChange = (e) => {
-    if (isAdmin) {
-        setFormData((prev) => ({ ...prev, department: e.target.value }));
+  // Create a pronounceable 5-letter pattern (C-V-C-V-C)
+  for (let i = 0; i < 7; i++) {
+    if (i % 2 === 0) {
+      word += consonants.charAt(Math.floor(Math.random() * consonants.length));
+    } else {
+      word += vowels.charAt(Math.floor(Math.random() * vowels.length));
     }
   }
+
+  // Add 3 random numbers at the end
+  let digits = "";
+  for (let i = 0; i < 3; i++) {
+    digits += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  }
+
+  return word + digits;
+};
+
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -66,15 +85,33 @@ const AddModerator = ({ modal, setModal }) => {
       return;
     }
 
+    let degree ;
+switch (formData.degree) {
+  case "bachelors":
+    degree = "01";
+    break;
+  case "masters":
+    degree = "02";
+    break;
+  case "phd":
+    degree = "03";
+    break; 
+}
+
+const password = generateEasyPassword();
+const userId = `mod${formData.year}${degree}${formData.semester}`;
+const moderator = {...formData, password, userId };
+
     setLoading(true);
     try {
       // Logic for Moderator addition API
-      await PrivateApi.post('/add-moderator', formData);
+      await PrivateApi.post('/create-moderator-account', {moderator});
       updateModal({ status: "success" });
       
       // Reset form on success
+      handleSearch();
       setFormData({
-        department: "",
+  
         year: "",
         semester: "",
         degree: "",
@@ -127,16 +164,6 @@ const years = (() => {
                   Only System Administrators can create moderator accounts.
                 </div>
               )}
-
-              <div className="flex flex-col gap-2">
-                <Department 
-                  defaultText="Select Department" 
-                  value={formData.department} 
-                  onChange={handleDepartmentChange} 
-                  required={true} 
-                  disabled={!isAdmin}
-                />
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-2">

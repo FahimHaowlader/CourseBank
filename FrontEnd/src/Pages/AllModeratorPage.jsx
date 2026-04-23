@@ -113,7 +113,7 @@ const AllModeratorPage = () => {
     setDeleteModal(prev => ({ ...prev, status: "loading" }));
     try {
       // Updated endpoint for Moderators
-      await PrivateApi.delete(`/delete-moderator/${deleteModal.targetId}`);
+      await PrivateApi.delete(`/delete-moderator-account/${deleteModal.targetId}`);
       setDeleteModal(prev => ({ ...prev, status: "success" }));
       handleSearch();
     } catch (e) { 
@@ -121,14 +121,64 @@ const AllModeratorPage = () => {
     }
   };
 
-  const handleShare = (item) => {
-    const text = `Moderator ID: ${item.userId}\nPassword: ${item.password}`;
-    if (navigator.share) {
-      navigator.share({ title: 'Moderator Details', text }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(text);
-    }
-  };
+  // const handleShare = (item) => {
+  //   const text = `Moderator ID: ${item.userId}\nPassword: ${item.password}`;
+  //   if (navigator.share) {
+  //     navigator.share({ title: 'Moderator Details', text }).catch(console.error);
+  //   } else {
+  //     navigator.clipboard.writeText(text);
+  //   }
+  // };
+
+   const handleShare = (item) => {
+  const text = `Moderator ID: ${item.userId}\nPassword: ${item.password}`;
+  // const url = window.location.href; // Optional: include your site URL
+  const encodedText = encodeURIComponent(text);
+
+  // 1. Try Native Share (Mobile/Supported Browsers)
+  if (navigator.share) {
+    navigator.share({
+      title: 'Moderators Details',
+      text: text,
+      // url: url,
+    })
+    .then(() => console.log('Successful share'))
+    .catch((error) => {
+      // If user cancels or it fails, fallback to clipboard
+      if (error.name !== 'AbortError') {
+        copyToClipboard(text);
+      }
+    });
+  } else {
+    // 2. Fallback: Manual Platform Links
+    // You can call a modal here or just open the most popular one (WhatsApp)
+    const shareLinks = {
+      // whatsapp: `https://wa.me/?text=${encodedText}`,
+      // telegram: `https://t.me/share/url?url=${url}&text=${encodedText}`,
+      // messenger: `fb-messenger://share/?link=${encodeURIComponent(url)}&app_id=YOUR_APP_ID`, // Requires FB App ID
+      // facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+
+      whatsapp: `https://wa.me/?text=${encodedText}`,
+    telegram: `https://t.me/share/url?url=&text=${encodedText}`,
+    // Messenger Desktop strictly requires a URL; 
+    // This link will open Messenger, but user will likely need to paste.
+    messenger: `fb-messenger://share/?link=${encodedText}`, 
+    // Facebook Feed strictly forbids pre-filled text via URL.
+    facebook: `https://www.facebook.com/sharer/sharer.php?quote=${encodedText}`
+    };
+
+    // Example: Defaulting to WhatsApp if native share is missing
+    window.open(shareLinks.whatsapp, '_blank');
+    
+    // Also copy to clipboard so they can paste it anywhere
+    copyToClipboard(text);
+  }
+};
+
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text);
+  alert("Details copied to clipboard! You can now paste them in Messenger or Telegram.");
+};
 
   const handleReset = () => {
     const defaultFilters = {
@@ -145,6 +195,7 @@ const AllModeratorPage = () => {
     else setPage(1);
   };
 
+  
   const years = (() => {
     const current = new Date().getFullYear();
     return Array.from({ length: current - 2025 + 1 }, (_, i) => current - i);
@@ -262,8 +313,27 @@ const AllModeratorPage = () => {
           </div>
         </div>
 
+        {totalDocs > 0 && (
+          <div className="flex mt-5 px-2 flex-col-reverse sm:flex-row justify-between items-center mb-6 gap-4">
+            <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center">
+              Showing{" "}
+              <span className="font-bold text-text-main dark:text-white">
+                {(page - 1) * 12 + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-bold text-text-main dark:text-white">
+                {totalDocs < page * 12 ? totalDocs : page * 12}
+              </span>{" "}
+              moderators of{" "}
+              <span className="font-bold text-text-main dark:text-white">
+              {totalDocs} moderators  
+              </span>
+            </div>
+
+          </div>
+        )}
         {/* --- DATA SECTION --- */}
-        <div className="w-full mt-8 md:rounded-xl md:border border-border-light dark:border-border-dark overflow-hidden md:shadow-sm">
+        <div className="w-full mt-5 md:rounded-xl md:border border-border-light dark:border-border-dark overflow-hidden md:shadow-sm">
           {moderators.length > 0 && (
             <div className="hidden md:grid grid-cols-24 bg-primary text-white font-bold text-sm uppercase tracking-wider">
               <div className="p-4 col-span-5 pl-8">Moderator <span className="hidden lg:inline">ID </span> </div>
@@ -286,7 +356,7 @@ const AllModeratorPage = () => {
                 })(item.status);
 
                 return (
-                  <div key={index} className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center p-5 md:p-0 bg-white dark:bg-card-dark md:bg-transparent rounded-2xl md:rounded-none border border-border-light dark:border-border-dark md:border-0 shadow-sm md:shadow-none hover:bg-primary/5 transition-all ">
+                  <div key={item._id} className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center p-5 md:p-0 bg-white dark:bg-card-dark md:bg-transparent rounded-2xl md:rounded-none border border-border-light dark:border-border-dark md:border-0 shadow-sm md:shadow-none hover:bg-primary/5 transition-all ">
                     <div className="flex flex-col gap-4 md:contents">
                       <div className="md:p-3 md:col-span-5 flex flex-col md:block gap-1 md:pl-8">
                         <span className="md:hidden text-xs font-bold uppercase text-primary/80 px-2">Moderator ID</span>
@@ -320,7 +390,7 @@ const AllModeratorPage = () => {
                         <MdOutlineShare size={20} />
                         <span className="md:hidden">Share</span>
                       </button>
-                      <button onClick={() => confirmDelete(item._id)} className="w-full md:w-auto p-2 md:p-2.5 text-red-500 bg-red-50 md:bg-transparent hover:bg-red-500 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-bold border border-red-100 md:border-0 cursor-pointer">
+                      <button onClick={() => confirmDelete(item.userId)} className="w-full md:w-auto p-2 md:p-2.5 text-red-500 bg-red-50 md:bg-transparent hover:bg-red-500 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-bold border border-red-100 md:border-0 cursor-pointer">
                         <MdDeleteOutline size={20} />     
                         <span className="md:hidden">Delete</span>
                       </button>
@@ -351,7 +421,7 @@ const AllModeratorPage = () => {
         </div>
 
         <Pagination page={page} setPage={setPage} totalDocs={totalDocs} />
-        <AddModerator modal={modal} setModal={setModal} />
+        <AddModerator modal={modal} setModal={setModal} handleSearch={handleSearch} />
 
         {/* --- DELETE MODAL --- */}
         {deleteModal.isOpen && (

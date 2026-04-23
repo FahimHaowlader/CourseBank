@@ -364,8 +364,28 @@ const copyToClipboard = (text) => {
           </div>
         </div>
 
+        {totalDocs > 0 && (
+          <div className="flex mt-5 px-2 flex-col-reverse sm:flex-row justify-between items-center mb-6 gap-4">
+            <div className="text-sm md:text-base text-text-secondary dark:text-gray-400 self-start sm:self-center">
+              Showing{" "}
+              <span className="font-bold text-text-main dark:text-white">
+                {(page - 1) * 12 + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-bold text-text-main dark:text-white">
+                {totalDocs < page * 12 ? totalDocs : page * 12}
+              </span>{" "}
+              contributors of{" "}
+              <span className="font-bold text-text-main dark:text-white">
+              {totalDocs} contributors
+              </span>
+            </div>
+
+          </div>
+        )}
+
         {/* --- DATA SECTION --- */}
-        <div className="w-full mt-8 md:rounded-xl md:border border-border-light dark:border-border-dark overflow-hidden md:shadow-sm">
+        <div className="w-full mt-5 md:rounded-xl md:border border-border-light dark:border-border-dark overflow-hidden md:shadow-sm">
           {contributors.length > 0 && (
             <div className="hidden md:grid grid-cols-24 bg-primary text-white font-bold text-sm uppercase tracking-wider">
               <div className="p-4 col-span-5 pl-8"> Contributor<span className="hidden lg:inline"> ID</span> </div>

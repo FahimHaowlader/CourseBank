@@ -121,7 +121,7 @@ const password = generateEasyPassword();
 const userId = `${formData.department}${formData.year}${degree}${formData.semester}`;
 
 const contributor = {...formData, password, userId };
-console.log("Generated contributor data:", contributor);
+
     setLoading(true);
     try {
       // Simulate API call delay
