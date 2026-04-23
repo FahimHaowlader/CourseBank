@@ -286,7 +286,7 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
       setSubmitModal((prev) => ({ ...prev, status: "approved-success", loading: false }));
       setContributor((prev) => ({...prev, status : "approved",feedback: "Your contributor account submission was approved on "+today+". You can now log in and see your courses for 30 days. If you have any questions, please contact to the moderators."})); // Immediate UI update for better UX
     } catch (error) {
-      setSubmitModal((prev) => ({ ...prev, status: "submit-error", loading: false }));
+      setSubmitModal((prev) => ({ ...prev, status: "approved-error", loading: false }));
     }
   }
 

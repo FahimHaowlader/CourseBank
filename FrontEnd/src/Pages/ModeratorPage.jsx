@@ -22,20 +22,21 @@ import PrivateApi from "../Hooks/PrivateApi.jsx";
 import UserNotFoundSection from "../Components/UserNotFoundSection.jsx";
 
 const ModeratorPage = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { moderatorUserId } = useParams(); // Get the moderator user ID from the URL
   const [error, setError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
   const [moderator, setModerator] = useState(null);
-  const [feedback, setFeedback] = useState(""); // For storing moderator feedback when canceling submission
+  const [feedback, setFeedback] = useState(moderator?.feedback || ""); // For storing moderator feedback when canceling submission
   const isOwner = user?.userId === moderator?.userId; // Placeholder - replace with actual ownership logic
 
   const myCourseCount = moderator?.myCourseCount || 0; // Placeholder - replace with actual course count logic
   const approvedCourseCount = moderator?.approvedCourseCount || 0; // Placeholder - replace with actual approved course count logic
 
   const [submitModal, setSubmitModal] = useState({
-    openModal: true,
+    openModal: false,
     id: null,
-    status: "delete-success", // 'warning', 'submit', 'cancel', 'cancel-success', 'cancel-error', 'submit-success', 'submit-error', 'approved', 'approved-success', 'approved-error', 'delete'
+    status: "", // 'warning', 'submit', 'cancel', 'cancel-success', 'cancel-error', 'submit-success', 'submit-error', 'approved', 'approved-success', 'approved-error', 'delete'
     loading: false,
   });
 
@@ -59,7 +60,7 @@ const ModeratorPage = () => {
     if (moderatorUserId) fetchModeratorData();
   }, [moderatorUserId]);
   const handleDeleteClick = async () => {
-    if (user?.role !== "contributor") {
+    if (user?.role === "admin") {
       setSubmitModal((prev) => ({
         ...prev,
         status: "delete",
@@ -69,8 +70,34 @@ const ModeratorPage = () => {
     }
   };
 
+  const AppleSpinner = () => (
+    <div className="flex items-center justify-center gap-2">
+      <svg className="animate-spin h-6 w-6 text-current" viewBox="0 0 24 24">
+        <style>{`
+          .spinner_blade { transform-origin: 12px 12px; animation: spinner_fade 1s linear infinite; }
+          @keyframes spinner_fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+        `}</style>
+        {[...Array(12)].map((_, i) => (
+          <rect
+            key={i}
+            className="spinner_blade"
+            x="11"
+            y="2"
+            width="2"
+            height="6"
+            rx="1"
+            style={{
+              transform: `rotate(${i * 30}deg)`,
+              animationDelay: `${(i - 12) * 0.083}s`,
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+
   const handleFinalizeClick = () => {
-    if ( myCourseCount !== approvedCourseCount) {
+    if (myCourseCount !== approvedCourseCount) {
       setSubmitModal((prev) => ({
         ...prev,
         openModal: true,
@@ -86,7 +113,7 @@ const ModeratorPage = () => {
   };
 
   const handleCancelClick = () => {
-    if (user?.role === "contributor" || isOwner) {
+    if (isOwner) {
       setSubmitModal({
         openModal: true,
         status: "cancel",
@@ -117,49 +144,72 @@ const ModeratorPage = () => {
       status: "",
       loading: false,
     });
+    setSubmitError(null);
   };
 
   const handleFinalSubmit = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
-    let res;
+
     try {
-      // throw new Error("Testing submit error handling"); // <-- Temporary line to test error modal
-      if (user.role === "contributor") {
-        res = await PrivateApi.post(`/request-submit-contributor-account`);
-      } else {
-        res = await PrivateApi.post(`/request-submit-contributor-account`, {
-          contributorUserId: userId,
+      let res;
+      if (user.role === "moderator") {
+        // Self-submission
+        res = await PrivateApi.post(`/request-submit-moderator-account`);
+      } else if (user.role === "admin") {
+        // Admin submitting on behalf of a moderator
+        res = await PrivateApi.post(`/request-submit-moderator-account`, {
+          moderatorUserId, // Ensure this variable is defined via useParams
         });
       }
 
-      // FIXED: Refresh user context so user.status becomes 'pending'
+      // 1. Refresh global Auth Context (Source of Truth)
       if (refreshUser) await refreshUser();
 
+      // 2. Update local UI State
       setSubmitModal((prev) => ({
         ...prev,
         openModal: true,
         status: "submit-success",
         loading: false,
       }));
-      setContributor((prev) => ({ ...prev, status: "pending", feedback: "" })); // Immediate UI update for better UX
+
+      setSubmitError(null);
+
+      // Optimistic UI update: ensures the dashboard reflects 'pending' immediately
+      if (setModerator) {
+        setModerator((prev) => ({
+          ...prev,
+          status: "pending",
+          feedback: "",
+        }));
+      }
     } catch (error) {
-      // console.log("Error submitting account:", error);
+      // 3. Extract the most specific error message possible
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to submit account.";
+
+      console.error("Submission Error:", errorMessage);
+
       setSubmitModal((prev) => ({
         ...prev,
         status: "submit-error",
         loading: false,
       }));
+
+      setSubmitError(errorMessage);
     }
   };
 
   const handleConfirmCancel = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
-      if (user.role === "contributor") {
-        await PrivateApi.post(`/cancel-contributor-account-submission`);
-      } else {
-        await PrivateApi.post(`/cancel-contributor-account-submission`, {
-          contributorUserId: userId,
+      if (user.role === "moderator") {
+        await PrivateApi.post(`/cancel-moderator-account-submission`,{ userId: moderatorUserId,});
+      } else if (user.role === "admin") {
+        await PrivateApi.post(`/cancel-moderator-account-submission`, {
+          userId: moderatorUserId,
           feedback: feedback.trim(),
         });
       }
@@ -169,7 +219,7 @@ const ModeratorPage = () => {
       if (refreshUser) await refreshUser();
 
       setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
-      setContributor((prev) => ({ ...prev, status: "active", feedback })); // Immediate UI update for better UX
+      setModerator((prev) => ({ ...prev, status: "active", feedback })); // Immediate UI update for better UX
     } catch (error) {
       setSubmitModal((prev) => ({ ...prev, status: "cancel-error" }));
     } finally {
@@ -179,13 +229,14 @@ const ModeratorPage = () => {
 
   const handleApproveClick = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
-    if (user?.role === "contributor") {
+    if (user?.role !== "admin") {
       return;
     }
+    console.log("Approving moderator account with userId:", moderatorUserId); 
     const today = new Date().toDateString();
     try {
-      await PrivateApi.post(`/approve-contributor-account-submission`, {
-        contributorUserId: userId,
+      await PrivateApi.post(`/approve-moderator-account-submission`, {
+        moderatorUserId,
       });
       if (refreshUser) await refreshUser();
       setSubmitModal((prev) => ({
@@ -193,7 +244,8 @@ const ModeratorPage = () => {
         status: "approved-success",
         loading: false,
       }));
-      setContributor((prev) => ({
+      setSubmitError(null);
+      setModerator((prev) => ({
         ...prev,
         status: "approved",
         feedback:
@@ -204,20 +256,25 @@ const ModeratorPage = () => {
     } catch (error) {
       setSubmitModal((prev) => ({
         ...prev,
-        status: "submit-error",
+        status: "approved-error",
         loading: false,
       }));
+      setSubmitError(
+       error.response?.data?.message || error.message ||
+          `We couldn't process your request. Please check your
+                      connection and try again.`,
+      );
     }
   };
 
   const handleDeleteAccount = async () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
-    if (user?.role === "contributor") {
+    if (user?.role !== "admin") {
       return;
     }
-    setTimeout(() => {}, 3000);
+    setTimeout(() => {}, 2000);
     try {
-      await PrivateApi.delete(`/delete-contributor-account/${userId}`);
+      await PrivateApi.delete(`/delete-moderator-account/${moderatorUserId}`);
       if (refreshUser) await refreshUser();
       setSubmitModal((prev) => ({
         ...prev,
@@ -243,7 +300,7 @@ const ModeratorPage = () => {
   };
 
   const handleReturnHome = () => {
-    setSubmitModal({loading: false ,status: "", openModal: false, id: null});
+    setSubmitModal({ loading: false, status: "", openModal: false, id: null });
     window.location.href = "/";
   };
 
@@ -257,12 +314,6 @@ const ModeratorPage = () => {
   if (error) {
     return <UserNotFoundSection />;
   }
-
-    if (!moderator) {
-       return <UserNotFoundSection />;
-  }
-
-
 
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
@@ -358,7 +409,7 @@ const ModeratorPage = () => {
           </div>
         </div>
         <div className="mt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          {user?.feedback ? (
+          {moderator?.feedback ? (
             <div className="p-4 bg-amber-50 border-l-4 w-full border-amber-500 rounded-r-lg shadow-sm">
               <div className="flex items-center mb-2">
                 <svg
@@ -369,11 +420,11 @@ const ModeratorPage = () => {
                   <path d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" />
                 </svg>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-amber-800">
-                  Moderator's Feedback
+                  Admin's Feedback
                 </h3>
               </div>
               <p className="text-amber-900 text-sm leading-relaxed">
-                {user?.feedback}
+                {moderator?.feedback}
               </p>
             </div>
           ) : (
@@ -381,7 +432,7 @@ const ModeratorPage = () => {
           )}
 
           <div className="flex flex-col gap-3 justify-end w-full lg:w-auto">
-            {
+            {moderator?.status === "active" && (
               <button
                 className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
                                    bg-primary hover:bg-primary-hover 
@@ -401,7 +452,7 @@ const ModeratorPage = () => {
                   Finalize & Submit Account
                 </span>
               </button>
-            }
+            )}
             {moderator?.status === "pending" && (
               <button
                 className="w-full lg:min-w-75 px-6 py-3 rounded-xl 
@@ -553,26 +604,23 @@ const ModeratorPage = () => {
                     </h3>
                     <div className="text-base sm:text-xl text-text-secondary dark:text-gray-400 space-y-3">
                       <p>
-                        To finalize{" "}
-                        {`${isOwner ? "your" : "moderator"}`}{" "}
+                        To finalize {`${isOwner ? "your" : "moderator"}`}{" "}
                         account, you must meet the following:
                       </p>
                       <ul className="text-left bg-slate-50 dark:bg-slate-800/50 p-4 sm:p-6 rounded-2xl border border-dashed border-amber-300 inline-block mx-auto w-full sm:w-auto">
-                        {myCourseCount !== approvedCourseCount &&
-                          (
-                            <>
-                              <li className="flex items-start gap-2 text-red-500 text-sm sm:text-base">
-                                <span className="font-bold">✕</span> All courses
-                                must be approved to submit the
-                                account
-                              </li>
-                              <li className="flex items-center gap-2 text-emerald-500 text-sm sm:text-base ml-5">
-                                ✓
-                                {`${isOwner ? "Your" : "Moderator"}`}{" "}
-                                approved course ({approvedCourseCount}) out of ({myCourseCount})
-                              </li>
-                            </>
-                          )}
+                        {myCourseCount !== approvedCourseCount && (
+                          <>
+                            <li className="flex items-start gap-2 text-red-500 text-sm sm:text-base">
+                              <span className="font-bold">✕</span> All courses
+                              must be approved to submit the account
+                            </li>
+                            <li className="flex items-center gap-2 text-emerald-500 text-sm sm:text-base ml-5">
+                              ✓{`${isOwner ? "Your" : "Moderator"}`} approved
+                              course ({approvedCourseCount}) out of (
+                              {myCourseCount})
+                            </li>
+                          </>
+                        )}
                       </ul>
                     </div>
                   </div>
@@ -598,8 +646,8 @@ const ModeratorPage = () => {
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
                       You are about to submit the account .
-                      {`${isOwner ? "Your" : "Moderator"}`}{" "}
-                      won't be able to edit them until the review is complete.
+                      {`${isOwner ? "Your" : "Moderator"}`} won't be able to
+                      edit them until the review is complete.
                     </p>
                   </div>
 
@@ -637,9 +685,9 @@ const ModeratorPage = () => {
                       Submission Successful!
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      {`${isOwner ? "Your" : "Moderator"}`}{" "}
-                      account have been submitted for final review. We will
-                      notify you once it complete.
+                      {`${isOwner ? "Your" : "Moderator"}`} account have been
+                      submitted for final review. We will notify you once it
+                      complete.
                     </p>
                   </div>
                   <button
@@ -667,8 +715,8 @@ const ModeratorPage = () => {
                       Submission Failed
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      We couldn't process your request. Please check your
-                      connection and try again.
+                      {submitError ||
+                        "An unexpected error occurred while submitting the account. Please check your connection and try again."}
                     </p>
                   </div>
                   <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
@@ -768,16 +816,14 @@ const ModeratorPage = () => {
                       Cancel Submission?
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      This will move{" "}
-                      {`${isOwner ? "your" : "moderator"}`}{" "}
+                      This will move {`${isOwner ? "your" : "moderator"}`}{" "}
                       account back to{" "}
                       <span className="font-bold text-rose-600">
                         Active mode
                       </span>
-                      .{" "}
-                      {`${isOwner ? "Your" : "Moderator"}`}{" "}
-                      account will no longer be under review, and you will need
-                      to submit again later.
+                      . {`${isOwner ? "Your" : "Moderator"}`} account will no
+                      longer be under review, and you will need to submit again
+                      later.
                     </p>
                   </div>
 
@@ -820,10 +866,9 @@ const ModeratorPage = () => {
                       Submission Cancelled
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      {`${isOwner ? "Your" : "Moderator"}`}{" "}
-                      request has been withdrawn.{" "}
-                      {`${isOwner ? "Your" : "Moderator"}`}{" "}
-                      account is now back in{" "}
+                      {`${isOwner ? "Your" : "Moderator"}`} request has been
+                      withdrawn. {`${isOwner ? "Your" : "Moderator"}`} account
+                      is now back in{" "}
                       <span className="font-bold text-rose-600">
                         Active mode
                       </span>{" "}
@@ -858,9 +903,8 @@ const ModeratorPage = () => {
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
                       We encountered an error while trying to withdraw your
-                      submission.{" "}
-                      {`${isOwner ?  "Your" : "Moderator"}`}{" "}
-                      account is still under review.
+                      submission. {`${isOwner ? "Your" : "Moderator"}`} account
+                      is still under review.
                     </p>
                   </div>
                   <div className="flex flex-col-reverse sm:flex-row w-full gap-3 sm:gap-6 mt-4">
@@ -936,7 +980,7 @@ const ModeratorPage = () => {
                       Approval Successful!
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      The account have been officially approved and the courses
+                      The account have been officially approved and the moderator has been notified. Approved courses
                       are now visible in the curriculum.
                     </p>
                   </div>
@@ -967,8 +1011,7 @@ const ModeratorPage = () => {
                       Approval Failed
                     </h3>
                     <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      Something went wrong while processing the approval. Please
-                      try again or check your permissions.
+                     {submitError }
                     </p>
                   </div>
 
@@ -981,13 +1024,13 @@ const ModeratorPage = () => {
                     </button>
                     <button
                       className="w-full py-3 sm:py-4 rounded-xl bg-rose-500 text-white text-lg sm:text-xl font-semibold shadow-sm hover:bg-rose-600 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
-                      onClick={() =>
+                      onClick={() => {
                         setSubmitModal((prev) => ({
                           ...prev,
                           status: "approved",
                           loading: false,
-                        }))
-                      }
+                        }));
+                      }} // This function should reset the modal to "approved" state and allow retrying the approval API call
                     >
                       <MdRefresh size={24} /> Retry
                     </button>
@@ -1010,8 +1053,8 @@ const ModeratorPage = () => {
                         permanent
                       </span>
                       .Moderator account will be removed, but moderator's
-                      courses and contributor account will stay live and move to the admin pool. Are
-                      you sure you want to proceed?
+                      courses and contributor account will stay live and move to
+                      the admin pool. Are you sure you want to proceed?
                     </p>
                   </div>
 
@@ -1036,7 +1079,7 @@ const ModeratorPage = () => {
                     </button>
                   </div>
                 </div>
-              )}            
+              )}
               {submitModal.status === "delete-error" && (
                 <div className="flex flex-col items-center gap-6 sm:gap-8">
                   <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
@@ -1077,36 +1120,36 @@ const ModeratorPage = () => {
           </div>
         )}
 
-         {submitModal.openModal && submitModal.status === "delete-success" &&  (
+        {submitModal.openModal && submitModal.status === "delete-success" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
               // onClick={!submitModal.loading ? closeModal : null}
             ></div>
             <div className="relative w-full max-w-3xl transform rounded-2xl sm:rounded-3xl bg-white dark:bg-card-dark p-6 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
-                <div className="flex flex-col items-center gap-6 sm:gap-8 text-center">
-                  <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-                    <IoMdCheckmarkCircle size={56} />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
-                      Account Deleted
-                    </h3>
-                    <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
-                      Moderator account has been successfully removed. We're
-                      sorry to see you go.
-                    </p>
-                  </div>
-                  <button
-                    className="w-full py-3 sm:py-4 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-semibold hover:opacity-90 shadow-sm transition-all cursor-pointer"
-                    onClick={() => (window.location.href = "/")} // Usually you redirect after deletion
-                  >
-                    Return to Home
-                  </button>
+              <div className="flex flex-col items-center gap-6 sm:gap-8 text-center">
+                <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                  <IoMdCheckmarkCircle size={56} />
                 </div>
-             </div>
-             </div>
-            )}
+                <div className="space-y-2">
+                  <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white">
+                    Account Deleted
+                  </h3>
+                  <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+                    Moderator account has been successfully removed. We're sorry
+                    to see you go.
+                  </p>
+                </div>
+                <button
+                  className="w-full py-3 sm:py-4 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-semibold hover:opacity-90 shadow-sm transition-all cursor-pointer"
+                  onClick={handleReturnHome} // Usually you redirect after deletion
+                >
+                  Return to Home
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
