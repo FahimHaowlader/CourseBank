@@ -346,7 +346,7 @@ const deleteModerator = asyncHandler(async (req, res) => {
   if (role !== "admin") {
     throw new apiError(403, "Only admin can delete moderators");
   }
-
+  
    // Validate userId format
    if (!moderatorUserId || moderatorUserId.length !== 11) {
      throw new apiError(400, "Invalid User ID format");
