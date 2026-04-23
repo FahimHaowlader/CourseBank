@@ -21,6 +21,7 @@ import AllCoursePage from "./Pages/AllCoursePage.jsx";
 import AllContributorPage from "./Pages/AllContributorPage.jsx";
 import AllModeratorPage from "./Pages/AllModeratorPage.jsx";
 import ModeratorPage from "./Pages/ModeratorPage.jsx";
+import NotFoundSection from "./Components/NotFoundSection.jsx";
 
 function App() {
   const router = createBrowserRouter([
@@ -106,7 +107,7 @@ function App() {
     {path: "/moderators/:moderatorUserId", element: <ModeratorPage />},
     {
       path: "*",
-      element: <h1 className="text-center text-3xl mt-20">404 Not Found</h1>,
+      element: <NotFoundSection />,
     },
   ]);
 
