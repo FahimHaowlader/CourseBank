@@ -40,11 +40,11 @@ const CoursePage = () => {
     format: "",
   });
   const handleSearch = () => {
-    // setPage(1); // Reset to first page on new search
-    // setSort({
-    //   sortField: "",
-    //   sortOrder: "",
-    // });
+    setPage(1); // Reset to first page on new search
+    setSort({
+      sortField: "",
+      sortOrder: "",
+    });
 
     const fetchCourses = async () => {
       try {
@@ -66,10 +66,11 @@ const CoursePage = () => {
         setCourses([]);
       } finally {
         setLoading(false);
+        
       }
     };
     fetchCourses();
-    // console.log(filters);
+   
   };
   const clearFilters = () => {
     setFilters({
@@ -222,7 +223,7 @@ const CoursePage = () => {
   // console.log(courses);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         <header className="mb-5">
           <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight  font-extrabold">
             Course Bank

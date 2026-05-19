@@ -1,14 +1,14 @@
 import "./App.css";
-//import elements for npm  packages
+// Import elements from npm packages
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 
-// import components
+// Import components
 import RoleProtectedRoute from "./MiddleWare/RoleProtectedRoute.jsx";
 
-// impoert context
+// Import context
 import { CourseProvider } from "./Contexts/Course.Context.jsx";
 
-// import pages
+// Import pages
 import CheckPage from "./Pages/CheckPage.jsx";
 import CoursePage from "./Pages/CoursePage.jsx";
 import CourseDetailsPage from "./Pages/CourseDetailsPage.jsx";
@@ -22,92 +22,76 @@ import AllContributorPage from "./Pages/AllContributorPage.jsx";
 import AllModeratorPage from "./Pages/AllModeratorPage.jsx";
 import ModeratorPage from "./Pages/ModeratorPage.jsx";
 import NotFoundSection from "./Components/NotFoundSection.jsx";
+import MainLayout from "./Layouts/MainLayout.jsx";
 
 function App() {
   const router = createBrowserRouter([
-    { path: "/", element: <Navigate to="/courses" replace /> },
-
     {
-      path: "/check-page",
-      element: (
-        <RoleProtectedRoute
-          allowedRoles={["contributor", "moderator", "admin"]}
-        >
-          <CheckPage />
-        </RoleProtectedRoute>
-      ),
-    },
-
-    { path: "/courses", element: <CoursePage /> },
-    { path: "/course/:id", element: <CourseDetailsPage /> },
-    { path: "/login", element: <LoginPage /> },
-    {
-      path: "/:userId/my-courses",
-      element: (
-        <RoleProtectedRoute
-          allowedRoles={["contributor", "moderator", "admin"]}
-        >
-          <ContributorCoursePage />
-        </RoleProtectedRoute>
-      ),
-    },
-    {
-      path: "/my-course/edit/:id",
-      element: (
-        <CourseProvider>
-          <RoleProtectedRoute
-            allowedRoles={["contributor", "moderator", "admin"]}
-          >
-            <CourseDetailsEditPage />
-          </RoleProtectedRoute>
-        </CourseProvider>
-      ),
-    },
-    {
-      path: "/my-course/:id",
-      element: (
-        <RoleProtectedRoute
-          allowedRoles={["contributor", "moderator", "admin"]}
-        >
-          <CourseDetailsPage />
-        </RoleProtectedRoute>
-      ),
-    },
-    {
-      path: "/edit/:id",
-      element: (
-        <CourseProvider>
-          <CourseDetailsEditPage />
-        </CourseProvider>
-      ),
-    },
-
-    {
-      path: "/add-course",
-      element: (
-        <RoleProtectedRoute
-          allowedRoles={["contributor", "moderator", "admin"]}
-        >
-          <AddCoursePage />
-        </RoleProtectedRoute>
-      ),
-    },
-
-    { path: "/admin", element: <AdminPage /> },
-    {
-      path: "/all",
-      element: (
-        <RoleProtectedRoute allowedRoles={["moderator", "admin"]}>
-          <AllCoursePage />
-        </RoleProtectedRoute>
-      ),
-    },
-    { path: "/contributors", element: <AllContributorPage /> },
-    { path: "/moderators", element: <AllModeratorPage /> },
-    {path: "/moderators/:moderatorUserId", element: <ModeratorPage />},
-    {
-      path: "*",
-      element: <NotFoundSection />,
+      path: "",
+      element: <MainLayout />,
+      // FIXED: Must be lowercase "children"
+      children: [
+        { path: "", element: <Navigate to="/courses" replace /> },
+        { path: "check-page", element: <CheckPage /> },
+        { path: "courses", element: <CoursePage /> },
+        { path: "course/:id", element: <CourseDetailsPage /> },
+        { path: "login", element: <LoginPage /> },
+        {
+          path: ":userId/courses",
+          element: (
+            <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+              <ContributorCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "course/edit/:id",
+          element: (
+            <CourseProvider>
+              <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+                <CourseDetailsEditPage />
+              </RoleProtectedRoute>
+            </CourseProvider>
+          ),
+        },
+        {
+          path: "course/:id",
+          element: (
+            <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+              <CourseDetailsPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "edit/:id",
+          element: (
+            <CourseProvider>
+              <CourseDetailsEditPage />
+            </CourseProvider>
+          ),
+        },
+        {
+          path: "add-course",
+          element: (
+            <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+              <AddCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+        { path: "admin", element: <AdminPage /> },
+        {
+          path: "all",
+          element: (
+            <RoleProtectedRoute allowedRoles={["moderator", "admin"]}>
+              <AllCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+        { path: "contributors", element: <AllContributorPage /> },
+        { path: "moderators", element: <AllModeratorPage /> },
+        { path: "moderators/:moderatorUserId", element: <ModeratorPage /> },
+        { path: "*", element: <NotFoundSection /> },
+      ],
     },
   ]);
 
@@ -118,4 +102,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;  

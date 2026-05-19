@@ -55,10 +55,7 @@ const NotFoundSection = () => {
         </button>
       </div>
 
-      {/* --- OPTIONAL SUBTLE TEXT --- */}
-      <p className="mt-8 text-sm text-gray-400 dark:text-gray-600">
-        Error Code: <span className="font-mono">ERR_ROUTE_NOT_FOUND</span>
-      </p>
+     
     </div>
   );
 };

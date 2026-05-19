@@ -21,6 +21,7 @@ import Pagination from "../Components/Pagination";
 import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton";
 import UpdateCourseInfo from "../Components/UpdateCourseInfo";
 import AddContributor from "../Components/AddContributor";
+import Breadcrumbs from "../Components/Breadcrumbs";
 // import Skeleton from "../Components/SkeletonCard";
 
 const CheckPage = () => {
@@ -28,7 +29,7 @@ const CheckPage = () => {
     // <div className='min-h-screen' >
     <div className="min-h-screen">
       {/* <ElementDeleteConfirmation /> */}
-      <AddContributor onClose={() => console.log("Close Modal")} />
+      {/* <AddContributor onClose={() => console.log("Close Modal")} /> */}
       {/* <h1 className='text-primary border p-6 rounded-xl'>Hello world </h1> */}
       {/* <SelectBox
   label="Year"
@@ -46,6 +47,7 @@ const CheckPage = () => {
   }
 /> */}
       {/* <NoCourse/> */}
+      <Breadcrumbs />
       {/* <NoElement/> */}
       {/* <CourseDeleteConformation/> */}
       {/* <ElementDeleteConfirmation/> */}
@@ -58,6 +60,7 @@ const CheckPage = () => {
       {/* <UpdateHandbook/> */}
       {/* <SelectAbleTable /> */}
       {/* <SemesterDisplay code={11} />
+      
 <SemesterDisplay code={50} />  */}
 {/* <CourseDetailsSkeleton /> */}
 {/* <UpdateCourseInfo infoModal={{openModal:true}}/> */}
