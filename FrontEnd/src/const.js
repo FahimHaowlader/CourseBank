@@ -34,5 +34,5 @@ export const parseUserId = (fullCode) => {
 
 // --- Test Case ---
 // const result = parseUserId("cse20230111");
-// console.log(result); 
+//  // console.log(result); 
 // Output: { degree: "bachelors", semester: 11, year: "2023" }

@@ -62,7 +62,7 @@ export const CourseProvider = ({ children }) => {
   };
 
   const handleDelete = (itemName) => {
-    console.log("deleting", itemName);
+     // console.log("deleting", itemName);
     // Logic for deletion goes here
   };
 

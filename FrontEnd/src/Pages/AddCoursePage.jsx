@@ -63,7 +63,7 @@ const AddCoursePage = () => {
   });
 
 
-  // console.log("Parsed User Info:", userInfo); // { dept: "cse", degree: "bachelors", semester: 11, year: 2023 }
+  //  // console.log("Parsed User Info:", userInfo); // { dept: "cse", degree: "bachelors", semester: 11, year: 2023 }
 
   useEffect(() => {
       // 1. Try scrolling the window
@@ -83,7 +83,7 @@ const AddCoursePage = () => {
 
   Object.keys(data).forEach((key) => {
     if (!data[key] || data[key].toString().trim() === "") {
-      // console.log("Missing field:", key); // log missing field
+      //  // console.log("Missing field:", key); // log missing field
       allFilled = false;
     }
   });
@@ -149,17 +149,17 @@ const isHandbookValid = () => {
 
  const handleSubmit = async (e) => {
     e.preventDefault(); // prevent page reload
-    // console.log(formData); // all form data here
+    //  // console.log(formData); // all form data here
 
     const validAssessments = cleanAssessments();
     const validTasks = cleanTasks();
     const validMaterials = cleanMaterials();
     const validBooks = cleanBooks();  
 
-    // console.log("Books:", validBooks);
-    // console.log("Materials:", validMaterials);
-    // console.log("Tasks:", validTasks);
-    // console.log("Assessments:", validAssessments);
+    //  // console.log("Books:", validBooks);
+    //  // console.log("Materials:", validMaterials);
+    //  // console.log("Tasks:", validTasks);
+    //  // console.log("Assessments:", validAssessments);
     let courseData;
     const hasBook = isHandbookValid();
 
@@ -168,15 +168,15 @@ const isHandbookValid = () => {
     } else {;  
      courseData = { ...formData, books: validBooks, materials: validMaterials, tasks: validTasks, assessments: validAssessments }  
     }
-    // console.log("Course Data:", courseData);
+    //  // console.log("Course Data:", courseData);
  
 
     try {
       setLoading(true);
       // Replace with your API endpoint
-      // console.log("Sending course data to API:", courseData);
+      //  // console.log("Sending course data to API:", courseData);
       const response = await PrivateApi.post("/create-course", courseData);
-      // console.log("Course created successfully:", response.data);
+      //  // console.log("Course created successfully:", response.data);
       // throw new Error("Simulated API error"); // Simulate an error for testing
       setModalStatus('success');
       // Optionally, reset form or redirect user
@@ -238,7 +238,7 @@ const isHandbookValid = () => {
     return titleValid && authorValid && isValidGoogleUrl;
   });
 
-  // console.log("Cleaned Books:", cleanedBooks);
+  //  // console.log("Cleaned Books:", cleanedBooks);
 
   if (cleanedBooks.length === 0) {
     // Reset UI: Using 'link' for consistency with your console log
@@ -297,7 +297,7 @@ const isHandbookValid = () => {
     return nameValid && isValidUrl && isGoogle;
   });
 
-  // console.log("Cleaned Materials:", cleanedMaterials);
+  //  // console.log("Cleaned Materials:", cleanedMaterials);
 
   if (cleanedMaterials.length === 0) {
     setMaterials([{ id: Date.now(), name: "", fileUrl: "" }]);
@@ -346,7 +346,7 @@ const [tasks, setTasks] = useState([{ id: Date.now(), name: "", fileUrl: "" }]);
     return nameValid && isValidGoogleUrl;
   });
 
-  // console.log("Cleaned Tasks:", cleanedTasks);
+  //  // console.log("Cleaned Tasks:", cleanedTasks);
 
   if (cleanedTasks.length === 0) {
     // Reset to one empty row using 'link' for consistency
@@ -443,7 +443,7 @@ const cleanAssessments = () => {
       // 2. USE >= INSTEAD OF >
       // This allows assessments to happen ON the starting date
       const isDateValid = assessmentDate.getTime() > courseStart.getTime();
-      console.log(`Assessment Date: ${assessmentDate.toISOString()}, Course Start: ${courseStart.toISOString()}, isDateValid: ${isDateValid}`); 
+       // console.log(`Assessment Date: ${assessmentDate.toISOString()}, Course Start: ${courseStart.toISOString()}, isDateValid: ${isDateValid}`); 
       
       const hasMark = !isNaN(a.mark);
 

@@ -6,9 +6,9 @@
 
 
 
-// // console.log(process.env.CLOUDINARY_API_KEY)
-// // console.log(process.env.CLOUDINARY_CLOUD_NAME)
-// // console.log(process.env.CLOUDINARY_API_KEY)
+// //  // console.log(process.env.CLOUDINARY_API_KEY)
+// //  // console.log(process.env.CLOUDINARY_CLOUD_NAME)
+// //  // console.log(process.env.CLOUDINARY_API_KEY)
 // cloudinary.config({
 //   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
 //   api_key: process.env.CLOUDINARY_API_KEY,
@@ -27,7 +27,7 @@
 //     })
 //     // Optionally delete the local file after successful upload
     
-//     console.log(response)
+//      // console.log(response)
     
 //     fs.unlinkSync(filePatha)
    
@@ -37,9 +37,9 @@
 //   } 
 //   catch(error){
 //     fs.unlinkSync(filePath)
-//     console.log(error)
+//      // console.log(error)
 //     // Delete the local file even if upload fails
-//      console.log("hi")
+//       // console.log("hi")
 //     return null
 //     }
    
@@ -51,7 +51,7 @@
 // // cloudinary.v2.uploader
 // // .upload("sample.jpg",
 // //   { width: 2000, height: 1000, crop: "limit" })
-// // .then(result=>console.log(result));
+// // .then(result=> // console.log(result));
 
 
 
@@ -75,7 +75,7 @@ const uploadOnCloudinary = async (filePath) => {
       resource_type: 'auto',
     });
 
-    // console.log("Upload response:", response);
+    //  // console.log("Upload response:", response);
 
     // Delete the uploaded file
       await fs.unlink(filePath)
@@ -102,7 +102,7 @@ const deleteCloudinaryFileById = async (publicId, resourceType = "image") => {
         });
 
         if (result.result === "ok") {
-            // console.log(`Successfully deleted from Cloudinary: ${publicId}`);
+            //  // console.log(`Successfully deleted from Cloudinary: ${publicId}`);
         } else {
             // console.warn(`Cloudinary deletion status: ${result.result} for ID: ${publicId}`);
         }

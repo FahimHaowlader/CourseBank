@@ -147,7 +147,7 @@ const AllContributorPage = () => {
 
   const processDelete = async () => {
     setDeleteModal(prev => ({ ...prev, status: "loading" }));
-    console.log("Attempting to delete contributor with ID:", deleteModal.targetId);
+     // console.log("Attempting to delete contributor with ID:", deleteModal.targetId);
     try {
       await PrivateApi.delete(`/delete-contributor-account/${deleteModal.targetId}`);
       setDeleteModal(prev => ({ ...prev, status: "success" }));
@@ -169,7 +169,7 @@ const AllContributorPage = () => {
       text: text,
       // url: url,
     })
-    .then(() => console.log('Successful share'))
+    .then(() =>  // console.log('Successful share'))
     .catch((error) => {
       // If user cancels or it fails, fallback to clipboard
       if (error.name !== 'AbortError') {

@@ -74,7 +74,7 @@ async function getCourses(userId, parameters ={},page,sort ={}) {
       sendTotal = false;
     } else {
       // Count documents
-    // console.log("Cache miss or expired for user:", userId);
+    //  // console.log("Cache miss or expired for user:", userId);
       totalDocuments = await Course.countDocuments(query);
       sendTotal = true;
       // Save cache
@@ -196,7 +196,7 @@ const fullCourseDetailsForEdit = asyncHandler(async (req, res, next) => {
   if (!course) {
     throw new apiError(404, "Course not found");
   }
-  console.log("Course Creator ID:", course);  
+   // console.log("Course Creator ID:", course);  
 
   // 3. Define Logic Flags
   const isOwner = course.createdBy.toString() === userId.toString();
@@ -238,7 +238,7 @@ const isModerator =
   const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
   const isExpired = Date.now() - new Date(course.createdAt).getTime() > oneYearInMs;
 
-  // console.log("User Role:", isExpired);
+  //  // console.log("User Role:", isExpired);
 
   // --- PERMISSION & LOCK LOGIC ---
 
@@ -252,7 +252,7 @@ const isModerator =
     throw new apiError(403, "Course Locked: This record is over 1 year old and can only be modified by an Admin.");
   }
 
-  // console.log("Course Status:", course.status);
+  //  // console.log("Course Status:", course.status);
 
   if(isModerator && course.status === "draft" && !hasAccess && !isOwner){
     throw new apiError(403, "Course Locked: Draft courses cannot be edited by moderators.");
@@ -308,14 +308,14 @@ if(role === "moderator" && queryUserId){
 }
 
   let filter = {};
-  // console.log("Role:", role);
+  //  // console.log("Role:", role);
 
   if (role === "contributor") {
     // Moderators can only see their own courses
     filter.createdBy = requesterId;
   } else if (role === "admin" || role === "moderator") {
     const user = await User.findOne({ userId: queryUserId }).select('_id status feedback approvedCourseCount myCourseCount');
-    console.log("Queried User:", user);
+     // console.log("Queried User:", user);
     if(!user) { 
       throw new apiError(404, "User not found");
     } 
@@ -497,7 +497,7 @@ const updateBasicInfo = asyncHandler(async (req, res) => {
   const { updatedData } = req.body;
   const userId = req.user?._id;
   const role = req.user?.role;
-  // console.log("Update Basic Info Request:", { courseId, updatedData, userId, role });
+  //  // console.log("Update Basic Info Request:", { courseId, updatedData, userId, role });
   // throw new apiError(500, "This endpoint is currently disabled for testing purposes.");
   // 1. Strict Authorization Check
   // User must be an Admin OR have the explicit 'access' flag
@@ -666,7 +666,7 @@ const updateInstructorInfo = asyncHandler(async (req, res) => {
       );
     }
   }
-// console.log("Update Instructor Info Request:", { courseId, instructor, userId, role });
+//  // console.log("Update Instructor Info Request:", { courseId, instructor, userId, role });
   // 4. Database Query Logic
   const query = { _id: courseId };
   if (role !== "admin") {
@@ -838,7 +838,7 @@ const deleteFile = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const role = req.user?.role;
 
-  console.log("Delete fileUrl:", publicId);
+   // console.log("Delete fileUrl:", publicId);
   // Auth check
   if (!userId || !role) {
     throw new apiError(401, "Unauthorized: User ID or role missing");
@@ -1325,7 +1325,7 @@ const updateCourseAssessments = asyncHandler(async (req, res) => {
       "Course not found or you are not authorized to update it"
     );
   }
-  // console.log("Updated Assessments:", updatedCourse.assessments);
+  //  // console.log("Updated Assessments:", updatedCourse.assessments);
   res.status(200).json(
     new apiResponse(
       200,
@@ -1931,7 +1931,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
       }
       throw new apiError(403, "Deletion criteria not met.");
     }
-    // console.log("Deleted Course:", deletedCourse);
+    //  // console.log("Deleted Course:", deletedCourse);
     // 6. CLEANUP USER STATS
     // We use the 'createdBy' from the deleted document to ensure we hit the right user
     const updatedUser = await User.findByIdAndUpdate(
@@ -1974,7 +1974,7 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
   const role = req.user?.role;
   const hasAccess = req.user?.access === true;
 
-  console.log("Submit Request - UserID:", userId, "Role:", role, "CourseID:", courseId);
+   // console.log("Submit Request - UserID:", userId, "Role:", role, "CourseID:", courseId);
 
   // 1. Authorization
   if (!hasAccess) {
@@ -2004,7 +2004,7 @@ const submitCourseForReview = asyncHandler(async (req, res) => {
   if (!course) {
     throw new apiError(404, "Course not found in the database.");
   }
-  console.log("Course fetched for submission:", course);
+   // console.log("Course fetched for submission:", course);
 
   if (role === "moderator") {
   // Extracting from cse20230211
@@ -2183,7 +2183,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    console.log("hi")
+     // console.log("hi")
 
    try {
  
@@ -2200,7 +2200,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
       select: "title hscYear semester degree status isEditedSinceFeedback feedback" 
     }
   );
-  console.log("Updated Course after Cancellation:", updatedCourse);
+   // console.log("Updated Course after Cancellation:", updatedCourse);
   // 4. Handle Failure
   if (!updatedCourse) {
     throw new apiError(
@@ -2215,7 +2215,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
   const idYear = Number(req.user.userId.slice(3, 7));    // "2023"
   const degreeCode = req.user.userId.slice(7, 9);        // "02"
   const idSemester = Number(req.user.userId.slice(-2));  // "11"
-  console.log("ho")
+   // console.log("ho")
   const degreeMap = {
     "01": "bachelors",
     "02": "masters",
@@ -2231,7 +2231,7 @@ const cancelCourseSubmission = asyncHandler(async (req, res) => {
     throw new apiError(403, "Moderator credentials do not match course criteria");
   }
 }
-console.log("Course cancellation successful, preparing response...");
+ // console.log("Course cancellation successful, preparing response...");
 
  res.status(200).json(
     new apiResponse(
@@ -2240,7 +2240,7 @@ console.log("Course cancellation successful, preparing response...");
       "Submission cancelled. The course is now back in Draft mode for editing."
     )
   );
-  console.log("Response sent successfully.");
+   // console.log("Response sent successfully.");
    } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -2385,7 +2385,7 @@ const administrativeCourseSearch = asyncHandler(async (req, res) => {
       throw new apiError(404, "Target user not found.");
     }
     
-    // console.log("AdministrativeCourseSearch - Target User:", targetUser);
+    //  // console.log("AdministrativeCourseSearch - Target User:", targetUser);
 
     // Safety Check: Moderators can only view Contributors or themselves
     if (role === "moderator" && targetUser.role === "contributor" && targetUser.year !== req.user.year && targetUser.degree !== req.user.degree && targetUser.semester !== req.user.semester) {
@@ -2406,8 +2406,8 @@ const administrativeCourseSearch = asyncHandler(async (req, res) => {
     // parameters.degree = req.user.degree;
     // parameters.semester = req.user.semester;
   }
-  // console.log("AdministrativeCourseSearch - Final Parameters:", parameters);
-  // console.log("UserCourseSearch2 - Parameters after user filter:", parameters);
+  //  // console.log("AdministrativeCourseSearch - Final Parameters:", parameters);
+  //  // console.log("UserCourseSearch2 - Parameters after user filter:", parameters);
   const result = await getCourses(userId, parameters, page, sort );
 
   if (!result) throw new apiError(500, "Error fetching courses");

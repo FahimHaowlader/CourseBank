@@ -74,7 +74,7 @@ const AddBook = () => {
 
     // CHECK if the status is 200 (Success)
     // Your backend sends 200, but doesn't send "success: true"
-    console.log("API Response:", res);
+     // console.log("API Response:", res);
     if (res.data.success) {
        setCourse(prev => ({...prev, 
         books: [...(prev?.books || []), res?.data?.data?.newBook || {}] 

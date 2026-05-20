@@ -49,7 +49,7 @@ const ModeratorPage = () => {
         const res = await PrivateApi.get(
           `/get-moderator-by-userId/${moderatorUserId}`,
         );
-        // console.log("Fetched moderator data:", res.data.data);
+        //  // console.log("Fetched moderator data:", res.data.data);
         setModerator(res?.data?.data); // Store the fetched moderator
       } catch (err) {
         setError(err.message || "Failed to fetch moderator details.");
@@ -232,7 +232,7 @@ const ModeratorPage = () => {
     if (user?.role !== "admin") {
       return;
     }
-    console.log("Approving moderator account with userId:", moderatorUserId); 
+     // console.log("Approving moderator account with userId:", moderatorUserId); 
     const today = new Date().toDateString();
     try {
       await PrivateApi.post(`/approve-moderator-account-submission`, {

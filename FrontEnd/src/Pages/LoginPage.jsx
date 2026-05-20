@@ -19,7 +19,7 @@ const LoginPage = () => {
 //       ? "/moderator-dashboard" 
 //       : user?.role === "contributor" 
 //         ? "/contributor-dashboard" // 👈 Add your contributor route here
-//         : "/courses"); // Default for students/guests  //  console.log("Redirecting to:", from);
+//         : "/courses"); // Default for students/guests  //   // console.log("Redirecting to:", from);
   const prevPath = sessionStorage.getItem("prevPath") || "/";
 
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -28,7 +28,7 @@ useEffect(() => {
     if (user) {
       // Use { replace: true } so the user can't go "back" to the login page
       navigate(prevPath, { replace: true });
-      console.log("User already logged in, redirecting to:", location.state?.from?.pathname);
+       // console.log("User already logged in, redirecting to:", location.state?.from?.pathname);
     }
   }, [user, navigate, from]);
   const handleSubmit = async (e) => {

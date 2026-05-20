@@ -131,7 +131,7 @@ const createModerators = asyncHandler(async (req, res) => {
     // { ordered: false } allows the operation to continue if some IDs already exist
     await User.insertMany(contributorsToCreate, { ordered: false });
   } catch (err) {
-    console.log("Bulk insert completed: Existing contributors were skipped.");
+     // console.log("Bulk insert completed: Existing contributors were skipped.");
   }
 
   // 6. Create the Moderator
@@ -155,8 +155,8 @@ const updateUserInfo = asyncHandler(async (req, res) => {
   const updateData = { ...req.body };
   const currentUserRole = req.user.role;
 
-  // console.log("User ID to Update:", userId);
-  // console.log("Update Data:", updateData);
+  //  // console.log("User ID to Update:", userId);
+  //  // console.log("Update Data:", updateData);
   
 
   // Only admin can update roles
@@ -187,8 +187,8 @@ const updateUserInfo = asyncHandler(async (req, res) => {
 
 const userLogin = asyncHandler(async (req, res) => {
   const { userId, password } = req.body;
-  // console.log("Login attempt for userId:", userId);
-  // console.log("Request body:", req.body);
+  //  // console.log("Login attempt for userId:", userId);
+  //  // console.log("Request body:", req.body);
 
   // Validate required fields
   if (!userId || !password) {
@@ -207,7 +207,7 @@ const userLogin = asyncHandler(async (req, res) => {
   if (!dbUser) {
     throw new apiError(401, "Invalid userId or password");
   }
-  // console.log("User found:", dbUser);
+  //  // console.log("User found:", dbUser);
 
   // Calculate the cutoff (30 days ago)
 const thirtyDaysAgo = new Date();
@@ -466,7 +466,7 @@ const getAllContributors= asyncHandler(async (req, res) => {
   const page = parseInt(req.body.page) || 1;
   const limit = 12;
   const skip = (page - 1) * limit;
-  // console.log("Search Parameter Received:", parameter,page);
+  //  // console.log("Search Parameter Received:", parameter,page);
 
   // 2. Authorization Guard
   if (!requesterAccess) {
@@ -525,8 +525,8 @@ const getAllContributors= asyncHandler(async (req, res) => {
       .limit(limit)
       .sort({ createdAt: -1 }) // Show newest users first
   ]);
-// console.log("Total Contributors Found:", totalContributors);
-// console.log("Contributors on Current Page:", contributors);
+//  // console.log("Total Contributors Found:", totalContributors);
+//  // console.log("Contributors on Current Page:", contributors);
   // 6. Response with Metadata
   res.status(200).json(
     new apiResponse(
@@ -650,7 +650,7 @@ const requestForSubmitContributorsAccount = asyncHandler(async (req, res) => {
   if (!requesterAccess) {
     throw new apiError(403, "Your account access is restricted.");
   }
-  // console.log("Submission Request by:", role, "for userId:", targetUserId);
+  //  // console.log("Submission Request by:", role, "for userId:", targetUserId);
   
   // 3. Moderator Scope Guard
   // Moderators can only submit contributors from their own Year/Semester/Degree
@@ -720,7 +720,7 @@ const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
   const requester = req.user;
   const { feedback, contributorUserId } = req.body || {};
 
-  console.log("Cancel Submission Request Body:", req.body);
+   // console.log("Cancel Submission Request Body:", req.body);
 
   // 1. Basic Auth & Access Guard
   if (!requester) {
@@ -809,7 +809,7 @@ const cancelContributorAccountSubmission = asyncHandler(async (req, res) => {
 const approveContributorAccountSubmission = asyncHandler(async (req, res) => {
   const { contributorUserId } = req.body;
   const { role, _id: reviewerId, userId: reviewerUserId, access: requesterAccess } = req.user;
-console.log("Approval Request Body:", req.body);  
+ // console.log("Approval Request Body:", req.body);  
   // 1. Authorization Guard
   if (!requesterAccess) {
     throw new apiError(403, "Your account access is restricted.");
@@ -833,7 +833,7 @@ console.log("Approval Request Body:", req.body);
 
   }
 
-  console.log("hi")
+   // console.log("hi")
 
   // 3. Find the Target Contributor
   const targetContributor = await User.findOne({ 
@@ -921,7 +921,7 @@ const requestForSubmitModeratorsAccount = asyncHandler(async (req, res) => {
   if (targetModerator.status !== 'active') {
     throw new apiError(400, "This account is already under review.");
   }
-console.log("Target Moderator Found:", targetModerator.userId);
+ // console.log("Target Moderator Found:", targetModerator.userId);
   // 3. Extract the last 8 digits of the target moderator's ID
   const modIdSuffix = targetModerator.userId.slice(-8);
 
@@ -936,20 +936,20 @@ console.log("Target Moderator Found:", targetModerator.userId);
     throw new apiError(404, "No departmental contributor accounts found .");
   }
 
-  console.log(`Found ${associatedContributors.length} associated contributors for moderator ${targetUserId}`);
+   // console.log(`Found ${associatedContributors.length} associated contributors for moderator ${targetUserId}`);
 
   // 5. Verify all contributors are 'approved'
   const unapprovedUsers = associatedContributors.filter(
     (user) => user.status !== "approved"
   );
-console.log(`Unapproved contributors count: ${unapprovedUsers.length}`);
+ // console.log(`Unapproved contributors count: ${unapprovedUsers.length}`);
   if (unapprovedUsers.length > 0) {
     throw new apiError(
       400, 
       `${unapprovedUsers.length} departmental accounts are not yet approved.`
     );
   }
-  console.log("All associated contributors are approved. Proceeding with moderator submission." ,{ userId: targetUserId });
+   // console.log("All associated contributors are approved. Proceeding with moderator submission." ,{ userId: targetUserId });
   // 6. Update Moderator Account (Always set access: false)   
   const updatedModerator = await User.findOneAndUpdate(
     { userId: targetUserId },

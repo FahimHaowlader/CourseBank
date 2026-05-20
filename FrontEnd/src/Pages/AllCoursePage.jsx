@@ -22,7 +22,7 @@ import { Link } from 'react-router';
 
 const AllCoursePage = () => {
   const {moderatorUserId} = useParams();
-  console.log("Moderator User ID from URL:", moderatorUserId); // Debugging line to check URL parameter
+   // console.log("Moderator User ID from URL:", moderatorUserId); // Debugging line to check URL parameter
   const {user} = useAuth(); // Assuming you have a useAuth hook for authentication context
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -61,7 +61,7 @@ const path = user?.role === "admin" ? "/admin/courses/add" : user?.role === "mod
       </svg>
     </div>
   );
-// console.log("User in AllCoursePage:", user); // Debugging line to check user data
+//  // console.log("User in AllCoursePage:", user); // Debugging line to check user data
   // Consolidated Search/Filter State
 
   // Debugging line to check user role
@@ -98,7 +98,7 @@ const path = user?.role === "admin" ? "/admin/courses/add" : user?.role === "mod
   filters.degree = degreeMap[degreeCode] || degreeCode || "";
   filters.semester = Number(semesterValue) || "";
 }
-  // console.log("Initial Filters State:", filters); // Debugging line to check initial filters state
+  //  // console.log("Initial Filters State:", filters); // Debugging line to check initial filters state
       useEffect(() => {
     // 1. Try scrolling the window
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -208,9 +208,9 @@ const path = user?.role === "admin" ? "/admin/courses/add" : user?.role === "mod
         limit: 12
       
     });
-    // console.log('API Response:', response.data); // Debugging line to check API response structure
+    //  // console.log('API Response:', response.data); // Debugging line to check API response structure
     setCourses(response.data.data.courses || []); 
-    // console.log("Courses set in state:", response.data.courses || response.data); // Debugging line to check courses being set
+    //  // console.log("Courses set in state:", response.data.courses || response.data); // Debugging line to check courses being set
     setTotalCourses(response.data.data.totalDocuments ); // Adjust based on actual response structure
   } catch (error) {
     // console.error('Error fetching courses:', error);
@@ -259,7 +259,7 @@ const path = user?.role === "admin" ? "/admin/courses/add" : user?.role === "mod
   };
 
   
-console.log(filters);
+ // console.log(filters);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">

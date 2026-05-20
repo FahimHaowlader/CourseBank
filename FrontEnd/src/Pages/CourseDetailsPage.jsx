@@ -29,7 +29,7 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
-  // console.log("Course ID from URL:", id); 
+  //  // console.log("Course ID from URL:", id); 
 
    useEffect(() => {
     // 1. Try scrolling the window
@@ -84,7 +84,7 @@ const CourseDetailsPage = () => {
   
 
   const handleDownload = (link) => {
-    console.log("Download link:", link); // Debugging line to check the link value
+     // console.log("Download link:", link); // Debugging line to check the link value
   if (!link) return;
   // '_blank' opens in a new tab
   window.open(link, '_blank', 'noopener,noreferrer');
@@ -98,7 +98,7 @@ const CourseDetailsPage = () => {
   if (error){
     return <CourseNotFound />;
   }
-// console.log("Course data after loading:", course);
+//  // console.log("Course data after loading:", course);
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
       { course  && (

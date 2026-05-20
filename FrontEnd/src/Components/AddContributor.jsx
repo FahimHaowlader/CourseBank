@@ -102,7 +102,7 @@ const AddContributor = ({ modal, setModal,handleSearch }) => {
       return;
     }
 
-    console.log("Submitting form with data:", formData);
+     // console.log("Submitting form with data:", formData);
 
 let degree ;
 switch (formData.degree) {

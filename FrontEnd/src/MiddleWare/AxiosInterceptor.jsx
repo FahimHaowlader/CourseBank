@@ -10,7 +10,7 @@ const AxiosInterceptor = ({ children }) => {
         const requestInterceptor = PrivateApi.interceptors.request.use(
             (config) => {
                 // Add a custom header or log "Hello"
-                console.log("Hello! Request is being sent to:", config.url);
+                 // console.log("Hello! Request is being sent to:", config.url);
                              
                 return config;
             },

@@ -133,11 +133,11 @@ const CoursePage = () => {
           "/users-all-course",
           { parameters: filters, sort, page },
         );
-        // console.log("Sorting Response:", filters); // Check the structure of the response
+        //  // console.log("Sorting Response:", filters); // Check the structure of the response
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          // console.log(response.data.data);
+          //  // console.log(response.data.data);
           setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
@@ -164,7 +164,7 @@ const CoursePage = () => {
         // Look at your log: response.data.data.courses is where the array lives
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
-          // console.log(response.data.data);
+          //  // console.log(response.data.data);
           setTotalDocs(response.data.data?.totalDocuments || totalDocs);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
@@ -217,10 +217,10 @@ const CoursePage = () => {
     });
   };
 
-  // console.log(totalDocs);
-  // console.log(page);
-  // console.log(filters);
-  // console.log(courses);
+  //  // console.log(totalDocs);
+  //  // console.log(page);
+  //  // console.log(filters);
+  //  // console.log(courses);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">

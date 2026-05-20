@@ -7,11 +7,11 @@ import router from "./route.js"; // your route.js with /api/v1 endpoints
 connectDB()
 .then(() => {
     app.listen(process.env.PORT || 8000, () => {
-        console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
+         // console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
     })
 })
 .catch((err) => {
-    console.log("MONGO db connection failed !!! ", err);
+     // console.log("MONGO db connection failed !!! ", err);
 })
 
 

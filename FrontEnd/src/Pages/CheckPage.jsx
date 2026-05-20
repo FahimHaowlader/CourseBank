@@ -29,7 +29,7 @@ const CheckPage = () => {
     // <div className='min-h-screen' >
     <div className="min-h-screen">
       {/* <ElementDeleteConfirmation /> */}
-      {/* <AddContributor onClose={() => console.log("Close Modal")} /> */}
+      {/* <AddContributor onClose={() =>  // console.log("Close Modal")} /> */}
       {/* <h1 className='text-primary border p-6 rounded-xl'>Hello world </h1> */}
       {/* <SelectBox
   label="Year"
@@ -64,7 +64,7 @@ const CheckPage = () => {
 <SemesterDisplay code={50} />  */}
 {/* <CourseDetailsSkeleton /> */}
 {/* <UpdateCourseInfo infoModal={{openModal:true}}/> */}
-  {/* <Pagination page={3} setPage={(p) => console.log(p)} totalDocs={244} /> */}
+  {/* <Pagination page={3} setPage={(p) =>  // console.log(p)} totalDocs={244} /> */}
   {/* <Skeleton /> */}
       {/* <AddElement title="Module" onAdd={() => alert("Add Module clicked")} /> */}
       {/* <AddFirstElement title="Document" onAdd={() => alert("Add Document clicked")} /> */}

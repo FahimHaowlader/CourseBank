@@ -66,7 +66,7 @@ const refreshUser = async () => {
 useEffect(() => {
   // Ignore the login page so we don't save it as a "previous" destination
   if (location.pathname !== "/login" && location.pathname !== "/signup") {
-    console.log("Saving full path:", location.pathname);
+     // console.log("Saving full path:", location.pathname);
     sessionStorage.setItem("prevPath", location.pathname);
   }
 }, [location]);

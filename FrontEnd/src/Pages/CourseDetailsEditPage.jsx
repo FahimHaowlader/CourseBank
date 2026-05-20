@@ -82,7 +82,7 @@ const CourseDetailsEditPage = () => {
     error,
   } = useCourse();
 const isOwner = course?.createdBy?.toString() === user?._id?.toString();
-console.log(isOwner)
+ // console.log(isOwner)
 
 const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize feedback state with course feedback or empty string
 
@@ -211,7 +211,7 @@ const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize fe
       
       // // FIXED: Refresh user context so user.status becomes 'active' again
       // if (refreshUser) await refreshUser();
-      // console.log("Cancelling course submission with ID:", course._id);
+      //  // console.log("Cancelling course submission with ID:", course._id);
       const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`);
       } else {
         const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`,{feedback: feedback.trim(), isOwner: isOwner});
@@ -269,7 +269,7 @@ const successfulDeleteAcknowledgement = () => {
     setSubmitModal((prev) => ({ ...prev, loading: true }));
     try {
       
-      // console.log("Submitting course for review with ID:", course._id);
+      //  // console.log("Submitting course for review with ID:", course._id);
       // Replace with your actual submission endpoint
       // await PrivateApi.post(`/submit-all-courses`);
 
@@ -313,7 +313,7 @@ const successfulDeleteAcknowledgement = () => {
   }
 
 const handleDownload = (link) => {
-    console.log("Download link:", link); // Debugging line to check the link value
+     // console.log("Download link:", link); // Debugging line to check the link value
   if (!link) return;
   // '_blank' opens in a new tab
   window.open(link, '_blank', 'noopener,noreferrer');

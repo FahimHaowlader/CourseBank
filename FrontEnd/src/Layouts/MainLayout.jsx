@@ -7,7 +7,7 @@ import { useAuth } from '../Contexts/Auth.Context';
 
 const MainLayout = () => {
   const { user } = useAuth();
-console.log("MainLayout Rendered - User:", user); // Debugging line to check user state
+ // console.log("MainLayout Rendered - User:", user); // Debugging line to check user state
   // Optional: Show a loading state while checking auth
   
   return (

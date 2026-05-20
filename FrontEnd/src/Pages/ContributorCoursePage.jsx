@@ -71,7 +71,7 @@ const ContributorCoursePage = () => {
         setCourses(response.data.data.courses);
         setContributor(response.data.data.contributor);
       } catch (error) {
-        console.log("Error fetching contributor's courses:", error);
+         // console.log("Error fetching contributor's courses:", error);
         setError(error.response?.data?.message || "Failed to load courses");
       } finally {
         setLoading(false);
@@ -234,7 +234,7 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
       }));
       setContributor((prev) => ({...prev, status : "pending",feedback:""})); // Immediate UI update for better UX
     } catch (error) {
-      // console.log("Error submitting account:", error);
+      //  // console.log("Error submitting account:", error);
       setSubmitModal((prev) => ({
         ...prev,
         status: "submit-error",

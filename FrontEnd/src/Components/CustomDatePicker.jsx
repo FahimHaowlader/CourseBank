@@ -3,7 +3,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const CustomDatePicker = ({ label, onChange,selectedDate :value }) => {
-  // console.log("CustomDatePicker Rendered with value:", value);
+  //  // console.log("CustomDatePicker Rendered with value:", value);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 

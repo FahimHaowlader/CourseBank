@@ -21,7 +21,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
 
     // 2. If no user is found in the context, they aren't logged in
     if (!user) {
-        console.log("No user found, redirecting to login...");
+         // console.log("No user found, redirecting to login...");
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
@@ -30,7 +30,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
     const userRole = user.role; 
     const isAllowed = allowedRoles.includes(userRole);
 
-    // console.log("Auth Check:", { 
+    //  // console.log("Auth Check:", { 
     //     userRole, 
     //     allowedRoles, 
     //     accessGranted: isAllowed 

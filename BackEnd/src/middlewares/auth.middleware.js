@@ -7,7 +7,7 @@ const verifyJwt = asyncHandler(async (req, _res, next) => {
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.split(" ")[1];
-    // console.log("Token from request:", token); // Debug log
+    //  // console.log("Token from request:", token); // Debug log
 
   if (!token) {
     throw new apiError(401, "Authentication token required");

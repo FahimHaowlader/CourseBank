@@ -6,7 +6,7 @@ import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
 
 const CourseDeleteConformation = ({openDelete,id}) => {
-  console.log(openDelete,id);
+   // console.log(openDelete,id);
 
   return (
     // <div

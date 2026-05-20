@@ -19,7 +19,7 @@ const Breadcrumbs = () => {
   };
 
   const path = user.role === "admin" ? "/admin" : user.role === "contributor" ? 'contributors/' + user.userId +"/courses": "moderators/" + user.userId;
-console.log("Breadcrumbs Rendered - User:", user, "Path:", path); // Debugging line to check user state and path
+ // console.log("Breadcrumbs Rendered - User:", user, "Path:", path); // Debugging line to check user state and path
   return (
     <nav 
       aria-label="breadcrumb" 
