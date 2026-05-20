@@ -1,10 +1,8 @@
 import { Router } from "express";
-<<<<<<< HEAD
-import { userCourseSearch, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse } from "./controllers/course.controller.js";
 
 
 import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, logoutUser , verifyToken } from "./controllers/user.controller.js";
-=======
+
 import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook,updateBasicInfo,
 updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview,administrativeCourseSearch, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
 
@@ -28,7 +26,7 @@ import {
   approveModeratorAccountSubmission,
   LogOut
 } from "./controllers/user.controller.js";
->>>>>>> test
+
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
 import {upload} from "./middlewares/multer.middleware.js";
