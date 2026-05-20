@@ -24,6 +24,11 @@ console.log("MainLayout Rendered - User:", user); // Debugging line to check use
       </main>
 
       {/* <Footer /> */}
+          <footer className="bg-background-light dark:bg-card-dark border-t border-border-light dark:border-border-dark py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-text-secondary dark:text-gray-500">
+          <p> University Course Bank System. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };
