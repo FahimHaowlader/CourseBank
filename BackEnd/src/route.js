@@ -1,8 +1,5 @@
 import { Router } from "express";
 
-
-import { createUser, updateUserInfo, userLogin, deleteUser, getAllUserSearch, logoutUser , verifyToken } from "./controllers/user.controller.js";
-
 import { userCourseSearch,fullCourseDetailsForEdit, fullCourseDetails,getCourseByCreatorId, createCourse, updateCourseInfo, uploadImage, uploadFile, deleteFile, updateCourseMaterials, updateCourseTasks, updateCourseAssessments, updateSuggestedBooks, updateCourseHandbook, deleteCourseHandbook, deleteCourse , addNewMaterial, deleteMaterial, addNewTask, deleteTask, addNewAssessment, deleteAssessment, addNewSuggestedBook, deleteSuggestedBook,updateBasicInfo,
 updateDescription,updateInstructorInfo,updateStartingDate, submitCourseForReview,administrativeCourseSearch, cancelCourseSubmission, acceptSubmission } from "./controllers/course.controller.js";
 
@@ -120,9 +117,9 @@ router.route('/accept-course-submission/:courseId').post(acceptSubmission);
 
 router.route('/delete-course/:courseId').delete(deleteCourse);
 
-router.route('/verify-token').get(verifyToken);
+// router.route('/verify-token').get(verifyToken);
 
-router.route ('/logout').post(logoutUser);
+// router.route ('/logout').post(logoutUser);
 
 {/** admin route */} 
 
