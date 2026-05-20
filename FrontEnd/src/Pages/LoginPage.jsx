@@ -1,32 +1,54 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { MdLock, MdOutlinePersonOutline } from "react-icons/md";
 import { IoMdKey } from "react-icons/io";
 import { TbEye, TbEyeClosed } from "react-icons/tb";
 import { useAuth } from "../Contexts/Auth.Context.jsx";
 import axios from "axios";
+import { useLocation,useNavigate } from "react-router";
 
 const LoginPage = () => {
-  
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const {loginWithUserIdAndPassword, error, setError,loading,setLoading} = useAuth();
+  const {loginWithUserIdAndPassword, error, setError,loading,setLoading,user} = useAuth();
+   const location = useLocation();
+   const navigate = useNavigate();
+   const from = location.state?.from?.pathname || "/"; // Default to home page if no previous location
+// 1. Check if they were trying to go to a specific URL before login
+// const from = location.state?.from?.pathname || 
+//   (user?.role === "admin" 
+//     ? "/admin-dashboard" 
+//     : user?.role === "moderator" 
+//       ? "/moderator-dashboard" 
+//       : user?.role === "contributor" 
+//         ? "/contributor-dashboard" // 👈 Add your contributor route here
+//         : "/courses"); // Default for students/guests  //   // console.log("Redirecting to:", from);
+  const prevPath = sessionStorage.getItem("prevPath") || "/";
 
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+useEffect(() => {
+    if (user) {
+      // Use { replace: true } so the user can't go "back" to the login page
+      navigate(prevPath, { replace: true });
+       // console.log("User already logged in, redirecting to:", location.state?.from?.pathname);
+    }
+  }, [user, navigate, from]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     
     const userid = e.target.userid.value;
     const password = e.target.password.value;
-
+ 
+    
     // 1. Validation Logic
     if (!userid || !password) {
       setError("Please enter both User ID and password.");
       return;
     }
-    if (userid.length !== 11 && userid.length !== 10) {
+    if (userid.length !== 11) {
       setError("Invalid User ID .");
       return;
     }
-    if (password.length !== 6) {
+    if (password.length < 6) {
       setError("wrong password .");
       return;
     }
@@ -35,12 +57,13 @@ const LoginPage = () => {
     setLoading(true);
     try {
     const response =  await loginWithUserIdAndPassword(userid.toLowerCase(), password);
+      navigate(from);
     }
     catch(err) {
       return;
     }finally {
       setLoading(false);
-    }
+    } 
   };
 
   return (
@@ -88,7 +111,7 @@ const LoginPage = () => {
                     placeholder="CSE2023XXXX"
                     required
                     autoComplete="username"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all sm:text-sm"
+                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all sm:text-sm uppercase"
                   />
                 </div>
               </div>
@@ -127,10 +150,10 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center items-center py-2.5 px-4 rounded-lg shadow-sm text-base font-semibold text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center py-2.5 px-4 rounded-lg shadow-sm text-base font-semibold text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
-                    <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin " />
                   ) : (
                     "Sign In"
                   )}

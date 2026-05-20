@@ -1,7 +1,7 @@
 import React from 'react';
 
 const semesterTransformer = (code) => {
-  if (!code || typeof code !== 'number') return "Invalid Code";
+  if (!code || typeof code !== 'number') return "Invalid Semester";
 
   const yearMap = {
     1: "First",

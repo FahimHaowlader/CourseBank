@@ -7,9 +7,10 @@ const verifyJwt = asyncHandler(async (req, _res, next) => {
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.split(" ")[1];
+    //  // console.log("Token from request:", token); // Debug log
 
   if (!token) {
-    throw new apiError(401, "Authentication required");
+    throw new apiError(401, "Authentication token required");
   }
 
   let decodedToken;
@@ -23,7 +24,11 @@ const verifyJwt = asyncHandler(async (req, _res, next) => {
   }
 
   const user = await User.findById(decodedToken._id).select(
+<<<<<<< HEAD
     "-password "
+=======
+    "-password -refreshToken +department +semester +degree +reviewedBy"
+>>>>>>> test
   );
 
   if (!user) {

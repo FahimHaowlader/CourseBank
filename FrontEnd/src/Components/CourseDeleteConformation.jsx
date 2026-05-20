@@ -5,7 +5,9 @@ import { IoMdCheckmarkCircle } from "react-icons/io";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { MdRefresh } from "react-icons/md";
 
-const CourseDeleteConformation = () => {
+const CourseDeleteConformation = ({openDelete,id}) => {
+   // console.log(openDelete,id);
+
   return (
     // <div
     //   aria-labelledby="modal-title"
@@ -36,20 +38,20 @@ const CourseDeleteConformation = () => {
     //           ?
     //         </p>
     //       </div>
-    //       <div className="flex w-full gap-6 mt-8">
-    //         <button className="flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-8 py-4 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-primary/50 transition-colors cursor-pointer">
-    //           Cancel
-    //         </button>
-    //         <button className="flex w-full items-center justify-center rounded-xl bg-orange-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-orange-600 focus:outline-none  focus:ring-orange-500/50 transition-colors cursor-pointer">
-    //            <span className="material-symbols-outlined pr-1">
-    //           <MdDeleteOutline size={26}/>
+    //        <div className="flex w-full gap-6 mt-8">
+    //          <button className="flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-8 py-4 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-primary/50 transition-colors cursor-pointer">
+    //            Cancel
+    //          </button>
+    //          <button className="flex w-full items-center justify-center rounded-xl bg-orange-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-orange-600 focus:outline-none  focus:ring-orange-500/50 transition-colors cursor-pointer">
+    //             <span className="material-symbols-outlined pr-1">
+    //            <MdDeleteOutline size={26}/>
     //         </span>
     //           Delete
     //         </button>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
+    //        </div>
+    //      </div>
+    //    </div>
+    //  </div>
     // <div
     //   aria-labelledby="modal-title"
     //   aria-modal="true"
@@ -96,7 +98,7 @@ const CourseDeleteConformation = () => {
     <div
       aria-labelledby="modal-title"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="hidden fixed inset-0 z-50 items-center justify-center p-4 sm:p-6"
       role="dialog"
     >
       <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"></div>

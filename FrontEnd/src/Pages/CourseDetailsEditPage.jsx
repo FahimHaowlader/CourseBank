@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router";
+
 import { GrShareOption } from "react-icons/gr";
 import { LuNotebook } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
@@ -9,717 +11,1733 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { MdOutlineAssignment } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { FiEdit2 } from "react-icons/fi";
+import { AiOutlinePlus } from "react-icons/ai";
+import { IoCloudDoneOutline } from "react-icons/io5";
+import { MdRefresh } from "react-icons/md";
+import { BsExclamationCircleFill } from "react-icons/bs";
+import { IoMdCheckmarkCircle } from "react-icons/io";
+import { IoMdClose , IoMdCheckmark} from "react-icons/io";
+import { MdRestartAlt,MdOutlineCancel,MdDelete,MdOutlineDeleteSweep } from "react-icons/md";
+
+
 import AddElement from "../Components/AddElement";
+import UpdateCourseInfo from "../Components/UpdateCourseInfo";
+import UpdateInstructorInfo from "../Components/UpdateInstructorInfo";
+import UpdateDescription from "../Components/UpdateDescription";
+import UpdateHandbook from "../Components/UpdateHandbook";
+import AddMaterial from "../Components/AddMaterial";
+import AddBook from "../Components/AddBook";
+import AddTask from "../Components/AddTask";
+import AddAssessment from "../Components/AddAssessment";
+import DeleteElement from "../Components/DeleteElement";
+import SemesterDisplay from "../Components/semesterTransformer";
+import { useCourse } from "../Contexts/Course.Context";
+import CourseDetailsSkeleton from "../Components/CourseDetailsSkeleton.jsx";
+import { DepartmentMap } from "../Components/DepartmentMap";
+import AddFirstElement from "../Components/AddFirstElement";
+import NoElement from "../Components/NoElement";
+import { useAuth } from "../Contexts/Auth.Context";
+import ElementDeleteConfirmation from "../Components/ElementDeleteConformation";
+import PrivateApi from "../Hooks/PrivateApi";
+import CourseNotFound from "../Components/CourseNotFound";
 
 const CourseDetailsEditPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const from = "/my-courses"; // Default to my courses page if no previous path
+  const {
+    course,
+    setCourse,
+    isLoading,
+    addCourse,
+    infoModal,
+    setInfoModal,
+    instructorModal,
+    setInstructorModal,
+    descriptionModal,
+    setDescriptionModal,
+    handbookModal,
+    setHandbookModal,
+    materialModal,
+    setMaterialModal,
+    bookModal,
+    setBookModal,
+    taskModal,
+    setTaskModal,
+    deleteModal,
+    setDeleteModal,
+    assessmentModal,
+    setAssessmentModal,
+    handleUpdateInfo,
+    handleUpdateInstructorInfo,
+    handleUpdateDescription,
+    handleUpdateHandbook,
+    handleUpdateMaterial,
+    handleUpdateBook,
+    handleUpdateTask,
+    handleUpdateAssessment,
+    handleDeleteElement,
+    handleDelete,
+    setDeleteItem,
+    error,
+  } = useCourse();
+const isOwner = course?.createdBy?.toString() === user?._id?.toString();
+ // console.log(isOwner)
+
+const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize feedback state with course feedback or empty string
+
+
+   useEffect(() => {
+    // 1. Try scrolling the window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 2. Safety: Try scrolling the HTML element (for some mobile browsers)
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // 3. Optional: If you have a specific container that scrolls, use:
+    // document.getElementById('main-container').scrollTo({ top: 0 });
+  }, []);
+
+  const finalAssessment = course.assessments
+    ? course.assessments.filter((assessment) => assessment.type === "final")
+    : [];
+
+  const nonFinalAssessments = course.assessments
+    ? course.assessments.filter((assessment) => assessment.type !== "final")
+    : [];
+
+  const handleFinalizeClick = () => {
+    if(finalAssessment.length <= 0 || nonFinalAssessments.length <= 0 || !(course.handbook) ||  course.books.length <= 0 ){
+    setSubmitModal({
+      openModal: true,
+      title: "Submit for Review",
+      status: "warning",
+    });
+   } else {
+    setSubmitModal({
+      openModal: true,
+      title: "Submit for Review",
+      status: "submit",
+    });
+    }
+
+  };
+
+  const cancelDeleteCourse = () => {
+    setModal({openModal: false, status:''})
+
+  };
+
+  const AppleSpinner = ({text}) => (
+    /* Apply text-white to the container to color both the text and the SVG */
+    <div className="flex items-center justify-center gap-2 text-white">
+      <svg
+        className="animate-spin h-6 w-6"
+        viewBox="0 0 24 24"
+        /* Ensure the rects inherit the currentColor from the parent div */
+        fill="currentColor"
+      >
+        <style>{`
+        .spinner_blade { transform-origin: 12px 12px; animation: spinner_fade 1s linear infinite; }
+        @keyframes spinner_fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+      `}</style>
+        {[...Array(12)].map((_, i) => (
+          <rect
+            key={i}
+            className="spinner_blade"
+            x="11"
+            y="2"
+            width="2"
+            height="6"
+            rx="1"
+            style={{
+              transform: `rotate(${i * 30}deg)`,
+              animationDelay: `${(i - 12) * 0.083}s`,
+            }}
+          />
+        ))}
+      </svg>
+      {/* The text now inherits the white color from the container */}
+      <span>{text}...</span>
+    </div>
+  );
+
+  const [submitModal, setSubmitModal] = useState({
+    openModal: false,
+    id: null,
+    title: "Submit for Review", // Default title
+    status: "", // 'confirm', 'loading', 'success', 'error', 'final-submit'
+  });
+
+  const [modal,setModal] = useState({
+    openModal: false,
+    status :""
+  });
+  
+
+  const closeModal = () => {
+    setSubmitModal({
+      openModal: false,
+      id: null,
+      title: "",
+      status: "",
+      loading: false,
+    });
+  };
+
+  // useEffect(() => {
+    // If an error exists and we are no longer loading, redirect
+  //   if (error && !isLoading) {
+  //     navigate(from, {
+  //       replace: true,
+  //       state: {
+  //         message: typeof error === "string" ? error : "Course error occurred",
+  //       },
+  //     });
+  //   }
+  // }, [error, isLoading, navigate, from]);
+
+  const handleCourseDelete = () => {
+    setModal({openModal: true, status:'confirm'})
+  };
+  
+  const handleConfirmCancel = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true }));
+    try {
+
+      if(user.role === "contributor"){
+      // await PrivateApi.post(`/cancel-account-submission`);
+      // // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
+      
+      // // FIXED: Refresh user context so user.status becomes 'active' again
+      // if (refreshUser) await refreshUser();
+      //  // console.log("Cancelling course submission with ID:", course._id);
+      const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`);
+      } else {
+        const res = await PrivateApi.post(`/cancel-course-submission/${course._id}`,{feedback: feedback.trim(), isOwner: isOwner});
+      }
+      setCourse(prev => ({ ...prev, status: "draft",feedback: feedback.trim() }));
+      setSubmitModal((prev) => ({ ...prev, status: "cancel-success" }));
+    } catch (error) {
+      setSubmitModal((prev) => ({ ...prev, status: "cancel-error" }));
+    } finally {    
+      setSubmitModal((prev) => ({ ...prev, loading: false }));
+    };
+  }
+
+    const handleCancelClick = () => {
+    setSubmitModal({
+      openModal: true,
+      status: "cancel",
+      loading: false
+    });
+  };
+
+
+  if (isLoading) {
+    return (
+      <div>
+        <CourseDetailsSkeleton />
+      </div>
+    );
+  }
+
+  const handleDeleteCourse = async (courseId) => {
+    setModal((prev) => ({ ...prev, status: "loading" }));
+    try {
+      // throw new Error("Testing delete error handling"); // <-- Temporary line to test error modal
+      // await PrivateApi.delete(`/delete-course/${courseId}`);
+      // setCourses((prevCourses) => prevCourses.filter((course) => course._id !== courseId));
+      const res = await PrivateApi.delete(`/delete-course/${courseId}`);
+      
+      setModal((prev) => ({ ...prev, status: "success" })); 
+    } catch (error) {
+      setModal((prev) => ({ ...prev, status: "error" }));
+      // console.error(`Error deleting course:`, error);
+    }
+  };
+const successfulDeleteAcknowledgement = () => {
+  setModal({openModal: false, status: ''});
+  navigate(-1, {
+    replace: true,
+    state: {
+      message: "Course deleted successfully",
+    },
+  });
+}
+  const handleFinalSubmit = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true }));
+    try {
+      
+      //  // console.log("Submitting course for review with ID:", course._id);
+      // Replace with your actual submission endpoint
+      // await PrivateApi.post(`/submit-all-courses`);
+
+      // Simulate network delay
+      // throw new Error("Simulated submission error"); // Uncomment to test error handling
+      const res = await PrivateApi.post(`/submit-course-for-review/${course._id}`);
+      
+       
+          setCourse(prev => ({ ...prev, status: "pending",feedback: "" }));
+       
+
+      setSubmitModal({
+        openModal: true,
+        status: "submit-success",
+        title: "All courses",
+        loading: false,
+      });
+    } catch (error) {
+      setSubmitModal((prev) => ({ ...prev, status: "submit-error", loading: false }));
+    }
+  };
+
+  const handleApproveClick = async () => {
+    setSubmitModal((prev) => ({ ...prev, loading: true }));
+
+    try {
+      // Simulate API call to approve the course
+       await PrivateApi.post(`/accept-course-submission/${course._id}`);
+      setCourse(prev => ({ ...prev, status: "approved" }));
+      setSubmitModal((prev) => ({ ...prev, loading: false, status: "approved-success" }));
+    } catch (error) {
+     setSubmitModal((prev) => ({ ...prev, loading: false, status: "approved-error" }));
+    } finally {
+      setSubmitModal((prev) => ({ ...prev, loading: false }));
+    }
+
+  };
+
+  const handleGiveFeedback = async () => {
+    setSubmitModal((prev) => ({ ...prev, status: "cancel" , openModal: true }));
+  }
+
+const handleDownload = (link) => {
+     // console.log("Download link:", link); // Debugging line to check the link value
+  if (!link) return;
+  // '_blank' opens in a new tab
+  window.open(link, '_blank', 'noopener,noreferrer');
+};
+
+const handleCancelSubmission = async () => {  
+   setSubmitModal({
+              openModal: false,
+              status: "",
+              loading: false,
+            });
+    if (user.role === "moderator" && !isOwner) {
+    navigate(-1); 
+  }  
+          
+}
+
+const handleApproveSubmission = async () => {
+            setSubmitModal({ openModal: false, status: "", loading: false })
+             if(user.role === "moderator") {
+              // Refresh the page or fetch updated data to reflect the approved course
+              navigate(-1); // This will reload the current page
+           }
+}
+
+if(error && !isLoading) {
+
+  return <CourseNotFound />
+}
+
+
+
+
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
-        {/* <nav
-             aria-label="Breadcrumb"
-             className="flex text-sm text-slate-500 dark:text-slate-400 mb-6"
-           >
-             <ol className="flex items-center space-x-2">
-               <li>
-                 <a className="hover:text-primary transition-colors" href="#">
-                   Courses
-                 </a>
-               </li>
-               <li>
-                 <span className="material-symbols-outlined text-xs text-slate-400">
-                   /
-                 </span>
-               </li>
-               <li className="font-medium text-slate-900 dark:text-white">
-                 CS101
-               </li>
-             </ol>
-           </nav> */}
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-5 md:pb-5 pt-3">
         <header className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-            <div className="flex-1">
-              {/* <div className="flex items-center gap-3 mb-3">
-                   <span className="bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 text-xs font-bold px-2.5 py-0.5 rounded uppercase tracking-wider">
-                     Spring 2024
-                   </span>
-                   <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 text-xs font-bold px-2.5 py-0.5 rounded uppercase tracking-wider">
-                     Open
-                   </span>
-                 </div> */}
-              <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
-                Introduction to Computer Science
-              </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-5">
-                Department of Engineering • School of Computing
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  3 Credits
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  Undergraduate
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  In-Person
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    <GrShareOption />
-                  </span>
-                  Mon/Wed 10:00 AM
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              {/* <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
-                   <span className="material-symbols-outlined text-lg">
-                     bookmark
-                   </span>
-                   Save
-                 </button>
-                 <button className="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-all shadow-sm">
-                   <span className="material-symbols-outlined text-lg">share</span>
-                   Share
-                 </button> */}
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
-                <span className="material-symbols-outlined ">
-                  <FiEdit2 size={20} />
-                </span>
-                Edit
-              </button>
-            </div>
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+  {/* basic Info - Added min-w-0 to allow internal content to shrink/wrap */}
+  <div className="flex-1 min-w-0"> 
+    <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold break-words leading-tight">
+      {/* Added break-words to handle long titles */}
+      {course.title
+        ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1)
+        : ""}
+    </h1>
+    
+    <p className="text-lg text-slate-600 dark:text-slate-400 mb-2 ">
+      {/* Added truncate for department names */}
+      {DepartmentMap[course.department]
+        ? "Department of " + DepartmentMap[course.department]
+        : "Unknown Department"}
+    </p>
+
+    <p className="text-transparent bg-clip-text bg-primary-dark dark:bg-primary font-bold 
+      selection:text-gray-600 dark:selection:text-gray-300 mb-6 uppercase break-all">
+      {/* Added break-all specifically for course codes (often no spaces) */}
+      {course.courseCode}
+    </p>
+
+    <div className="flex flex-wrap gap-3">
+      {/* Map through items or list them with max-w-full to prevent badge overflow */}
+      {[course.degree, course.type, course.format].map((val, i) => (
+        val && (
+          <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize max-w-full">
+            <span className="truncate">{val}</span>
           </div>
+        )
+      ))}
+
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        {course.credits} Credits
+      </div>
+
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        <SemesterDisplay code={course.semester} />
+      </div>
+    </div>
+  </div>
+
+  {/* Actions - shrink-0 ensures buttons don't get squished by the title */}
+  <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+    { (course.status === "draft" || user.role === "admin") && (
+      <button
+        className="flex w-full lg:w-auto cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+        onClick={handleUpdateInfo}
+      >
+        <FiEdit2 size={20} />
+        Edit
+      </button>
+    )}
+    <UpdateCourseInfo />
+  </div>
+</div>
         </header>
-        {/* <div className="border-b border-border-light dark:border-border-dark mb-8">
-             <nav className="flex space-x-8 -mb-px overflow-x-auto">
-               <a
-                 className="border-b-2 border-primary text-primary font-semibold py-4 px-1 text-sm whitespace-nowrap"
-                 href="#"
-               >
-                 Overview
-               </a>
-               <a
-                 className="border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 font-medium py-4 px-1 text-sm whitespace-nowrap transition-colors"
-                 href="#"
-               >
-                 Syllabus
-               </a>
-               <a
-                 className="border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 font-medium py-4 px-1 text-sm whitespace-nowrap transition-colors"
-                 href="#"
-               >
-                 Materials
-               </a>
-               <a
-                 className="border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 font-medium py-4 px-1 text-sm whitespace-nowrap transition-colors flex items-center gap-1"
-                 href="#"
-               >
-                 Reviews
-                 <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded text-xs font-bold">
-                   4.8
-                 </span>
-               </a>
-             </nav>
-           </div> */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-3 flex flex-col gap-8">
             <section>
-              <div className="flex  items-center justify-between pr-10 mb-4">
+              <div className="flex items-center justify-between pr-10 mb-2">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white ">
                   Instructor Info
                 </h2>
-                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                  <FiEdit2 size={22} />
-                </div>
+                {
+                  (course.status === "draft" || user.role === "admin") && (
+                    <div
+                      className="flex flex-col sm:items-center material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                      onClick={handleUpdateInstructorInfo}
+                    >
+                      <FiEdit2 size={22} />
+                </div>)
+                }
+             
+                <UpdateInstructorInfo
+                  instructorModal={instructorModal}
+                  setInstructorModal={setInstructorModal}
+                />
               </div>
+           
+
               <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  <img
-                    alt="Dr. Sarah Jenkins"
-                    className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD916ur3Kw62VYw88YBsrNnkZ6ke42kDz0jYaHhQAqaXLhIwRuvwEuUrxicp0CetW2aGZFuonbY0jz1MWz_-C1ryyMAKpPuvGjiHTRYi8MB-RGQB4wRr3z3cTnpcGWLbst8PDjjg6VtLQ1XKoI_74KHsEISGlxppCAYWrT_5_-aXRldEBw0EGSlF5c3Ds3T6hRfCrZR1HxJwKbLxFSInIrkWZDsP2zdM_Otno_7_MgQBUtu73AyDbRWGpBCc0tr8oB5rGEK2EzfdLgP"
-                  />
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Dr. Sarah Jenkins
-                    </h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">
-                      School of Computing
-                    </p>
-                  </div>
+                {/* <div className="flex items-center gap-4">
+
+                              <img
+
+                               alt={course.instructorName}
+
+                               className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700"
+
+                               src={course.instructorImage.imageURL}
+
+                             /> */}
+
+                <div className="flex flex-col sm:items-center">
+                  <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white capitalize">
+                    {course.instructorName}
+                  </h3>
+
+                  <p className="text-slate-500 text-center dark:text-slate-400 text-sm">
+                    {DepartmentMap[course.instructorDepartment]
+                      ? "Department of " +
+                        DepartmentMap[course.instructorDepartment]
+                      : "Unknown Department"}
+                  </p>
                 </div>
+
+                {/* </div>  */}
+
                 <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm">
                   <div className="flex flex-col text-center sm:text-right">
                     <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
                       Course Start
                     </span>
+
                     <span className="font-medium text-slate-800 dark:text-slate-200">
-                      15th January 2024
+                      {new Date(course.startingDate)
+                        .toLocaleDateString("en-GB")
+                        .replace(/\//g, "-")}
+                      {/* 1//09/2024 */}
                     </span>
                   </div>
-                  {/* <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                     <div className="flex flex-col sm:text-right">
-                       <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">
-                         Format
-                       </span>
-                       <span className="font-medium text-slate-800 dark:text-slate-200">
-                         Theory + Lab
-                       </span>
-                     </div> */}
-                  {/* <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                     <span className="inline-flex items-center justify-center px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-mono text-xs font-semibold">
-                       ● CS101-S24
-                     </span> */}
                 </div>
               </div>
             </section>
+
             <section>
               <div className="flex  items-center justify-between pr-10 mb-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   Course Description
                 </h2>
                 {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
-
-                <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+                        {
+                  (course.status === "draft" || user.role === "admin") && (
+                        
+                <div
+                  className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={handleUpdateDescription}
+                >
                   <FiEdit2 size={22} />
-                </div>
+                </div>)}
+                <UpdateDescription
+                  descriptionModal={descriptionModal}
+                  setDescriptionModal={setDescriptionModal}
+                />
               </div>
               <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p className="mb-4">
-                  Algebra of matrices: Various types of matrices: operations of
-                  matrices: determinant of matrices: transpose and complex
-                  conjugate of matrices: special types of matrices: block
-                  matrices: adjoint und inverse of matrices: elementary row
-                  operations und echelon forms of matrices: rank of a matrix:
-                  System of lincar equations: Basic definitions, Linear
-                  equations. degenerated linear equations, leading unknowns of a
-                  non-degenerated linear equation, systems of linear equations
-                  and their solutions, equivalent systems. and related theorems:
-                  use of inverse matrix. rank. und echelon forms in solving
-                  systems of homogeneous and non-homogencous linear equations;
-                  LU decomposition and their application to solving the system
-                  of linear equations: Vector space: Basie definitions and
-                  examples: lincar combinations: spanning sets: subspaces:
-                  linear span: row and column spaces of matrices: linear
-                  dependence and independence of vectors: direct sum: basis and
-                  dimension of vector space: quotient space: solution space of a
-                  system of homogeneous linear equations: Linear
-                  transformations: kernel. image, rank. and nullity: matris
-                  representation: change of basis: similarity: bigenvalues and
-                  cigenvectors: Polynomials of matrices; characteristics of
-                  polynomials; characteristic equations: Cayloy-Hamilton
-                  theorem: cigenvalues and cigenvectors: diagonalization of
-                  matrices: Inner product space: Cauchy-Schwarz inequality:
-                  orthogonal vectors and orthonormal basis: Gram-Schmidt
-                  orthogonalization process and its application to QR
-                  decomposition: bilinear and quadratic forms.
-                </p>
+                <p className="mb-4 capitalize ">{course.description}</p>
               </div>
             </section>
-            <div className="flex  items-center justify-end pr-10">
-              {/* <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                   Course Description
-                 </h2> */}
-              {/* <FiEdit2 className="text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer pb-0.5" size={22}/> */}
 
-              <div className="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                <FiEdit2 size={22} />
-              </div>
-            </div>
-            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-800 flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-primary dark:text-teal-300 text-2xl">
-                    <LuNotebook />
-                  </span>
+            {/* Course Handbook Section */}
+            <section>
+              <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-xl p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-800 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-primary dark:text-teal-300 text-2xl">
+                      <LuNotebook />
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-1">
+                      Full Course Handbook
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl">
+                      Download the complete guide including detailed policies,
+                      grading rubric
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white mb-1">
-                    Full Course Handbook
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl">
-                    Download the complete guide including detailed policies,
-                    grading rubric
-                  </p>
-                </div>
-              </div>
-              <button className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5">
-                <span className="material-symbols-outlined ">
-                  <FiEdit2 size={20} />
+                <div className="flex flex-col w-full lg:w-auto lg:flex-row gap-3 sm:justify-center justify-end sm:items-center item" >
+    
+                    {
+                  (course.status === "draft" || user.role === "admin") && (
+                   
+                <button
+                  className="flex w-full lg:w-auto  cursor-pointer items-center justify-center gap-2 px-6 py-2 bg-primary text-white text-lg rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+                  onClick={handleUpdateHandbook}
+                >
+                  {course.handbook ? (
+                    <>
+                      <span className="material-symbols-outlined ">
+                        <FiEdit2 size={20} />
+                      </span>
+                      Edit
+                    </>
+
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined ">
+                        <AiOutlinePlus size={20} />
+                      </span>
+                      Add Handbook
+                    </>
+                  )}
+                </button>
+                )}
+                {
+                  course.handbook && (
+                     <button className="flex w-full lg:w-auto justify-center cursor-pointer text-lg items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+                  onClick={() => handleDownload(course.handbook)}
+                  >
+                <span className="material-symbols-outlined text-lg">
+                  <MdOutlineFileDownload size={26} />
                 </span>
-                Edit
-              </button>
-            </div>
+                Download <span className="hidden sm:block">PDF</span>
+              </button>)
+                }
+
+                <UpdateHandbook
+                  handbookModal={handbookModal}
+                  setHandbookModal={setHandbookModal}
+                />
+
+              </div>
+                </div>
+            </section>
+            {/*  Course Materials Section */}
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   Course Materials
                 </h2>
-                {/* <a
-                     className="text-sm font-semibold text-primary hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
-                     href="#"
-                   >
-                     View All Files
-                   </a> */}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                        <FaRegFilePdf size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
+
+              {/* FIXED LOGIC: 1 col for single item or empty, 2 cols for multiple items on md screens */}
+              <div className={`grid gap-4 grid-cols-1 md:grid-cols-2`}>
+                {course.materials && course.materials.length > 0 ? (
+                  <>
+                    {course.materials.map((material) => (
+                      <div
+                        key={material.id}
+                        className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer min-w-0"
+                      >
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                          <div className="w-10 h-10 shrink-0 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
+                            <FaRegFilePdf size={24} />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors capitalize break-all line-clamp-3 sm:line-clamp-2 pr-2">
+                              {material.name || "Untitled Material"}
+                            </h4>
+                          </div>
+                        </div>
+                           <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(material.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
+                        
+                        {
+                          (course.status === "draft" || user.role === "admin") && (<button
+                          className="text-slate-400 hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              _id: material._id,
+                              from: "materials",
+                              name: material.name,
+                            });
+                          }}
+                           >
+                          <MdDeleteOutline size={26} />
+                        </button>)
+                        }
+
+                     
+                      </div>
+                    ))}
+                    {(course.status === "draft" || user.role === "admin") && (
+                      <div
+                        onClick={handleUpdateMaterial}
+                        className="cursor-pointer"
+                      >
+                        <AddElement />
+                      </div>
+                    )}
+                  </>
+                ) : (course.status === "draft" || user.role === "admin")  ? (
+                  /* FIXED: Wrapped in col-span-full to ensure it spans the whole grid width */
+                  <div className="col-span-full">
+                    <AddFirstElement
+                      title={"material"}
+                      onAdd={handleUpdateMaterial}
+                    />
                   </div>
-                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdDeleteOutline size={26} />
-                  </button>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                        <FaRegFilePdf size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
+                ) : (
+                  <div className="col-span-full">
+                  <NoElement title={"materials"} />
                   </div>
-                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdDeleteOutline size={26} />
-                  </button>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                      <span className="material-symbols-outlined">
-                        <FaRegFilePdf size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                        Lecture Notes: Weeks 1-4
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        PDF • 2.4 MB • Updated yesterday
-                      </p>
-                    </div>
-                  </div>
-                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdDeleteOutline size={26} />
-                  </button>
-                </div>
-                <AddElement />
-                {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                         <span className="material-symbols-outlined">code</span>
-                       </div>
-                       <div>
-                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                           Lab Starter Code
-                         </h4>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                           ZIP • 156 KB • Week 2 Resources
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                       download
-                     </span>
-                   </div>
-                   <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                         <span className="material-symbols-outlined">
-                           slideshow
-                         </span>
-                       </div>
-                       <div>
-                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                           Python Setup Guide
-                         </h4>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                           PPTX • 5.1 MB • Supplementary
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                       download
-                     </span>
-                   </div>
-                   <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                         <span className="material-symbols-outlined">
-                           table_view
-                         </span>
-                       </div>
-                       <div>
-                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                           Dataset: Iris.csv
-                         </h4>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                           CSV • 12 KB • For Lab 3
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                       download
-                     </span>
-                   </div> */}
+                )}
               </div>
+
+              <AddMaterial
+                materialModal={materialModal}
+                setMaterialModal={setMaterialModal}
+              />
+              <DeleteElement />
             </section>
+
+            {/* Suggested Books Section */}
             <section>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                 Suggested Books
               </h2>
+
               <div className="space-y-4">
-                <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
-                      <span className="material-symbols-outlined text-primary text-2xl ">
-                        <MdOutlineMenuBook size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-base">
-                        Think Python: How to Think Like a Computer Scientist
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                        Allen B. Downey • 2nd Edition • O'Reilly Media
-                      </p>
-                      {/* <p className="text-xs font-mono text-slate-400 mt-2">
-                           ISBN: 978-1491939369
-                         </p> */}
-                    </div>
-                  </div>
-                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdDeleteOutline size={26} />
-                  </button>
-                </div>
-                <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
-                      <span className="material-symbols-outlined text-primary text-2xl ">
-                        <MdOutlineMenuBook size={24} />
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-base">
-                        Think Python: How to Think Like a Computer Scientist
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                        Allen B. Downey • 2nd Edition • O'Reilly Media
-                      </p>
-                      {/* <p className="text-xs font-mono text-slate-400 mt-2">
-                           ISBN: 978-1491939369
-                         </p> */}
-                    </div>
-                  </div>
-                  <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <MdDeleteOutline size={26} />
-                  </button>
-                </div>
-                <AddElement />
-                {/* <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all">
-                     <div className="flex items-start gap-4">
-                       <div className="w-12 h-16 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
-                         <span className="material-symbols-outlined text-primary text-2xl">
-                           menu_book
-                         </span>
-                       </div>
-                       <div>
-                         <h4 className="font-bold text-slate-900 dark:text-white text-base">
-                           Clean Code: A Handbook of Agile Software Craftsmanship
-                         </h4>
-                         <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                           Robert C. Martin • 1st Edition • Prentice Hall
-                         </p>
-                         <p className="text-xs font-mono text-slate-400 mt-2">
-                           ISBN: 978-0132350884
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-                       download
-                     </span>
-                   </div> */}
+                {course.books && course.books.length > 0 ? (
+                  <>
+                    {/* Render Book List */}
+
+                    {course.books.map((book) => (
+                      <div
+                        key={book.id}
+                        className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-sm transition-all min-w-0"
+                      >
+                        <div className="flex items-start gap-4 min-w-0 flex-1">
+                          <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-800">
+                            <MdOutlineMenuBook
+                              size={24}
+                              className="text-primary"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-slate-900 dark:text-white text-base break-all line-clamp-2 capitalize pr-2">
+                              {book.title || "Untitled Book"}
+                            </h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 truncate capitalize pr-2">
+                              {book.authorName || "Unknown Author"}
+                            </p>
+                          </div>
+                        </div>
+                         <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(book.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
+                        {
+                          (course.status === "draft" || user.role === "admin")  && (   <button
+                          className="text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              _id: book._id,
+                              from: "books",
+                              name: book.title,
+                            });
+                          }}
+                        >
+                          <MdDeleteOutline size={26} />
+                        </button>)
+                        }
+                      
+                      </div>
+                      
+                    ))}
+                    
+                    {
+                      (course.status === "draft" || user.role === "admin") && (
+                        <div onClick={handleUpdateBook} className="cursor-pointer">
+                          <AddElement />
+                        </div>
+                      )
+                    }
+                  </>
+                ) :  (
+                  /* Empty State - Takes full width automatically in space-y-4 */
+                  <AddFirstElement title={"book"} onAdd={handleUpdateBook} />
+                )}
               </div>
+
+              {/* Modals outside the list flow */}
+              <AddBook bookModal={bookModal} setBookModal={setBookModal} />
+
             </section>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <section className="lg:col-span-2">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                    Active Tasks &amp; Assignments
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                        <span className="material-symbols-outlined">
-                          <IoDocumentsOutline size={24} />
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                          Lecture Notes: Weeks 1-4
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          PDF • 2.4 MB • Updated yesterday
-                        </p>
-                      </div>
+            {/* Tasks & Assignments Section */}
+            <section className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  Active Tasks &amp; Assignments
+                </h2>
+              </div>
+
+              {/* Grid Logic: 1 column if 1 item or empty, 2 columns for 2+ items on medium screens */}
+              <div className={`grid gap-4 grid-cols-1 md:grid-cols-2`}>
+                {
+                  course.tasks && course.tasks.length > 0 ? (
+                    <>
+                      {/* Render Task List */}
+                      {course.tasks.map((task) => (
+                        <div
+                          key={task.id}
+                          className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer min-w-0"
+                        >
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
+                            <div className="w-10 h-10 shrink-0 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
+                              <IoDocumentsOutline size={24} />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors  break-all line-clamp-3 sm:line-clamp-2 capitalize pr-2">
+                                {task.name || "Untitled Task"}
+                              </h4>
+                            </div>
+                          </div>
+                           <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(task.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
+                          {
+                            (course.status === "draft" || user.role === "admin")  && ( <button
+                            className="text-slate-400 cursor-pointer hover:bg-red-50 hover:text-red-500 p-2 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
+                             onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              _id: task._id,
+                              from: "tasks",
+                              name: task.name,
+                            });
+                          }}
+                        >
+                            <MdDeleteOutline size={26} />
+                          </button>)
+                          }
+                         
+                        </div>
+                      ))}
+                      {
+                        (course.status === "draft" || user.role === "admin") && (
+                          <div onClick={handleUpdateTask} className="cursor-pointer">
+                            <AddElement />
+                          </div>
+                        )
+                      }
+                     
+                    </>
+                  
+                  ) : (
+                      (course.status === "draft" || user.role === "admin")  ? (
+                      <div className="col-span-full">
+                      <AddFirstElement
+                        title={"task"}
+                        onAdd={handleUpdateTask}
+                      />
                     </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
-                  </div>
-                  <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                        <span className="material-symbols-outlined">
-                          <IoDocumentsOutline size={24} />
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                          Lecture Notes: Weeks 1-4
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          PDF • 2.4 MB • Updated yesterday
-                        </p>
-                      </div>
+                  ) :(
+                    <div className="col-span-full">
+                    <NoElement title={"tasks and assignments"} />
                     </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
-                  </div>
-                  <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary-dark/10 flex items-center justify-center text-primary dark:text-primary-dark">
-                        <span className="material-symbols-outlined">
-                          <IoDocumentsOutline size={24} />
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                          Lecture Notes: Weeks 1-4
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          PDF • 2.4 MB • Updated yesterday
-                        </p>
-                      </div>
-                    </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
-                  </div>
-                  {/* <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                         <span className="material-symbols-outlined">code</span>
-                       </div>
-                       <div>
-                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                           Lab Starter Code
-                         </h4>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                           ZIP • 156 KB • Week 2 Resources
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                       download
-                     </span>
-                   </div>
-                   <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                         <span className="material-symbols-outlined">
-                           slideshow
-                         </span>
-                       </div>
-                       <div>
-                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                           Python Setup Guide
-                         </h4>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                           PPTX • 5.1 MB • Supplementary
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                       download
-                     </span>
-                   </div>
-                   <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between hover:shadow-md transition-shadow group cursor-pointer">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                         <span className="material-symbols-outlined">
-                           table_view
-                         </span>
-                       </div>
-                       <div>
-                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">
-                           Dataset: Iris.csv
-                         </h4>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                           CSV • 12 KB • For Lab 3
-                         </p>
-                       </div>
-                     </div>
-                     <span className="material-symbols-outlined text-slate-400 hover:text-primary">
-                       download
-                     </span>
-                   </div> */}
-                  <AddElement />
-                </div>
-              </section>
-            </div>
+                  )
+
+                  /* EMPTY STATE: Wrapped in col-span-full to ensure it takes the full width */
+               ) }
+              </div>
+
+              {/* Modal Logic */}
+
+              <AddTask taskModal={taskModal} setTaskModal={setTaskModal} />
+            </section>
             {/* <NoElement/> */}
 
+            {/* assessmnets  section */}
             <section>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
                 Assessment Resources
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
-                    <span className="material-symbols-outlined text-primary text-base">
-                      <MdOutlineAssignment size={20} />
-                    </span>
-                    Term Test Questions
-                  </h3>
-                  <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                        <IoDocumentTextOutline size={24} />
-                      </span>
+
+              {course.assessments && course.assessments.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    {nonFinalAssessments && nonFinalAssessments.length > 0 ? (
                       <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                          Spring 2023 - Midterm Exam
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Practice questions with answer key
-                        </p>
+                        <div className="space-y-3">
+                          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                            <span className="material-symbols-outlined text-primary text-base">
+                              <MdOutlineAssignment size={20} />
+                            </span>
+                            Term Test Questions
+                          </h3>
+                          {course.assessments
+                            .filter((assessment) => assessment.type !== "final")
+                            // Sort by date: Newest (latest) date first (Descending)
+                            .sort(
+                              (a, b) =>
+                                new Date(a.date).getTime() -
+                                new Date(b.date).getTime(),
+                            )
+                            .map((assessment) => (
+                              <div
+                                key={assessment.id}
+                                className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
+                                    <IoDocumentTextOutline size={24} />
+                                  </span>
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
+                                      {assessment.type || "Untitled Assessment"}
+                                    </p>
+                                    <div className="flex items-center gap-3 sm:gap-5">
+                                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                                         Data : <span className="font-bold"> {new Date(assessment.date)
+                                          .toLocaleDateString("en-GB")
+                                          .replace(/\//g, "-")}</span>
+                                      </p>
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                                        mark : <span className="font-bold">{assessment.mark}</span> 
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex justify-center items-center">
+                                 <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(assessment.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
+                                {
+                                  (course.status === "draft" || user.role === "admin")  && (<button className="material-symbols-outlined  text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                   onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              _id: assessment._id,
+                              from: "assessments",
+                              name: assessment.type,
+                            });
+                          }}
+                        >
+                                  <MdDeleteOutline size={26} />
+                                </button> )
+                                }
+                                
+                              </div>
+                              </div>
+                            ))}
+                            {
+                              (course.status === "draft" || user.role === "admin") && (
+                                <div
+                            onClick={handleUpdateAssessment}
+                            className="cursor-pointer"
+                          >
+                            <AddElement />
+                          </div>
+                           ) }
+                          
+                        </div>
                       </div>
-                    </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
+                    ) : (
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                          <span className="material-symbols-outlined text-primary text-base">
+                            <MdOutlineAssignment size={20} />
+                          </span>
+                          Term Test Questions
+                        </h3>
+                        <div className="col-span-full">
+                          <AddFirstElement
+                            title={"assessment"}
+                            onAdd={handleUpdateAssessment}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                        <IoDocumentTextOutline size={24} />
-                      </span>
+
+                  <div>
+                    {finalAssessment && finalAssessment.length > 0 ? (
                       <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                          Fall 2022 - Midterm Exam
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Questions only
-                        </p>
+                        <div className="space-y-3">
+                          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                            <span className="material-symbols-outlined text-primary text-base">
+                              <MdOutlineAssignment size={20} />
+                            </span>
+                            Final Exam Questions
+                          </h3>
+                          {course.assessments
+                            .filter((assessment) => assessment.type === "final")
+                            // Sort by date: Earliest date first
+                            .sort(
+                              (a, b) =>
+                                new Date(a.date).getTime() -
+                                new Date(b.date).getTime(),
+                            )
+                            .map((assessment) => (
+                              <div
+                                key={assessment.id}
+                                className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
+                                    <IoDocumentTextOutline size={24} />
+                                  </span>
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
+                                      {assessment.type || "Untitled Assessment"}
+                                    </p>
+                                    <div className="flex items-center gap-3 sm:gap-5">
+                                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Date : <span className="font-bold">{new Date(assessment.date)
+                                          .toLocaleDateString("en-GB")
+                                          .replace(/\//g, "-")}</span>
+                                      </p>
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                                        mark : <span className="font-bold">{assessment.mark}</span>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex justify-center items-center">
+
+                                
+                                 <span className="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  onClick={() => handleDownload(assessment.fileUrl)}
+                  >
+                    <MdOutlineFileDownload size={26} />
+                  </span>
+                                {
+                                  (course.status === "draft" || user.role === "admin")  && (<button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                        onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteModal({
+                              openModal: true,
+                              status: "delete",   
+                            });
+                            setDeleteItem({
+                              _id: assessment._id,
+                              from: "assessments",
+                              name: assessment.type,
+                            });
+                          }}
+                        >
+                                  <MdDeleteOutline size={26} />
+                                </button>)
+                                }
+                                </div>
+                                
+                              </div>
+                            ))}
+                        {
+                          (course.status === "draft" || user.role === "admin") && (
+                            <div
+                            onClick={handleUpdateAssessment}
+                            className="cursor-pointer"
+                            >
+                          <AddElement />
+                        </div> )}
+                       
+                          </div>
                       </div>
-                    </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
-                  </div>
-                  <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                        <IoDocumentTextOutline size={24} />
-                      </span>
+                    ) : (
                       <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                          Sample Quiz Questions
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Logic &amp; Control Flow • Interactive PDF
-                        </p>
+                        <div className="space-y-3">
+                          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                            <span className="material-symbols-outlined text-primary text-base">
+                              <MdOutlineAssignment size={20} />
+                            </span>
+                            Final Exam Questions
+                          </h3>
+                          <div className="col-span-full">
+                            <AddFirstElement
+                              title={"final assessment"}
+                              onAdd={handleUpdateAssessment}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
+                    )}
                   </div>
-                  <AddElement />
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
-                    <span className="material-symbols-outlined text-primary text-base">
-                      <MdOutlineAssignment size={20} />
-                    </span>
-                    Final Exam Questions
-                  </h3>
-                  <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                        <IoDocumentTextOutline size={24} />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                          Spring 2023 - Final Exam
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Comprehensive review set
-                        </p>
-                      </div>
-                    </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
-                  </div>
-                  <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark p-3 rounded-lg flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 p-1.5 rounded text-lg">
-                        <IoDocumentTextOutline size={24} />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                          Fall 2022 - Final Exam
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Past paper
-                        </p>
-                      </div>
-                    </div>
-                    <button className="material-symbols-outlined text-slate-400 hover:bg-red-50 hover:text-red-500 cursor-pointer p-2 dark:hover:bg-slate-800 rounded-full transition-colors">
-                      <MdDeleteOutline size={26} />
-                    </button>
-                  </div>
-                  <AddElement />
+              ) : (
+                <div className="col-span-full">
+                  <AddFirstElement
+                    title={"assessment"}
+                    onAdd={handleUpdateAssessment}
+                  />
                 </div>
-              </div>
+              )}
+              <AddAssessment
+                assessmentModal={assessmentModal}
+                setAssessmentModal={setAssessmentModal}
+              />
             </section>
           </div>
         </div>
+
+        {/* --- RESTORED FEEDBACK & SUBMIT SECTION --- */}
+        <div className="my-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          {course.feedback ? (
+            <div className="p-4 bg-amber-50 border-l-4 w-full border-amber-500 rounded-r-lg shadow-sm">
+              <div className="flex items-center mb-2">
+                <svg
+                  className="w-5 h-5 text-amber-600 mr-2 shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" />
+                </svg>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-amber-800">
+                  Moderator's Feedback
+                </h3>
+              </div>
+              <p className="text-amber-900 text-sm leading-relaxed">
+                {course.feedback}
+              </p>
+            </div>
+          ) : (
+            <div className=""></div>
+          )}
+        </div>
+
+       
+          <div className="flex flex-col gap-4 w-full sm:flex-row lg:flex-col">
+            {/* 1. Finalize & Submit Button */}
+             {course.status === "draft" &&  (
+            <button
+              type="button"
+              onClick={handleFinalizeClick}
+              className="group relative flex flex-1 items-center justify-center gap-3 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition-all duration-200 hover:bg-emerald-700 hover:shadow-emerald-900/40 active:scale-[0.98] cursor-pointer"
+            >
+              <IoCloudDoneOutline
+                size={22}
+                className="transition-transform duration-300 group-hover:scale-110"
+              />
+              <span className="tracking-wide"> Submit For Review</span>
+            </button>
+               )}
+
+               {course.status === "pending"  && (
+          <button
+            type="button"
+            onClick={() => {
+              
+              if(user.role === "contributor" || isOwner) {
+              setSubmitModal((prev)=> ({
+                ...prev,
+                openModal: true,
+                status: "cancel",
+              }));
+            } else {
+                  setSubmitModal((prev)=> ({
+                ...prev,
+                openModal: true,
+                status: "feedback",
+              }))
+            }
+            }}
+            className="group flex w-full items-center justify-center gap-3 rounded-xl 
+               bg-amber-500 hover:bg-amber-600 
+               text-white font-bold 
+               border border-amber-400/30
+               shadow-lg shadow-amber-900/20 
+               transition-all duration-200 
+               transform active:scale-[0.97] cursor-pointer py-3"
+          >
+            <IoMdClose
+              size={22}
+              className="transition-transform group-hover:rotate-90"
+            />
+            <span className="tracking-tight">{`${isOwner ? "Cancel" : "Reject"}`} Submission</span>
+          </button>
+        )}
+
+        {course.status === "pending" && user.role !== "contributor" && (
+  <button
+    type="button"
+    onClick={() => {
+      setSubmitModal((prev) => ({
+        ...prev,
+        openModal: true,
+        status: "approved", // Changed from "cancel" to "approved"
+      }));
+    }}
+    className="group flex w-full items-center justify-center gap-3 rounded-xl 
+       bg-primary-dark hover:bg-primary-hover
+       text-white font-bold 
+       border border-emerald-400/30
+       shadow-lg shadow-emerald-900/20 
+       transition-all duration-200 
+       transform active:scale-[0.97] cursor-pointer py-3"
+  >
+    <IoMdCheckmark
+      size={22}
+      className="transition-transform group-hover:scale-110"
+    />
+    <span className="tracking-tight">Accept Submission</span>
+  </button>
+)}
+           
+
+            {/* 2. Delete Course Button */}
+            {
+              course.status !== "approved" && user.role === "contributor" && (
+            
+            <button
+              type="button"
+              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
+              onClick={handleCourseDelete}
+              >
+              <MdDeleteOutline
+                size={22}
+                className="text-rose-100/90 transition-transform duration-300 group-hover:rotate-12"
+              />
+              <span className="tracking-wide">Delete Course</span>
+            </button>
+              )}
+            {
+              (user.role === "admin" ||(user.role === "moderator" &&  isOwner)) && (
+            
+            <button
+              type="button"
+              className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-rose-500/30 bg-rose-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20 transition-all duration-200 hover:bg-rose-700 hover:shadow-rose-900/40 active:scale-[0.98] cursor-pointer"
+              onClick={handleCourseDelete}
+              >
+              <MdDeleteOutline
+                size={22}
+                className="text-rose-100/90 transition-transform duration-300 group-hover:rotate-12"
+              />
+              <span className="tracking-wide">Delete Course</span>
+            </button>
+              )}
+
+
+          </div>
+     
+
+        
+
+{/* 1. DELETE CONFIRMATION / LOADING MODAL */}
+{modal.openModal && (modal.status === "confirm" || modal.status === "loading") && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" 
+      onClick={modal.status !== 'loading' ? cancelDeleteCourse : null}
+    ></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 text-red-500">
+          <MdDelete size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Delete Course?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            Are you sure you want to delete {" "}<span className="font-bold text-text-main dark:text-white">{course.title}</span>?
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button 
+            disabled={modal.status === "loading"} 
+            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer" 
+            onClick={cancelDeleteCourse}
+          >
+            Cancel
+          </button>
+          <button 
+            disabled={modal.status === "loading"} 
+            className="flex-1 py-4 rounded-xl bg-red-500 text-white text-lg font-semibold hover:bg-red-600 disabled:bg-red-400 shadow-sm flex justify-center items-center transition-all active:scale-95 cursor-pointer" 
+            onClick={() => handleDeleteCourse(course._id)}
+          >
+            {modal.status === "loading" ? (
+              <AppleSpinner text={"Deleting"} />
+            ) : (
+              <span className="flex justify-center items-center gap-2">
+                <MdDeleteOutline size={26} /> Delete
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* 2. SUCCESS MODAL */}
+{modal.openModal && modal.status === "success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    {/* Backdrop */}
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    
+    {/* Modal Card */}
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-6 sm:gap-8">
+        
+        {/* Icon: Rose Theme for Delete Success */}
+        <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdOutlineDeleteSweep className="text-[40px] sm:text-[56px]" />
+        </div>
+
+        {/* Text Content */}
+        <div className="space-y-4 text-center">
+          <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+            Successfully Deleted!
+          </h3>
+          <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+            The course has been <span className="text-rose-600 font-bold uppercase">permanently removed</span> from the system. This action has been successfully logged.
+          </p>
+        </div>
+
+        {/* Action Button: Styled as the "Delete" primary action */}
+        <button 
+          className="w-full mt-4 py-3 sm:py-4 rounded-xl bg-rose-600 text-white text-lg sm:text-xl font-semibold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all active:scale-95 cursor-pointer font-display" 
+          onClick={successfulDeleteAcknowledgement}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* 3. DELETION ERROR MODAL */}
+{modal.openModal && modal.status === "error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Deletion Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            We encountered an issue while trying to delete {" "}<span className="font-bold text-text-main dark:text-white">{course.title}</span>. Please try again.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button 
+            className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
+            onClick={cancelDeleteCourse}
+          >
+            Cancel
+          </button>
+          <button 
+            className="flex-1 py-4 rounded-xl bg-orange-500 text-white text-lg font-semibold hover:bg-orange-600 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer" 
+            onClick={() => setModal((prev) => ({ ...prev, status: "confirm" }))}
+          >
+            <MdRefresh size={24} /> Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+        {/* --- WARNING MODAL --- */}
+        {submitModal.openModal && submitModal.status === "warning" && (
+          <div
+            aria-labelledby="modal-title"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+            role="dialog"
+          >
+            <div
+              className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
+              onClick={cancelDeleteCourse}
+            ></div>
+            <div className="relative w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-left shadow-2xl transition-all border border-border-light dark:border-border-dark">
+              <div className="flex flex-col items-center gap-8 text-center">
+                {/* Warning Icon */}
+                <div className="flex h-28 w-28 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-500">
+                  <span className="material-symbols-outlined text-[56px]">
+                    <BsExclamationCircleFill />
+                  </span>
+                </div>
+
+                <div className="space-y-4">
+                  <h3
+                    className="text-3xl sm:text-4xl font-bold text-text-main dark:text-white"
+                    id="modal-title"
+                  >
+                    Cannot Submit Yet
+                  </h3>
+                  <div className="text-xl text-text-secondary dark:text-gray-400 space-y-3">
+                    <p>
+                      To finalize {`${user.role === "contributor" ? "your":"the"}`} submit, you must meet the following:
+                    </p>
+                     <ul className="text-left bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-dashed border-amber-300 inline-block mx-auto space-y-.5 ">
+            
+               
+                <li className={`flex items-center gap-2 ${course.handbook ?"text-emerald-600":"text-red-600"}`}> 
+                { `Required the handbook to submit the course` }
+              </li>
+                <li className={`flex items-center gap-2 ${course.books.length > 0 ?"text-emerald-600":"text-red-600"}`}> 
+                { `Minimum 1 suggested book required to submit the course` }
+              </li>
+
+  
+                <li className={`flex items-center gap-2 ${finalAssessment.length > 0 ?"text-emerald-600":"text-red-600"}`}> 
+                { `Minimum 1 final assessmnet required to submit the course` }
+              </li>
+
+                <li className={`flex items-center gap-2 ${nonFinalAssessments.length > 0 ?"text-emerald-600":"text-red-600"}`}> 
+                { `Minimum 1 non-final assessmnet required to submit the course` }
+              </li>
+
+
+            </ul> 
+                  </div>
+                </div>
+
+                <div className="w-full mt-8">
+                  <button
+                    className="w-full rounded-xl bg-amber-500 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-amber-600 hover:cursor-pointer transition-colors cursor-pointer"
+                    onClick={closeModal}
+                  >
+                    Got it, I'll fix it
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- FINAL SUBMIT MODAL --- */}
+     {/* --- 1. SUBMIT CONFIRMATION MODAL --- */}
+{submitModal.openModal && submitModal.status === "submit" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onClick={!submitModal.loading ? closeModal : null}></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submit for Review?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            You are about to submit {`${user.role === "contributor" ? "your" : "the"}`} courses to the moderator. Once submitted, you won't be able to edit them until the review process is complete.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button disabled={submitModal.loading} className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50" onClick={closeModal}>
+            Not Now
+          </button>
+          <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleFinalSubmit}>
+            {submitModal.loading ? <AppleSpinner text={"Submitting"} /> : "Submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* --- 2. SUBMIT SUCCESS MODAL --- */}
+{submitModal.openModal && submitModal.status === "submit-success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Submission Successful!</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            {`${user.role === "contributor" ? "Your" : "The"}`} courses have been submitted for final review. You will be notified once the moderator completes the evaluation.
+          </p>
+        </div>
+        <button className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}>
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "submit-error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    {/* Backdrop */}
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    
+    {/* Modal Card */}
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all animate-in fade-in zoom-in duration-300">
+      <div className="flex flex-col items-center gap-8">
+        
+        {/* Error Icon Circle */}
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+
+        {/* Text Content */}
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">
+            Submission Failed
+          </h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
+            We couldn't process your request. Please check your connection or schedule for conflicts and try again.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row w-full gap-4 mt-8">
+          <button 
+            className="w-full py-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
+            onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+          >
+            Cancel
+          </button>
+          
+          <button 
+            className="w-full py-4 rounded-xl bg-orange-500 text-white text-xl font-semibold hover:bg-orange-600 shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+            onClick={() => setSubmitModal(prev => ({ ...prev, status: "submit", loading: false }))}
+          >
+            <MdRefresh size={28} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "feedback" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div 
+      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" 
+      onClick={!submitModal.loading ? closeModal : null}
+    ></div>
+
+    {/* Reduced padding from p-14 to p-10 to keep it from stretching too far */}
+    <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-card-dark p-8 sm:p-10 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-6">
+        
+        {/* Slightly smaller icon container to save vertical space */}
+        <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-sky-50 dark:bg-sky-900/20 text-sky-500">
+          <svg className="w-12 h-12 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+        </div>
+
+        <div className="space-y-2 w-full">
+          <h3 className="text-2xl sm:text-3xl font-bold text-text-main dark:text-white font-display">
+            Request Changes
+          </h3>
+          <p className="text-base sm:text-lg text-text-secondary dark:text-gray-400 font-body">
+            Provide feedback to help the creator improve this submission.
+          </p>
+        </div>
+
+        {/* Constrained textarea height */}
+        <div className="w-full">
+          <textarea
+            rows={3} 
+            className="w-full p-4 rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-slate-800/50 text-text-main dark:text-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none resize-none text-base font-body"
+            placeholder="What needs to be changed?"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+          />
+        </div>
+
+        <div className="flex w-full gap-4 mt-2">
+          <button 
+            disabled={submitModal.loading} 
+            className="flex-1 py-3 sm:py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-lg font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 cursor-pointer" 
+            onClick={closeModal}
+          >
+            Cancel
+          </button>
+          
+          <button 
+            disabled={submitModal.loading || feedback?.trim().length < 10} 
+            className="flex-1 bg-sky-600 py-3 sm:py-4 rounded-xl text-lg font-semibold text-white hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 transition-all active:scale-95 cursor-pointer flex justify-center items-center" 
+            onClick={handleGiveFeedback}
+          >
+            {submitModal.loading ? <AppleSpinner text={"Sending"} /> : "Give Feedback"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* --- 3. CANCEL CONFIRMATION MODAL --- */}
+{submitModal.openModal && submitModal.status === "cancel" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onClick={!submitModal.loading ? closeModal : null}></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdRestartAlt size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Cancel Submission?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+             {`${user.role === "contributor" ? "Your" : "The"}`} courses will no longer be under review, and creator will need to submit again later.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button disabled={submitModal.loading} className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50" onClick={closeModal}>
+            Keep Review
+          </button>
+          <button disabled={submitModal.loading} className="flex-1 bg-rose-600 py-4 rounded-xl text-xl font-semibold text-white shadow-sm hover:bg-rose-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleConfirmCancel}>
+            {submitModal.loading ? <AppleSpinner text={"Cancelling"} /> : "Cancel"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* --- 4. CANCEL SUCCESS MODAL --- */}
+{submitModal.openModal && submitModal.status === "cancel-success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    {/* Backdrop */}
+    <div 
+      className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" 
+      onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+    ></div>
+
+    {/* Modal Card */}
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-6 sm:gap-8">
+        
+        {/* Icon: Rose Theme */}
+        <div className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <MdRestartAlt className="text-[40px] sm:text-[56px]" />
+        </div>
+
+        {/* Text Content */}
+        <div className="space-y-2">
+          <h3 className="text-2xl sm:text-4xl font-bold text-text-main dark:text-white font-display">
+            Submission Cancelled
+          </h3>
+          <p className="text-base sm:text-xl text-text-secondary dark:text-gray-400 leading-relaxed font-body">
+            {user.role === "contributor" ? "Your" : "Contributor"} request has been withdrawn. {user.role === "contributor" ? "Your" : "The"} course is now back in{" "}
+            <span className="font-bold text-rose-600">Active mode</span> and you can edit {user.role === "contributor" ? "your" : "the"} courses again.
+          </p>
+        </div>
+
+        {/* Action Button */}
+        <button
+          className="w-full mt-4 py-3 sm:py-4 rounded-xl bg-rose-600 text-lg sm:text-xl text-white font-semibold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all active:scale-95 cursor-pointer font-display"
+          onClick={handleCancelSubmission}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "cancel-error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark transition-all">
+      <div className="flex flex-col items-center gap-8">
+        {/* Error Icon Container */}
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        
+        {/* Text Content */}
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Cancellation Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed max-w-2xl">
+            We encountered an error while trying to withdraw your request. {user.role === "contributor" ? "Your" : "The"} course is still under review. Please try again later.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row w-full gap-4 mt-8">
+          <button 
+            className="w-full py-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 transition-colors cursor-pointer" 
+            onClick={() => setSubmitModal({ openModal: false, status: "", loading: false })}
+          >
+            Close
+          </button>
+          <button 
+            className="w-full py-4 rounded-xl bg-orange-500 text-white text-xl font-semibold hover:bg-orange-600 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+            onClick={() => setSubmitModal(prev => ({ ...prev, status: "cancel", loading: false }))}
+          >
+            <MdRefresh size={28} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "approved" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={!submitModal.loading ? closeModal : null}></div>
+    <div className="relative w-full max-w-3xl rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">
+          <IoMdCheckmarkCircle size={64} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Approve Submission?</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400">
+            Approving this will publish these courses and make them live for students. This action will be logged.
+          </p>
+        </div>
+        <div className="flex w-full gap-6 mt-8">
+          <button disabled={submitModal.loading} className="flex-1 py-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 hover:bg-gray-50 cursor-pointer" onClick={closeModal}>
+            Cancel
+          </button>
+          <button disabled={submitModal.loading} className="flex-1 bg-emerald-600 py-4 rounded-xl text-xl font-semibold text-white hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer flex justify-center items-center" onClick={handleApproveClick}>
+            {submitModal.loading ? <AppleSpinner text={"Approving"} /> : "Approve"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "approved-success" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl transform rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <IoMdCheckmarkCircle size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Approval Complete</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            The courses have been successfully approved and published. The contributor has been notified.
+          </p>
+        </div>
+        <button 
+          className="w-full mt-8 py-4 rounded-xl bg-primary text-white text-xl font-semibold hover:bg-primary-hover shadow-sm transition-colors cursor-pointer" 
+          onClick={handleApproveSubmission}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{submitModal.openModal && submitModal.status === "approved-error" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog">
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"></div>
+    <div className="relative w-full max-w-3xl rounded-3xl bg-white dark:bg-card-dark p-10 sm:p-14 text-center shadow-2xl border border-border-light dark:border-border-dark">
+      <div className="flex flex-col items-center gap-8">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+          <BsExclamationCircleFill size={56} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-4xl font-bold text-text-main dark:text-white">Approval Failed</h3>
+          <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">
+            There was an error while trying to approve this content. Please try again or contact system administration.
+          </p>
+        </div>
+        <div className="flex flex-col-reverse sm:flex-row w-full gap-4 mt-8">
+          <button 
+            className="w-full py-4 rounded-xl border border-border-light bg-white dark:bg-gray-800 text-xl font-semibold text-text-main dark:text-gray-300 cursor-pointer" 
+            onClick={closeModal}
+          >
+            Close
+          </button>
+          <button 
+            className="w-full py-4 rounded-xl bg-rose-500 text-white text-xl font-semibold hover:bg-rose-600 shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+            onClick={() => setSubmitModal(p => ({ ...p, status: "approved", loading: false }))}
+          >
+            <MdRefresh size={28} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
       </main>
+
       {/* <footer className="bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark py-12">
            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
              <div className="flex items-center gap-2 text-primary font-bold text-lg">

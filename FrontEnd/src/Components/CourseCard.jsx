@@ -6,7 +6,7 @@ import SemesterDisplay from "./semesterTransformer";
 import { Link } from "react-router";
 
 const CourseCard = ({Course}) => {
-  console.log(Course.instructorName);
+  //  // console.log(Course.instructorName);
   return (
     <article className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark flex flex-col h-full overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
       <div className="p-5 flex flex-col flex-1">
@@ -31,8 +31,8 @@ const CourseCard = ({Course}) => {
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                         {Course?.degree?.charAt(0).toUpperCase() + Course?.degree?.slice(1)}
                     </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
-                       {Course?.category?.charAt(0).toUpperCase() + Course?.category?.slice(1)}
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm capitalize">
+                       {Course?.format}
                     </div>
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                       {Course?.credits} Credits
@@ -42,8 +42,8 @@ const CourseCard = ({Course}) => {
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
                       {Course?.type?.charAt(0).toUpperCase() + Course?.type?.slice(1)}
                     </div>
-                    <div className="inline-flex max-w-[72%] items-center justify-center px-2.5 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
-                      <SemesterDisplay code={22} />
+                    <div className="inline-flex max-w-[72%] min-w-[70%] items-center justify-center px-2.5 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-semibold text-slate-600 group-hover:text-slate-800 dark:text-slate-300 shadow-sm">
+                <SemesterDisplay code={Course.semester} />
                     </div>
                     {/* <span className="bg-white dark:bg-background-dark text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-1 rounded-md border border-border-light dark:border-border-dark tracking-tighter">
                                 2nd Semester 
@@ -60,19 +60,19 @@ const CourseCard = ({Course}) => {
                       <span className="material-symbols-outlined text-[18px] opacity-70">
                         <LuCalendarDays />
                       </span>
-                  <span>{new Date(Course?.staringDate).toLocaleDateString('en-GB').replace(/\//g, '-')}</span>
+                  <span>{new Date(Course?.startingDate).toLocaleDateString('en-GB').replace(/\//g, '-')}</span>
                     </div>
                   </div>
                 </div>
       <div className="p-5 pt-0">
-          <Link  to={'/course/' + Course._id}>
         <button className="w-auto px-4 h-9 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer">
+          <Link  to={'/courses/' + Course._id} className="flex items-center gap-1.5">
         View Details 
           <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
             <IoArrowForwardSharp size={18} />
           </span>
-        </button>
         </Link> 
+        </button>
       </div>
     </article>
   );

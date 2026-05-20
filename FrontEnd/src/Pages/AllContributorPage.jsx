@@ -6,28 +6,28 @@ import { LiaIdCardSolid } from "react-icons/lia";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import Department from "../Components/Department";
 import { useAuth } from "../Contexts/Auth.Context.jsx";
-import AddModerator from "../Components/AddModerator"; // Assumed Component Name
+import AddContributor from "../Components/AddContributor";
 import PrivateApi from "../Hooks/PrivateApi.jsx";
 import Pagination from "../Components/Pagination.jsx";
-import { Link } from "react-router";
+import AccessDeniedSection from "../Components/AccessDeniedSection.jsx";
+import { Link, useParams } from "react-router";
 
-const AllModeratorPage = () => {
+const AllContributorPage = () => {
+  const {moderatorUserId} = useParams();
   const { user } = useAuth();
+  const [error, setError] = useState(null);
   const [modal, setModal] = useState({ openModal: false, status: "" });
-  
   const [deleteModal, setDeleteModal] = useState({ 
     isOpen: false, 
     status: "idle", 
     targetId: null 
   });
-
-  const [moderators, setModerators] = useState([]);
+  const [contributors, setContributors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
-
   const [filters, setFilters] = useState({
-    moderatorId: "",
+    contributorId: "",
     semester: "",
     degree: "",
     year: "",
@@ -36,6 +36,29 @@ const AllModeratorPage = () => {
     department: ""
   });
 
+  if(moderatorUserId && user?.role === "moderator" && moderatorUserId !== user.userId) {
+    return <AccessDeniedSection />;
+  }
+
+  if (moderatorUserId) {
+  // Mapping object for degree codes
+  const degreeMap = {
+    "01": "bachelors",
+    "02": "masters",
+    "03": "phd"
+  };
+
+  // 1. Extract the raw values using slice
+  const degreeCode = moderatorUserId.slice(7, 9);
+  const yearValue = moderatorUserId.slice(3, 7);
+  const semesterValue = moderatorUserId.slice(9, 11);
+
+  // 2. Assign to filters
+  // Look up the degree name; default to "Unknown" or the code itself if not found
+  filters.degree = degreeMap[degreeCode] || degreeCode || "";
+  filters.year = yearValue || "";
+  filters.semester = semesterValue || "";
+}
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -50,7 +73,9 @@ const AllModeratorPage = () => {
   };
 
   useEffect(() => {
+  
     if (user) {
+      if(!moderatorUserId && user?.role === "admin") {
       setFilters((prev) => ({
         ...prev,
         semester: user?.role === "admin" ? "" : user.semester || "",
@@ -58,22 +83,31 @@ const AllModeratorPage = () => {
         year: user?.role === "admin" ? "" : user.year || "",
       }));
     }
+  }
   }, [user]);
 
   const handleSearch = async (customFilters = null) => {
+      setLoading(true);
     const currentFilters = customFilters || filters;
-    const { moderatorId, access } = currentFilters;
+    const { contributorId, access } = currentFilters;
 
-    if (moderatorId) {
-      const isValidFormat = /^[A-Za-z]{3}\d{8}$/.test(moderatorId);
+    if (contributorId) {
+      const isValidFormat = /^[A-Za-z]{3}\d{8}$/.test(contributorId);
+      if (user?.role === 'moderator') {
+        const inputSuffix = contributorId.slice(-8);
+        const userSuffix = user?.userId?.toString().slice(-8);
+        if (inputSuffix !== userSuffix) {
+          setFilters(prev => ({ ...prev, contributorId: '' }));
+          return;
+        }
+      }
       if (!isValidFormat) {
-        setFilters(prev => ({ ...prev, moderatorId: '' }));
+        setFilters(prev => ({ ...prev, contributorId: '' }));
         return;
       }
     }
 
-    setLoading(true);
-    const { moderatorId: userId, ...remainingFilters } = currentFilters;
+    const { contributorId: userId, ...remainingFilters } = currentFilters;
     const rawParams = { 
       ...remainingFilters, 
       userId,
@@ -85,12 +119,13 @@ const AllModeratorPage = () => {
     );
 
     try {
-      // Updated endpoint for Moderators
-      const response = await PrivateApi.post('/get-all-moderators', { parameter, page });
-      setTotalDocs(response?.data?.data?.totalModerators);
-      setModerators(response?.data?.data?.moderators || []);
+      const response = await PrivateApi.post('/get-all-contributors', { parameter, page });
+      setTotalDocs(response?.data?.data?.totalContributors);
+      setContributors(response?.data?.data?.contributors || []);
+      setError(null);
     } catch (error) {
       console.error("API Error:", error);
+      setError(error?.response?.data?.message || "An error occurred while fetching contributors.");
     } finally {
       setLoading(false);
     }
@@ -112,9 +147,9 @@ const AllModeratorPage = () => {
 
   const processDelete = async () => {
     setDeleteModal(prev => ({ ...prev, status: "loading" }));
+     // console.log("Attempting to delete contributor with ID:", deleteModal.targetId);
     try {
-      // Updated endpoint for Moderators
-      await PrivateApi.delete(`/delete-moderator-account/${deleteModal.targetId}`);
+      await PrivateApi.delete(`/delete-contributor-account/${deleteModal.targetId}`);
       setDeleteModal(prev => ({ ...prev, status: "success" }));
       handleSearch();
     } catch (e) { 
@@ -122,36 +157,30 @@ const AllModeratorPage = () => {
     }
   };
 
-  // const handleShare = (item) => {
-  //   const text = `Moderator ID: ${item.userId}\nPassword: ${item.password}`;
-  //   if (navigator.share) {
-  //     navigator.share({ title: 'Moderator Details', text }).catch(console.error);
-  //   } else {
-  //     navigator.clipboard.writeText(text);
-  //   }
-  // };
-
-   const handleShare = (item) => {
-  const text = `Moderator ID: ${item.userId}\nPassword: ${item.password}`;
+  const handleShare = (item) => {
+  const text = `Contributor ID: ${item.userId}\nPassword: ${item.password}`;
   // const url = window.location.href; // Optional: include your site URL
   const encodedText = encodeURIComponent(text);
 
   // 1. Try Native Share (Mobile/Supported Browsers)
-  if (navigator.share) {
-    navigator.share({
-      title: 'Moderators Details',
-      text: text,
-      // url: url,
-    })
-    .then(() =>  { // console.log('Successful share')
-    })
-    .catch((error) => {
-      // If user cancels or it fails, fallback to clipboard
-      if (error.name !== 'AbortError') {
-        copyToClipboard(text);
-      }
-    });
-  } else {
+if (navigator.share) {
+  navigator.share({
+    title: 'Contributor Details',
+    text: text,
+    // url: url,
+  })
+  .then(() => {
+    // Shared successfully! You can leave this empty or add a success toast.
+  })
+  .catch((error) => {
+    // 'AbortError' means the user explicitly closed/canceled the share sheet.
+    // We only want to copy to clipboard if it failed due to an actual error.
+    if (error.name !== 'AbortError') {
+      copyToClipboard(text);
+    }
+  });
+} // <-- Missing closing brace for the 'if' statement was added here
+   else {
     // 2. Fallback: Manual Platform Links
     // You can call a modal here or just open the most popular one (WhatsApp)
     const shareLinks = {
@@ -181,29 +210,53 @@ const copyToClipboard = (text) => {
   navigator.clipboard.writeText(text);
   alert("Details copied to clipboard! You can now paste them in Messenger or Telegram.");
 };
-
   const handleReset = () => {
     const defaultFilters = {
-      moderatorId: "",
+      contributorId: "",
       semester: user?.role === "admin" ? "" : user?.semester || "",
       degree: user?.role === "admin" ? "" : user?.degree || "",
       year: user?.role === "admin" ? "" : user?.year || "",
       status: "",
       access: "",
       department: ""
-    };
+    }
+     if (moderatorUserId) {
+  // Mapping object for degree codes
+  const degreeMap = {
+    "01": "Bachelors",
+    "02": "Masters",
+    "03": "PhD"
+  };
+
+  // 1. Extract the raw values using slice
+  const degreeCode = moderatorUserId.slice(7, 9);
+  const yearValue = moderatorUserId.slice(3, 7);
+  const semesterValue = moderatorUserId.slice(9, 11);
+
+  // 2. Assign to filters
+  // Look up the degree name; default to "Unknown" or the code itself if not found
+  defaultFilters.degree = degreeMap[degreeCode] || degreeCode || "";
+  defaultFilters.year = yearValue || "";
+  defaultFilters.semester = semesterValue || "";
+}
+
     setFilters(defaultFilters);
     if (page === 1) handleSearch(defaultFilters);
     else setPage(1);
   };
 
-  
   const years = (() => {
     const current = new Date().getFullYear();
     return Array.from({ length: current - 2025 + 1 }, (_, i) => current - i);
   })();
 
-  const isLocked = user?.role !== "admin";
+
+  if (error) {
+    return <AccessDeniedSection />;
+  }
+  
+
+  const isLocked = user?.role !== "admin" || moderatorUserId ;
   const lockedStyles = "cursor-not-allowed opacity-70 bg-gray-50 dark:bg-white/5";
 
   return (
@@ -211,10 +264,10 @@ const copyToClipboard = (text) => {
       <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">
         <header className="mb-5">
           <h1 className="text-2xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
-            Search and Explore Moderators
+            Search and Explore Contributors
           </h1>
           <p className="mt-0.5 text-base md:text-lg text-secondary-text dark:text-gray-400 max-w-4xl">
-            Filter moderators by ID, department, and status to manage administrative access.
+            Filter contributors by ID, department, status, and access to manage scholarly input.
           </p>
         </header>
 
@@ -222,17 +275,17 @@ const copyToClipboard = (text) => {
         <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-4 md:p-6 mb-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-24 gap-4 items-end">
             <label className="flex flex-col gap-1.5 w-full sm:col-span-2 md:col-span-24 xl:col-span-8">
-              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Moderator Id</span>
+              <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Contributor Id</span>
               <div className="relative flex items-center w-full border border-border-light dark:border-border-dark rounded-lg">
                 <span className="absolute left-3 text-text-secondary text-[20px]"><LiaIdCardSolid /></span>
-                <input type="text" name="moderatorId" value={filters.moderatorId} onChange={handleChange} placeholder="e.g. MOD20260211" className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border-0 focus:ring-1 focus:ring-primary focus:outline-none text-sm transition-all uppercase" />
+                <input type="text" name="contributorId" value={filters.contributorId} onChange={handleChange} placeholder="e.g. CSE20260211" className="w-full h-11 pl-10 pr-4 rounded-lg bg-white dark:bg-background-dark border-0 focus:ring-1 focus:ring-primary focus:outline-none text-sm transition-all uppercase" />
               </div>
             </label>
 
             <label className={`flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-6 ${isLocked ? "cursor-not-allowed" : ""}`}>
               <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">Semester</span>
               <div className={`relative w-full border border-border-light dark:border-border-dark rounded-lg ${isLocked ? lockedStyles : ""}`}>
-                <select name="semester" value={filters.semester} onChange={handleFilterChangeIntoNumber} disabled={isLocked} className={`w-full h-11 pl-3 pr-10 rounded-lg bg-transparent border-0 text-sm appearance-none cursor-pointer focus:ring-1 focus:ring-primary focus:outline-none `}>
+                <select name="semester" value={filters.semester} onChange={handleFilterChangeIntoNumber} disabled={isLocked} className={`w-full h-11 pl-3 pr-10 rounded-lg bg-transparent border-0 text-sm appearance-none ${user?.role === "admin" ? "cursor-pointer" : "cursor-not-allowed"} focus:ring-1 focus:ring-primary focus:outline-none `}>
                   <option value="">All Semesters</option>
                   <option value="11">First Year 1st Semester</option>
                   <option value="12">First Year 2nd Semester</option>
@@ -252,7 +305,7 @@ const copyToClipboard = (text) => {
             <label className={`flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-5 ${isLocked ? "cursor-not-allowed" : ""}`}>
               <span className="text-sm font-semibold text-text-secondary">Degree</span>
               <div className={`relative w-full border border-border-light dark:border-border-dark rounded-lg ${isLocked ? lockedStyles : ""}`}>
-                <select name="degree" value={filters.degree} onChange={handleChange } disabled={isLocked} className={`w-full h-11 pl-3 pr-10 bg-transparent border-0 text-sm appearance-none focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer rounded-lg`}>
+                <select name="degree" value={filters.degree} onChange={handleChange } disabled={isLocked} className={`w-full h-11 pl-3 pr-10 bg-transparent border-0 text-sm appearance-none focus:ring-1 focus:ring-primary focus:outline-none ${user?.role === "admin" ? "cursor-pointer" : "cursor-not-allowed"} rounded-lg`}>
                   <option value="">All Degrees</option>
                   <option value="bachelors">Bachelor</option>
                   <option value="masters">Master</option>
@@ -265,7 +318,7 @@ const copyToClipboard = (text) => {
             <label className={`flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-8 xl:col-span-5 ${isLocked ? "cursor-not-allowed" : ""}`}>
               <span className="text-sm font-semibold text-text-secondary">Hsc Year</span>
               <div className={`relative w-full border border-border-light dark:border-border-dark rounded-lg ${isLocked ? lockedStyles : ""}`}>
-                <select name="year" value={filters.year} onChange={handleFilterChangeIntoNumber} disabled={isLocked} className={`w-full h-11 pl-3 pr-10 bg-transparent border-0 text-sm appearance-none focus:ring-1 focus:ring-primary cursor-pointer focus:outline-none rounded-lg`}>
+                <select name="year" value={filters.year} onChange={handleFilterChangeIntoNumber} disabled={isLocked} className={`w-full h-11 pl-3 pr-10 bg-transparent border-0 text-sm appearance-none focus:ring-1 focus:ring-primary ${user?.role === "admin" ? "cursor-pointer" : "cursor-not-allowed"} focus:outline-none rounded-lg`}>
                   <option value="">All Years</option>
                   {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
@@ -274,7 +327,7 @@ const copyToClipboard = (text) => {
             </label>
 
             <div className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-16 xl:col-span-6">
-              <Department defaultText={"No Departments"} value={filters.department} onChange={handleChange} disabled={true} />
+              <Department defaultText={"All Departments"} value={filters.department} onChange={handleChange} />
             </div>
 
             <label className="flex flex-col gap-1.5 w-full sm:col-span-1 md:col-span-12 xl:col-span-4">
@@ -304,12 +357,12 @@ const copyToClipboard = (text) => {
 
             <div className="col-span-1 sm:col-span-2 md:col-span-12 xl:col-span-10 mt-4 md:mt-auto">
               <div className="flex flex-col sm:flex-row items-center justify-start xl:justify-end gap-3 w-full sm:h-11">
-                <button onClick={handleReset} className="w-full sm:w-auto min-w-48 flex items-center justify-center gap-2 px-5 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors font-semibold active:scale-95 cursor-pointer"><MdRefresh className="text-[20px]" /> Reset Filters</button>
-                <button onClick={triggerManualSearch} disabled={loading} className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-8 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer">
+                <button onClick={handleReset} className="w-full sm:w-auto min-w-44 flex items-center justify-center gap-2 px-4 h-11 text-primary hover:bg-primary/5 rounded-lg transition-colors font-semibold active:scale-95 cursor-pointer"><MdRefresh className="text-[20px]" /> Reset Filters</button>
+                <button onClick={triggerManualSearch} disabled={loading} className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer">
                   {loading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" /> : <AiOutlineSearch className="text-[20px]" />}
                   <span>Search</span>
                 </button>
-                <button onClick={() => setModal({ openModal: true, status: "idle" })} className="w-full sm:w-auto min-w-52   flex items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all active:scale-95 cursor-pointer"><AiOutlinePlus className="text-[20px]" /> New Moderator</button>
+                <button onClick={() => setModal({ openModal: true, status: "idle" })} className="w-full sm:w-auto flex min-w-52 items-center justify-center gap-2 py-2 px-6 h-11 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all active:scale-95 cursor-pointer"><AiOutlinePlus className="text-[20px]" /> New Contributor</button>
               </div>
             </div>
           </div>
@@ -326,19 +379,20 @@ const copyToClipboard = (text) => {
               <span className="font-bold text-text-main dark:text-white">
                 {totalDocs < page * 12 ? totalDocs : page * 12}
               </span>{" "}
-              moderators of{" "}
+              contributors of{" "}
               <span className="font-bold text-text-main dark:text-white">
-              {totalDocs} moderators  
+              {totalDocs} contributors
               </span>
             </div>
 
           </div>
         )}
+
         {/* --- DATA SECTION --- */}
         <div className="w-full mt-5 md:rounded-xl md:border border-border-light dark:border-border-dark overflow-hidden md:shadow-sm">
-          {moderators.length > 0 && (
+          {contributors.length > 0 && (
             <div className="hidden md:grid grid-cols-24 bg-primary text-white font-bold text-sm uppercase tracking-wider">
-              <div className="p-4 col-span-5 pl-8">Moderator <span className="hidden lg:inline">ID </span> </div>
+              <div className="p-4 col-span-5 pl-8"> Contributor<span className="hidden lg:inline"> ID</span> </div>
               <div className="p-4 col-span-6 text-center">Password</div>
               <div className="p-4 col-span-4 text-center">Access</div>
               <div className="p-4 col-span-5 text-center">Status</div>
@@ -347,8 +401,8 @@ const copyToClipboard = (text) => {
           )}
 
           <div className="flex flex-col gap-4 md:gap-0 bg-transparent md:bg-white dark:md:bg-card-dark md:divide-y md:divide-border-light">
-            {moderators.length > 0 ? (
-              moderators.map((item, index) => {
+            {contributors.length > 0 ? (
+              contributors.map((item, index) => {
                 const theme = ((status) => {
                   const s = status?.toLowerCase();
                   if (s === 'approved') return { text: "text-primary", dot: "bg-primary", ping: "bg-primary/60" };
@@ -358,10 +412,10 @@ const copyToClipboard = (text) => {
                 })(item.status);
 
                 return (
-                  <Link to={item.userId} key={item._id} className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center p-5 md:p-0 bg-white dark:bg-card-dark md:bg-transparent rounded-2xl md:rounded-none border border-border-light dark:border-border-dark md:border-0 shadow-sm md:shadow-none hover:bg-primary/5 transition-all ">
+                  <Link to={`${item.userId}/courses`} key={index} className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center p-5 md:p-0 bg-white dark:bg-card-dark md:bg-transparent rounded-2xl md:rounded-none border border-border-light dark:border-border-dark md:border-0 shadow-sm md:shadow-none hover:bg-primary/5 transition-all ">
                     <div className="flex flex-col gap-4 md:contents">
                       <div className="md:p-3 md:col-span-5 flex flex-col md:block gap-1 md:pl-8">
-                        <span className="md:hidden text-xs font-bold uppercase text-primary/80 px-2">Moderator ID</span>
+                        <span className="md:hidden text-xs font-bold uppercase text-primary/80 px-2">Contributor ID</span>
                         <span className="text-sm uppercase font-bold px-2 md:p-0">{item.userId}</span>
                       </div>
                       <div className="md:p-3 md:col-span-6 flex flex-col md:items-center gap-1">
@@ -402,12 +456,13 @@ const copyToClipboard = (text) => {
               })
             ) : (
               !loading && (
+                /* --- NO CONTRIBUTORS FOUND EMPTY STATE --- */
                 <div className=" flex flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed ">
                   <h3 className="text-xl font-bold text-text-main dark:text-white mb-2">
-                    No moderators found
+                    No contributors found
                   </h3>
                   <p className="text-text-secondary dark:text-gray-400 px-5 ">
-                    We couldn't find any moderators matching your filters. Try
+                    We couldn't find any contributors matching your filters. Try
                     adjusting your search criteria.
                   </p>
                   <button
@@ -418,19 +473,20 @@ const copyToClipboard = (text) => {
                   </button>
                 </div>
               )
-            )}
+            )}        
           </div>
         </div>
 
         <Pagination page={page} setPage={setPage} totalDocs={totalDocs} />
-        <AddModerator modal={modal} setModal={setModal} handleSearch={handleSearch} />
+        <AddContributor modal={modal} setModal={setModal} handleSearch={handleSearch} />
 
-        {/* --- DELETE MODAL --- */}
+        {/* --- DYNAMIC DELETE FEEDBACK MODAL --- */}
         {deleteModal.isOpen && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-all cursor-pointer" onClick={() => setDeleteModal({ isOpen: false, status: "idle", targetId: null })} />
             <div className="relative w-full max-w-2xl bg-white dark:bg-card-dark rounded-3xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in fade-in zoom-in duration-300">
               
+              {/* 1. Confirm View */}
               {deleteModal.status === "idle" && (
                 <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
                   <div className="flex h-28 w-28 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 text-red-500">
@@ -438,7 +494,7 @@ const copyToClipboard = (text) => {
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-4xl font-bold text-text-main dark:text-white">Are you sure?</h3>
-                    <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">This moderator will be permanently removed. This action cannot be undone.</p>
+                    <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">This action cannot be undone. This contributor will be permanently removed from the system.</p>
                   </div>
                   <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-6 mt-2">
                     <button onClick={() => setDeleteModal({ isOpen: false, status: "idle", targetId: null })} className="flex-1 px-8 py-4 rounded-xl border border-border-light dark:border-border-dark font-semibold text-xl text-text-secondary hover:bg-gray-50 cursor-pointer">Cancel</button>
@@ -447,6 +503,7 @@ const copyToClipboard = (text) => {
                 </div>
               )}
 
+              {/* 2. Loading View */}
               {deleteModal.status === "loading" && (
                 <div className="p-20 text-center flex flex-col items-center gap-8">
                   <div className="animate-spin h-20 w-20 border-4 border-teal-600 border-t-transparent rounded-full" />
@@ -454,6 +511,7 @@ const copyToClipboard = (text) => {
                 </div>
               )}
 
+              {/* 3. Success View (Teal Design Match) */}
               {deleteModal.status === "success" && (
                 <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8 animate-in zoom-in duration-300">
                   <div className="flex h-28 w-28 items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/20 text-teal-600">
@@ -461,12 +519,13 @@ const copyToClipboard = (text) => {
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-4xl font-bold text-text-main dark:text-white">Successful!</h3>
-                    <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Moderator deleted successfully.</p>
+                    <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Contributor deleted successfully.</p>
                   </div>
                   <button onClick={() => setDeleteModal({ isOpen: false, status: "idle", targetId: null })} className="w-full rounded-xl bg-teal-600 px-8 py-4 text-xl font-semibold text-white shadow-sm hover:bg-teal-700 transition-colors cursor-pointer">Done</button>
                 </div>
               )}
 
+              {/* 4. Error View */}
               {deleteModal.status === "error" && (
                 <div className="p-10 sm:p-14 text-center flex flex-col items-center gap-8 animate-in zoom-in duration-300">
                   <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-500">
@@ -474,7 +533,7 @@ const copyToClipboard = (text) => {
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-4xl font-bold text-text-main dark:text-white">Deletion Failed</h3>
-                    <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Check your connection and try again.</p>
+                    <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Something went wrong.Please try again.</p>
                   </div>
                   <div className="flex flex-col sm:flex-row w-full gap-3 sm:gap-6">
                     <button onClick={() => setDeleteModal({ isOpen: false, status: "idle", targetId: null })} className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300 cursor-pointer hover:bg-gray-50">Cancel</button>
@@ -490,4 +549,4 @@ const copyToClipboard = (text) => {
   );
 };
 
-export default AllModeratorPage;
+export default AllContributorPage;
