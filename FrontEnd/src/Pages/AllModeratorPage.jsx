@@ -143,7 +143,8 @@ const AllModeratorPage = () => {
       text: text,
       // url: url,
     })
-    .then(() =>  // console.log('Successful share'))
+    .then(() =>  { // console.log('Successful share')
+    })
     .catch((error) => {
       // If user cancels or it fails, fallback to clipboard
       if (error.name !== 'AbortError') {

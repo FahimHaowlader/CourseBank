@@ -163,20 +163,24 @@ const AllContributorPage = () => {
   const encodedText = encodeURIComponent(text);
 
   // 1. Try Native Share (Mobile/Supported Browsers)
-  if (navigator.share) {
-    navigator.share({
-      title: 'Contributor Details',
-      text: text,
-      // url: url,
-    })
-    .then(() =>  // console.log('Successful share'))
-    .catch((error) => {
-      // If user cancels or it fails, fallback to clipboard
-      if (error.name !== 'AbortError') {
-        copyToClipboard(text);
-      }
-    });
-  } else {
+if (navigator.share) {
+  navigator.share({
+    title: 'Contributor Details',
+    text: text,
+    // url: url,
+  })
+  .then(() => {
+    // Shared successfully! You can leave this empty or add a success toast.
+  })
+  .catch((error) => {
+    // 'AbortError' means the user explicitly closed/canceled the share sheet.
+    // We only want to copy to clipboard if it failed due to an actual error.
+    if (error.name !== 'AbortError') {
+      copyToClipboard(text);
+    }
+  });
+} // <-- Missing closing brace for the 'if' statement was added here
+   else {
     // 2. Fallback: Manual Platform Links
     // You can call a modal here or just open the most popular one (WhatsApp)
     const shareLinks = {
