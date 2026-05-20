@@ -223,7 +223,7 @@ const CoursePage = () => {
   // console.log(courses);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">
         <header className="mb-5">
           <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text  bg-primary-dark dark:bg-primary tracking-tight  font-extrabold">
             Course Bank
@@ -663,7 +663,7 @@ const CoursePage = () => {
                 </div>
               )}
         </div>
-        <div className=" flex items-center justify-between  px-4 py-2 sm:px-6 mt-8 ">
+        
           {/* <div className="flex flex-1 justify-between sm:hidden">
             <a
               className="relative inline-flex items-center rounded-md border border-border-light dark:border-border-dark bg-white dark:bg-background-dark px-4 py-2 text-sm font-medium text-text-secondary hover:bg-gray-50"
@@ -740,7 +740,7 @@ const CoursePage = () => {
             </div>
           </div> */}
           <Pagination page={page} setPage={setPage} totalDocs={totalDocs} />
-        </div>
+       
         {/* <div className="hidden mt-12  flex-col items-center justify-center py-16 text-center bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark border-dashed">
           {/* <div className="size-16 rounded-full bg-white dark:bg-background-dark flex items-center justify-center mb-4 text-text-secondary">
             <span className="material-symbols-outlined text-4xl">search_off</span>

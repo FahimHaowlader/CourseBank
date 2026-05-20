@@ -610,6 +610,7 @@ console.log(filters);
         </div>
 
         {/* Pagination */}
+   
         {totalCourses > 12 && (
           // <div className="flex flex-1 items-center justify-center md:justify-end mt-8">
           //   <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
@@ -646,6 +647,7 @@ console.log(filters);
             totalDocs={totalCourses} 
           />
         )}
+       
       </main>
 
       {/* 1. DELETE CONFIRMATION / LOADING MODAL */}
