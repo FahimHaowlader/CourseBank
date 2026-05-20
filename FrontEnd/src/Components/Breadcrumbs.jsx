@@ -5,7 +5,7 @@ import { useAuth } from '../Contexts/Auth.Context';
 
 const Breadcrumbs = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user,logOut } = useAuth();
 
   // Prevents the bar from showing if you're already on the home page
   if (location.pathname === '/') {
@@ -14,11 +14,11 @@ const Breadcrumbs = () => {
 
   // Placeholder function for handleLogout - replace this with your actual auth logic
   const handleLogout = () => {
-    console.log('Logging out...');
+   logOut(); // Call the logout function from your auth context or service
     // e.g., signOut(), localStorage.clear(), etc.
   };
 
-  const path = user.role === "admin" ? "/admin" : user.role === "contributor" ? 'contributors/' + user.userId : "moderators/" + user.userId;
+  const path = user.role === "admin" ? "/admin" : user.role === "contributor" ? 'contributors/' + user.userId +"/courses": "moderators/" + user.userId;
 console.log("Breadcrumbs Rendered - User:", user, "Path:", path); // Debugging line to check user state and path
   return (
     <nav 
@@ -43,7 +43,7 @@ console.log("Breadcrumbs Rendered - User:", user, "Path:", path); // Debugging l
         <div className="flex items-center gap-4">
           {/* Dashboard Link */}
           <Link
-            to={`/${path}`}
+            to={`${path}`}
             className="flex items-center gap-1 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
           >
             <MdDashboard className="text-[16px]" />

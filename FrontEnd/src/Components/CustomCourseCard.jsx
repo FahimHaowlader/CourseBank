@@ -19,7 +19,7 @@ const CustomCourseCard = ({ Course, setModal }) => {
       <Link
         className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 hover:bg-primary/20 dark:bg-gray-800 dark:text-primary dark:hover:bg-gray-700"
         title="Edit Course"
-        to={`/my-course/edit/${Course?._id}`}
+        to={`edit/${Course?._id}`}
       >
         <FiEdit className="text-[20px]" />
       </Link>
@@ -35,7 +35,7 @@ const CustomCourseCard = ({ Course, setModal }) => {
 
   // Helper for Review Button (Moderator on others' pending)
   const ReviewButton = () => (
-    <Link to={`/my-course/edit/${Course?._id}`}  
+    <Link to={`review/${Course?._id}`}  
       onClick={() => typeof handleReview === 'function' && handleReview(Course?._id)}
       className="group relative flex items-center gap-2 overflow-hidden rounded-lg border border-amber-500/30 bg-amber-50/50 px-3 h-8 text-amber-700 transition-all duration-300 hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/20 dark:bg-amber-500/5 dark:text-amber-400 dark:border-amber-500/30 dark:hover:bg-amber-500 dark:hover:text-white cursor-pointer"
     >
@@ -153,7 +153,7 @@ const CustomCourseCard = ({ Course, setModal }) => {
       <div className="p-5 pt-0 flex items-center justify-between">
         <Link
           className="w-auto px-4 h-8 rounded-lg border border-primary/20 text-primary hover:bg-primary hover:text-white font-semibold text-sm transition-colors flex items-center gap-1.5 hover:cursor-pointer"
-          to={`/my-course/${Course?._id}`}
+          to={`${Course?._id}`}
         >
           View Details
           <span className="transition-transform group-hover:translate-x-0.5">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
 import {
   MdOutlineAssignment,
@@ -317,7 +317,7 @@ const ModeratorPage = () => {
 
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
@@ -334,9 +334,9 @@ const ModeratorPage = () => {
         <div className="flex justify-center items-center">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Module 1: Manage Courses */}
-            <a
+            <Link
               className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
-              href="#"
+              to={`courses`}  
             >
               <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
                 <span className="text-[28px]">
@@ -356,12 +356,12 @@ const ModeratorPage = () => {
                   <IoArrowForwardSharp />
                 </span>
               </div>
-            </a>
+            </Link>
 
             {/* Module 2: Manage Contributors */}
-            <a
+            <Link
               className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-sky-500/5 hover:-translate-y-1 transition-all duration-300"
-              href="#"
+             to={`contributors`}
             >
               <div className="h-12 w-12 rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-4 group-hover:bg-sky-500 group-hover:text-white transition-colors">
                 <span className="text-[32px]">
@@ -381,7 +381,7 @@ const ModeratorPage = () => {
                   <IoArrowForwardSharp />
                 </span>
               </div>
-            </a>
+            </Link>
 
             <a
               className="group relative bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 flex flex-col hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"

@@ -26,6 +26,7 @@ import MainLayout from "./Layouts/MainLayout.jsx";
 
 function App() {
   const router = createBrowserRouter([
+    { path: "login", element: <LoginPage /> },
     {
       path: "",
       element: <MainLayout />,
@@ -34,66 +35,325 @@ function App() {
         { path: "", element: <Navigate to="/courses" replace /> },
         { path: "check-page", element: <CheckPage /> },
         { path: "courses", element: <CoursePage /> },
-        { path: "course/:id", element: <CourseDetailsPage /> },
-        { path: "login", element: <LoginPage /> },
+        { path: "courses/:id", element: <CourseDetailsPage /> },
+       
+
+        // contributor routes
         {
-          path: ":userId/courses",
+          path: "contributors/:contributorUserId/courses",
           element: (
-            <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+            <RoleProtectedRoute
+              allowedRoles={["contributor", "moderator", "admin"]}
+            >
               <ContributorCoursePage />
             </RoleProtectedRoute>
           ),
         },
         {
-          path: "course/edit/:id",
+          path: "contributors/:contributorUserId/courses/:id",
+          element: (
+            <RoleProtectedRoute
+              allowedRoles={["contributor", "moderator", "admin"]}
+            >
+              <CourseDetailsPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "contributors/:contributorUserId/courses/edit/:id",
           element: (
             <CourseProvider>
-              <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+              <RoleProtectedRoute
+                allowedRoles={["contributor", "moderator", "admin"]}
+              >
                 <CourseDetailsEditPage />
               </RoleProtectedRoute>
             </CourseProvider>
           ),
         },
         {
-          path: "course/:id",
+          path: "contributors/:contributorUserId/courses/add",
           element: (
-            <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+            <RoleProtectedRoute
+              allowedRoles={["contributor", "moderator", "admin"]}
+            >
+              <AddCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+
+        // moderator routes
+
+        {
+          path: "moderators/:moderatorUserId",
+          element: (
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
+              <ModeratorPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "moderators/:moderatorUserId/courses/:id",
+          element: (
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
               <CourseDetailsPage />
             </RoleProtectedRoute>
           ),
         },
         {
-          path: "edit/:id",
+          path: "moderators/:moderatorUserId/courses/edit/:id",
           element: (
             <CourseProvider>
-              <CourseDetailsEditPage />
+              <RoleProtectedRoute
+                allowedRoles={["moderator", "admin"]}
+              >
+                <CourseDetailsEditPage />
+              </RoleProtectedRoute>
             </CourseProvider>
           ),
         },
         {
-          path: "add-course",
+          path: "moderators/:moderatorUserId/courses/add",
           element: (
-            <RoleProtectedRoute allowedRoles={["contributor", "moderator", "admin"]}>
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
               <AddCoursePage />
             </RoleProtectedRoute>
-          ),
+          ), 
         },
-        { path: "admin", element: <AdminPage /> },
         {
-          path: "all",
+          path: "moderators/:moderatorUserId/courses",
           element: (
-            <RoleProtectedRoute allowedRoles={["moderator", "admin"]}>
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
               <AllCoursePage />
             </RoleProtectedRoute>
           ),
         },
-        { path: "contributors", element: <AllContributorPage /> },
-        { path: "moderators", element: <AllModeratorPage /> },
-        { path: "moderators/:moderatorUserId", element: <ModeratorPage /> },
-        { path: "*", element: <NotFoundSection /> },
-      ],
-    },
-  ]);
+        {
+          path: "moderators/:moderatorUserId/courses/review/:id",
+          element: (
+            <CourseProvider>
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
+              <CourseDetailsEditPage />
+            </RoleProtectedRoute>
+            </CourseProvider>
+          ),
+        },
+        {
+          path: "moderators/:moderatorUserId/contributors",
+          element: (
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
+              <AllContributorPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "moderators/:moderatorUserId/contributors/:contributorUserId/courses",
+          element: (
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
+              <ContributorCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "moderators/:moderatorUserId/contributors/:contributorUserId/courses/:id",
+          element: (
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
+              <CourseDetailsPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "moderators/:moderatorUserId/contributors/:contributorUserId/courses/review/:id",
+          element: (
+            <CourseProvider>
+            <RoleProtectedRoute
+              allowedRoles={["moderator", "admin"]}
+            >
+              <CourseDetailsEditPage />
+            </RoleProtectedRoute>
+            </CourseProvider>
+          ),
+        },
+
+        // admin routes
+
+        {
+          path: "admin",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        
+        {
+          path: "admin/courses",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AllCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "admin/courses/add",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AddCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "admin/courses/:id",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <CourseDetailsPage />
+            </RoleProtectedRoute>
+          ),
+        },
+        {
+          path: "admin/courses/edit/:id",
+          element: (
+            <CourseProvider>
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <CourseDetailsEditPage />
+                </RoleProtectedRoute>
+                </CourseProvider>
+              ),
+            },
+
+              {
+          path: "admin/contributors",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AllContributorPage />
+            </RoleProtectedRoute>
+          ),
+        },
+              {
+          path: "admin/contributors/:contributorUserId/courses",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <ContributorCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+              {
+          path: "admin/contributors/:contributorUserId/courses/:id",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <CourseDetailsPage />
+            </RoleProtectedRoute>
+          ),
+        },
+              {
+          path: "admin/contributors/:contributorUserId/courses/edit/:id",
+          element: (
+            <CourseProvider>
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <CourseDetailsEditPage />
+            </RoleProtectedRoute>
+            </CourseProvider>
+          ),
+        },
+           {
+          path: "admin/moderators",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AllModeratorPage />
+            </RoleProtectedRoute>
+          ),
+        },
+           {
+          path: "admin/moderators/:moderatorUserId",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <ModeratorPage />
+            </RoleProtectedRoute>
+          ),
+        },
+           {
+          path: "admin/moderators/:moderatorUserId/courses",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AllCoursePage />
+            </RoleProtectedRoute>
+          ),
+        },
+           {
+          path: "admin/moderators/:moderatorUserId/courses/:id",
+          element: (
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <CourseDetailsPage />
+            </RoleProtectedRoute>
+          ),
+        },
+           {
+          path: "admin/moderators/:moderatorUserId/courses/edit/:id",
+          element: (
+            <CourseProvider>
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <CourseDetailsEditPage />
+              </RoleProtectedRoute>
+            </CourseProvider>
+          ),
+        },
+        
+        {
+       path: "admin/moderators/:moderatorUserId/contributors",
+       element: (
+         <RoleProtectedRoute allowedRoles={["admin"]}>
+           <AllContributorPage />
+         </RoleProtectedRoute>
+       ),
+     },
+        
+        {
+       path: "admin/moderators/:moderatorUserId/contributors/:contributorUserId/courses",
+       element: (
+         <RoleProtectedRoute allowedRoles={["admin"]}>
+           <ContributorCoursePage />
+         </RoleProtectedRoute>
+       ),
+     },
+        
+        {
+       path: "admin/moderators/:moderatorUserId/contributors/:contributorUserId/courses/:id",
+       element: (
+         <RoleProtectedRoute allowedRoles={["admin"]}>
+           <CourseDetailsPage />
+         </RoleProtectedRoute>
+       ),
+     },
+     {
+       path: "admin/moderators/:moderatorUserId/contributors/:contributorUserId/courses/edit/:id",
+       element: (
+        <CourseProvider>
+         <RoleProtectedRoute allowedRoles={["admin"]}>
+           <CourseDetailsEditPage />
+         </RoleProtectedRoute>
+         </CourseProvider>  
+       ),
+     },
+    ],
+  },
+  { path: "*", element: <NotFoundSection /> },
+]);
 
   return (
     <div className="App">
@@ -102,4 +362,4 @@ function App() {
   );
 }
 
-export default App;  
+export default App;

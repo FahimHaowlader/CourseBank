@@ -26,7 +26,7 @@ import UserNotFoundSection from "../Components/UserNotFoundSection.jsx";
 
 
 const ContributorCoursePage = () => {
-  const { userId } = useParams();
+  const { contributorUserId } = useParams();
 
   const { user, refreshUser } = useAuth();
 
@@ -66,7 +66,7 @@ const ContributorCoursePage = () => {
       setLoading(true);
       try {
         const response = await PrivateApi.get(
-          `/courses-by-creator/${userId}`,
+          `/courses-by-creator/${contributorUserId}`,
         );
         setCourses(response.data.data.courses);
         setContributor(response.data.data.contributor);
@@ -77,8 +77,8 @@ const ContributorCoursePage = () => {
         setLoading(false);
       }
     };
-    if (userId) fetchContributorCourses();
-  }, [userId]);
+    if (contributorUserId) fetchContributorCourses();
+  }, [contributorUserId]);
 const isOwner = contributor?._id?.toString() === user?._id?.toString();
   
   useEffect(() => {
@@ -179,7 +179,7 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
       if (user.role === "contributor") {
       await PrivateApi.post(`/cancel-contributor-account-submission`);
       } else{
-        await PrivateApi.post(`/cancel-contributor-account-submission`,{contributorUserId:userId,feedback : feedback.trim() });
+        await PrivateApi.post(`/cancel-contributor-account-submission`,{contributorUserId:contributorUserId,feedback : feedback.trim() });
       }
       // throw new Error("Testing cancel error handling"); // <-- Temporary line to test error modal
 
@@ -220,7 +220,7 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
       if (user.role === "contributor") {
          res = await PrivateApi.post(`/request-submit-contributor-account`);
       } else{
-         res = await PrivateApi.post(`/request-submit-contributor-account`,{contributorUserId:userId});
+         res = await PrivateApi.post(`/request-submit-contributor-account`,{contributorUserId:contributorUserId});
       }
 
       // FIXED: Refresh user context so user.status becomes 'pending'
@@ -257,7 +257,7 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
          setTimeout(() => {
     },3000)
     try {
-      await PrivateApi.delete(`/delete-contributor-account/${userId}`);
+      await PrivateApi.delete(`/delete-contributor-account/${contributorUserId}`);
       if (refreshUser) await refreshUser();
       setSubmitModal((prev) => ({ ...prev, status: "delete-success", loading: false }));
     } catch (error) {
@@ -281,7 +281,7 @@ const isOwner = contributor?._id?.toString() === user?._id?.toString();
     }
     const today = new Date().toDateString();
     try {
-      await PrivateApi.post(`/approve-contributor-account-submission`,{contributorUserId:userId });
+      await PrivateApi.post(`/approve-contributor-account-submission`,{contributorUserId:contributorUserId});
       if (refreshUser) await refreshUser();
       setSubmitModal((prev) => ({ ...prev, status: "approved-success", loading: false }));
       setContributor((prev) => ({...prev, status : "approved",feedback: "Your contributor account submission was approved on "+today+". You can now log in and see your courses for 30 days. If you have any questions, please contact to the moderators."})); // Immediate UI update for better UX
@@ -316,7 +316,7 @@ const handleReturnHome = () => {
 
   return (
     <div className="bg-background-light dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-2">
         <div>
           <div className=" mb-5">
             <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight  font-extrabold">

@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation } from "react-router";
+import { useLocation ,useNavigate} from "react-router";
 import PrivateApi from "../Hooks/PrivateApi";
 
+// const navigate = useNavigate();
 const AuthContext = createContext(null);
-
 // 1. Custom hook for easy access
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -92,6 +92,7 @@ useEffect(() => {
     try {
       await axios.post(`${API_BASE_URL}/logout`, {}, { withCredentials: true });
       setUser(null);
+     window.location.href = "/";
     } catch (err) {
       console.error("Logout failed", err);
     }

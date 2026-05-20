@@ -82,6 +82,7 @@ const CourseDetailsEditPage = () => {
     error,
   } = useCourse();
 const isOwner = course?.createdBy?.toString() === user?._id?.toString();
+console.log(isOwner)
 
 const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize feedback state with course feedback or empty string
 
@@ -257,7 +258,7 @@ const [feedback,setFeedback] = useState(course.feedback || ""); // Initialize fe
   };
 const successfulDeleteAcknowledgement = () => {
   setModal({openModal: false, status: ''});
-  navigate(from, {
+  navigate(-1, {
     replace: true,
     state: {
       message: "Course deleted successfully",
@@ -349,7 +350,7 @@ if(error && !isLoading) {
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans antialiased selection:bg-teal-100 dark:selection:bg-teal-900">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-5 md:pb-5 pt-3">
         <header className="mb-8">
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
   {/* basic Info - Added min-w-0 to allow internal content to shrink/wrap */}
@@ -1175,7 +1176,7 @@ if(error && !isLoading) {
             </button>
               )}
             {
-              (user.role === "admin" || isOwner) && (
+              (user.role === "admin" ||(user.role === "moderator" &&  isOwner)) && (
             
             <button
               type="button"

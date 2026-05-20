@@ -523,7 +523,7 @@ const years = (() => {
   return (
     <> 
     <div className="bg-background-light dark:bg-background-dark font-display antialiased text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col transition-colors duration-200">
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 pt-5">
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 pt-3">
         <div className="mb-5">
           <h1 className="text-3xl md:text-4xl font-extrabold bg-primary-dark dark:bg-primary bg-clip-text text-text-main-light dark:text-text-main-dark mb-1 tracking-tight text-transparent">
             Add New Course
@@ -1370,7 +1370,7 @@ const years = (() => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/my-courses')} // Redirect to list or the new course
+          onClick={() => navigate(-1)} // Redirect to list or the new course
           className="w-full rounded-xl bg-teal-600 py-4 text-xl font-semibold text-white hover:bg-teal-700 transition-colors cursor-pointer"
         >
           Go To Your Courses

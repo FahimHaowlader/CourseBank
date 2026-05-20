@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { useParams } from 'react-router';
 
 
 import { AiOutlineSearch, AiOutlinePlus } from "react-icons/ai";
@@ -21,7 +21,8 @@ import Pagination from '../Components/Pagination.jsx';
 import { Link } from 'react-router';
 
 const AllCoursePage = () => {
-  
+  const {moderatorUserId} = useParams();
+  console.log("Moderator User ID from URL:", moderatorUserId); // Debugging line to check URL parameter
   const {user} = useAuth(); // Assuming you have a useAuth hook for authentication context
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const AllCoursePage = () => {
       status: "",
     });
 
-
+const path = user?.role === "admin" ? "/admin/courses/add" : user?.role === "moderator" ?  "/moderators/" + user?.userId +"/courses/add" :"";
   const AppleSpinner = () => (
     <div className="flex items-center justify-center gap-2">
       <svg className="animate-spin h-6 w-6 text-current" viewBox="0 0 24 24">
@@ -78,6 +79,25 @@ const AllCoursePage = () => {
     credits: '',
     format: ''
   });
+
+    if (moderatorUserId) {
+  // Mapping object for degree codes
+  const degreeMap = {
+    "01": "bachelors",
+    "02": "masters",
+    "03": "phd"
+  };
+
+  // 1. Extract the raw values using slice
+  const degreeCode = moderatorUserId.slice(7, 9);
+  const yearValue = moderatorUserId.slice(3, 7);
+  const semesterValue = moderatorUserId.slice(9, 11);
+
+  // 2. Assign to filters
+  // Look up the degree name; default to "Unknown" or the code itself if not found
+  filters.degree = degreeMap[degreeCode] || degreeCode || "";
+  filters.semester = Number(semesterValue) || "";
+}
   // console.log("Initial Filters State:", filters); // Debugging line to check initial filters state
       useEffect(() => {
     // 1. Try scrolling the window
@@ -239,16 +259,16 @@ const AllCoursePage = () => {
   };
 
   
-
+console.log(filters);
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">
         <header className="mb-5">
           <div className='flex justify-between mb-1'>
             <h1 className="text-3xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
               Explore Courses
             </h1>
-            <Link to='/add-course' className="flex cursor-pointer items-center gap-2 px-4 md:px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
+            <Link to={path} className="flex cursor-pointer items-center gap-2 px-4 md:px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 font-semibold shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
               <AiOutlinePlus />
               Add <span className='hidden sm:block'>Course</span>
             </Link>
@@ -534,7 +554,7 @@ const AllCoursePage = () => {
 
 
         
-        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${totalCourses ? "mt-5":'mt-16'}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${totalCourses ? "mt-5":'mt-16'}`}>
           {loading && (
             <>
               <div>

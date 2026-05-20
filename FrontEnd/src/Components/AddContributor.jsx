@@ -269,7 +269,7 @@ const contributor = {...formData, password, userId };
             </div>
             <div className="space-y-4">
               <h3 className="text-4xl font-bold text-text-main dark:text-white">Addition Failed</h3>
-              <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Check your connection and try again.</p>
+              <p className="text-xl text-text-secondary dark:text-gray-400 leading-relaxed">Something went wrong. Please try again.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-3 sm:gap-6">
               <button onClick={handleClose} className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-xl font-semibold text-text-main dark:text-gray-300 cursor-pointer hover:bg-gray-50 transition-colors">

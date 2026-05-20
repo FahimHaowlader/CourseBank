@@ -9,6 +9,7 @@ import { useAuth } from "../Contexts/Auth.Context.jsx";
 import AddModerator from "../Components/AddModerator"; // Assumed Component Name
 import PrivateApi from "../Hooks/PrivateApi.jsx";
 import Pagination from "../Components/Pagination.jsx";
+import { Link } from "react-router";
 
 const AllModeratorPage = () => {
   const { user } = useAuth();
@@ -206,7 +207,7 @@ const copyToClipboard = (text) => {
 
   return (
     <div className="bg-white dark:bg-black text-text-main dark:text-white font-display antialiased min-h-screen flex flex-col">
-      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-5">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10 pt-3">
         <header className="mb-5">
           <h1 className="text-2xl md:text-4xl text-transparent bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold">
             Search and Explore Moderators
@@ -356,7 +357,7 @@ const copyToClipboard = (text) => {
                 })(item.status);
 
                 return (
-                  <div key={item._id} className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center p-5 md:p-0 bg-white dark:bg-card-dark md:bg-transparent rounded-2xl md:rounded-none border border-border-light dark:border-border-dark md:border-0 shadow-sm md:shadow-none hover:bg-primary/5 transition-all ">
+                  <Link to={item.userId} key={item._id} className="grid grid-cols-2 md:grid-cols-24 items-start md:items-center p-5 md:p-0 bg-white dark:bg-card-dark md:bg-transparent rounded-2xl md:rounded-none border border-border-light dark:border-border-dark md:border-0 shadow-sm md:shadow-none hover:bg-primary/5 transition-all ">
                     <div className="flex flex-col gap-4 md:contents">
                       <div className="md:p-3 md:col-span-5 flex flex-col md:block gap-1 md:pl-8">
                         <span className="md:hidden text-xs font-bold uppercase text-primary/80 px-2">Moderator ID</span>
@@ -395,7 +396,7 @@ const copyToClipboard = (text) => {
                         <span className="md:hidden">Delete</span>
                       </button>
                     </div>
-                  </div>
+                  </Link>
                 );
               })
             ) : (
