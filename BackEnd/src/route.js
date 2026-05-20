@@ -19,7 +19,8 @@ import {
   approveContributorAccountSubmission,
   requestForSubmitModeratorsAccount,
   cancelModeratorAccountSubmission,
-  approveModeratorAccountSubmission
+  approveModeratorAccountSubmission,
+  LogOut
 } from "./controllers/user.controller.js";
 
 import  verifyJwt from "./middlewares/auth.middleware.js";
@@ -45,6 +46,8 @@ router.route('/upload/image').post(verifyJwt, upload.single('image') , uploadIma
 router.route('/upload/file').post(verifyJwt, upload.single('file') , uploadFile);
 
 router.route('/delete/file').delete(verifyJwt, deleteFile);
+
+router.route('/logout').post(verifyJwt, LogOut);
 
 {/** users route */} 
 

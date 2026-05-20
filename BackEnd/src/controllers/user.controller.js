@@ -1130,6 +1130,18 @@ const approveModeratorAccountSubmission = asyncHandler(async (req, res) => {
   );
 });
 
+const LogOut = asyncHandler(async (req, res) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    // secure: process.env.NODE_ENV === "production",
+    secure: false,
+    sameSite: "lax",
+    path : "/"
+  });
+
+  res.status(200).json(new apiResponse(200, {}, "Logged out successfully"));
+});
+
 
 export {
   createContributors,
@@ -1147,5 +1159,6 @@ export {
   approveContributorAccountSubmission,
   requestForSubmitModeratorsAccount,
   cancelModeratorAccountSubmission,
-  approveModeratorAccountSubmission
+  approveModeratorAccountSubmission,
+  LogOut
 };
