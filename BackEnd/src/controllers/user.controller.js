@@ -1130,12 +1130,14 @@ const approveModeratorAccountSubmission = asyncHandler(async (req, res) => {
 });
 
 const LogOut = asyncHandler(async (req, res) => {
+
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: false, // Set to true in production (requires HTTPS)
+    secure: true, // Set to true in production (requires HTTPS)
     sameSite: "none",
     path : "/"
   });
+ 
 
   res.status(200).json(new apiResponse(200, {}, "Logged out successfully"));
 });
