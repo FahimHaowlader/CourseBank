@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import PrivateApi from "../hooks/PrivateApi"; // Double check folder casing!
+import PrivateApi from "../Hooks/PrivateApi"; // Double check folder casing!
 
 const AxiosInterceptor = ({ children }) => {
 
