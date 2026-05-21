@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import PrivateApi from "../Hooks/PrivateApi"; // Double check folder casing!
+import PrivateApi from "../Hooks/PrivateApi";
 
 const AxiosInterceptor = ({ children }) => {
 
@@ -20,12 +20,19 @@ const AxiosInterceptor = ({ children }) => {
                 return response;
             },
             (error) => {
-                // Handle 401 Unauthorized globally without logging out
-                if (error.response && error.response.status === 401) {
-                    console.warn(`Unauthorized access attempt to: ${error.config.url}`);
-                    // You can trigger a localized alert, clear an explicit token string, 
-                    // or do nothing and let the component catch the error.
+                // 🛡️ Guard: If the 401 happened during a logout request, swallow it cleanly
+                if (error.config?.url?.includes('/logout')) {
+                    return Promise.reject(error);
                 }
+
+                // Handle 401 Unauthorized globally without forcing a loop
+                if (error.response && error.response.status === 401) {
+                    console.warn(`[401 Unauthorized] Access restricted for endpoint: ${error.config.url}`);
+                    
+                    // Safe spot for global side-effects if needed in the future, 
+                    // like clearing local storage cache structures.
+                }
+                
                 return Promise.reject(error);
             }
         );
@@ -35,7 +42,7 @@ const AxiosInterceptor = ({ children }) => {
             PrivateApi.interceptors.request.eject(requestInterceptor);
             PrivateApi.interceptors.response.eject(responseInterceptor);
         };
-    }, []); // Empty array means this attaches exactly once on app boot
+    }, []); // Attaches seamlessly once on application boot
 
     return children;
 };

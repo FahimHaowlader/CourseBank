@@ -4,7 +4,6 @@ import PrivateApi from "../Hooks/PrivateApi";
 
 const AuthContext = createContext(null);
 
-// Custom hook for easy context access
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -15,18 +14,20 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Prevents premature redirects on page load
+  const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // 🛡️ Safety shield flag
 
-  const API_BASE_URL = 'https://coursebank.onrender.com/api/v1';
-  // const API_BASE_URL = 'http://localhost:5100/api/v1';
+  // Adjust this dynamically based on deployment environments
+  const API_BASE_URL = 'https://coursebank.onrender.com/api/v1'
+  // const API_BASE_URL = 'http://localhost:5100/api/v1'
+    
 
   // 1. HELPER TO SYNC SESSION ON REFRESH
   useEffect(() => {
     const syncSession = async () => {
       try {
         setLoading(true);
-        // Using relative path so PrivateApi does not duplicate the baseURL
         const response = await PrivateApi.get("/refresh", { 
           withCredentials: true 
         }); 
@@ -42,10 +43,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     syncSession();
-  }, []); // Empty array ensures this runs exactly ONCE per page reload
+  }, []); 
 
   // 2. HELPER TO MANUALLY RE-FETCH USER PROFILE DATA
   const refreshUser = async () => {
+    if (isLoggingOut) return null; // Abort instantly if logging out
     try {
       setLoading(true);
       console.log("Refreshing user data...");
@@ -54,22 +56,21 @@ export const AuthProvider = ({ children }) => {
       return response.data.user;
     } catch (error) {
       console.error("Failed to sync user data", error);
+    } finally {
+      setLoading(false);
     }
-      finally {
-        setLoading(false);
-      }
   };
 
   // 3. TRACK LOCATION HISTORY WITHOUT REACT-ROUTER HOOKS
   useEffect(() => {
-    // Safely pull the active route directly from the browser window object
-    const currentPath = window.location.pathname;
+    // 🛡️ If logging out, freeze track parsing to prevent residual requests from firing
+    if (isLoggingOut || !user) return;
 
-    // Ignore the login and signup paths so they aren't stored as redirect points
+    const currentPath = window.location.pathname;
     if (currentPath !== "/login" && currentPath !== "/signup") {
       sessionStorage.setItem("prevPath", currentPath);
     }
-  }, [user]); // Fires dynamically whenever the active login state updates
+  }, [user, isLoggingOut]); 
 
   // 4. USER LOGIN HANDLER
   const loginWithUserIdAndPassword = async (userId, password) => {
@@ -92,11 +93,25 @@ export const AuthProvider = ({ children }) => {
   // 5. USER LOGOUT HANDLER
   const logOut = async () => {
     try {
+      setIsLoggingOut(true); // 🛡️ Activate shield: prevents any re-fetching loops
+      setLoading(true);
+
+      // Call backend to clear cookies cleanly
       await axios.post(`${API_BASE_URL}/logout`, {}, { withCredentials: true });
+      
+      // Clear client state memory completely
       setUser(null);
-      window.location.href = "/"; // Force window redirect to clear any residual memory states
+      setError(null);
+      
+      // Redirect safely to public landing page
+      window.location.replace("/"); 
     } catch (err) {
-      // console.error("Logout failed", err);
+      console.error("Logout request error:", err);
+      // Fallback fallback if network breaks down mid-flight
+      setUser(null);
+      window.location.replace("/");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 

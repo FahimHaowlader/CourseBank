@@ -4,6 +4,7 @@ import { MdHome, MdDashboard, MdLogout } from 'react-icons/md';
 import { useAuth } from '../Contexts/Auth.Context';
 
 const Breadcrumbs = () => {
+
   const location = useLocation();
   const { user,logOut } = useAuth();
 
@@ -11,9 +12,13 @@ const Breadcrumbs = () => {
   if (location.pathname === '/') {
     return null;
   }
+  if (!user) {
+    return null; 
+  }
 
   // Placeholder function for handleLogout - replace this with your actual auth logic
   const handleLogout = () => {
+ 
    logOut(); // Call the logout function from your auth context or service
     // e.g., signOut(), localStorage.clear(), etc.
   };
