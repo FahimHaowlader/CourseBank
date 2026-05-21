@@ -1,17 +1,12 @@
 import { useEffect } from "react";
-import PrivateApi from "../Hooks/PrivateApi";
-import { useAuth } from "../Contexts/Auth.Context.jsx";
+import PrivateApi from "../hooks/PrivateApi"; // Double check folder casing!
 
 const AxiosInterceptor = ({ children }) => {
-    const { logOut } = useAuth(); // Using the logOut function from your Context
 
     useEffect(() => {
         // --- 1. REQUEST INTERCEPTOR ---
         const requestInterceptor = PrivateApi.interceptors.request.use(
             (config) => {
-                // Add a custom header or log "Hello"
-                 // console.log("Hello! Request is being sent to:", config.url);
-                             
                 return config;
             },
             (error) => {
@@ -22,25 +17,25 @@ const AxiosInterceptor = ({ children }) => {
         // --- 2. RESPONSE INTERCEPTOR ---
         const responseInterceptor = PrivateApi.interceptors.response.use(
             (response) => {
-                // Any status code 2xx triggers this
                 return response;
             },
             (error) => {
-                // Handle 401 Unauthorized (Expired Token)
+                // Handle 401 Unauthorized globally without logging out
                 if (error.response && error.response.status === 401) {
-                    console.error("Unauthorized! Calling logOut...");
-                    logOut(); // This clears your user state and redirects
+                    console.warn(`Unauthorized access attempt to: ${error.config.url}`);
+                    // You can trigger a localized alert, clear an explicit token string, 
+                    // or do nothing and let the component catch the error.
                 }
                 return Promise.reject(error);
             }
         );
 
-        // --- 3. CLEANUP ---
+        // --- 3. CLEANUP ON UNMOUNT ---
         return () => {
             PrivateApi.interceptors.request.eject(requestInterceptor);
             PrivateApi.interceptors.response.eject(responseInterceptor);
         };
-    }, [logOut]); // Fixed: logOut is the dependency here
+    }, []); // Empty array means this attaches exactly once on app boot
 
     return children;
 };

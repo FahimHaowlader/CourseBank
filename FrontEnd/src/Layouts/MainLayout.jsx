@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router';
 // import Navbar from '../components/Navbar';
 // import Footer from '../components/Footer';
-import Breadcrumbs from '../components/Breadcrumbs';
+import Breadcrumbs from '../Components/Breadcrumbs';
 import { useAuth } from '../Contexts/Auth.Context';
 
 const MainLayout = () => {

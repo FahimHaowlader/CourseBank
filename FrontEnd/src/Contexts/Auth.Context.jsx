@@ -1,11 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation ,useNavigate} from "react-router";
 import PrivateApi from "../Hooks/PrivateApi";
 
-// const navigate = useNavigate();
 const AuthContext = createContext(null);
-// 1. Custom hook for easy access
+
+// Custom hook for easy context access
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -16,61 +15,63 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Start as true to prevent premature redirects
+  const [loading, setLoading] = useState(true); // Prevents premature redirects on page load
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'http://localhost:5100/api/v1';
+  const API_BASE_URL = 'https://coursebank.onrender.com/api/v1';
+  // const API_BASE_URL = 'http://localhost:5100/api/v1';
 
-  // Helper to sync session on refresh
+  // 1. HELPER TO SYNC SESSION ON REFRESH
   useEffect(() => {
     const syncSession = async () => {
       try {
         setLoading(true);
-        const response = await PrivateApi.get(`${API_BASE_URL}/refresh`, { 
+        // Using relative path so PrivateApi does not duplicate the baseURL
+        const response = await PrivateApi.get("/refresh", { 
           withCredentials: true 
         }); 
 
         if (response.data?.data?.user) {
-          // This updates the 'user' state for the next render
           setUser(response.data.data.user);
-          
         }
       } catch (err) {
-        // console.error("Session sync failed:", err.message);
         setUser(null);
       } finally {
-        // Stop loading only after we know if the user exists or not
         setLoading(false); 
       }
     };
 
     syncSession();
-  }, []); // Empty array ensures this runs ONCE per page refresh
+  }, []); // Empty array ensures this runs exactly ONCE per page reload
 
-  // Inside your AuthProvider
-const refreshUser = async () => {
-  try {
-    // 1. Call the API to get the LATEST user data from DB
-    const response = await PrivateApi.get("/refresh",); // Ensure cookies are sent
-    
-    // 2. Update the React State with the fresh data
-    setUser(response.data.data.user); 
-    
-    return response.data.user;
-  } catch (error) {
-    console.error("Failed to sync user data", error);
-  }
-};
+  // 2. HELPER TO MANUALLY RE-FETCH USER PROFILE DATA
+  const refreshUser = async () => {
+    try {
+      setLoading(true);
+      console.log("Refreshing user data...");
+      const response = await PrivateApi.get("/refresh", { withCredentials: true });
+      setUser(response.data.data.user); 
+      return response.data.user;
+    } catch (error) {
+      console.error("Failed to sync user data", error);
+    }
+      finally {
+        setLoading(false);
+      }
+  };
 
+  // 3. TRACK LOCATION HISTORY WITHOUT REACT-ROUTER HOOKS
+  useEffect(() => {
+    // Safely pull the active route directly from the browser window object
+    const currentPath = window.location.pathname;
 
-useEffect(() => {
-  // Ignore the login page so we don't save it as a "previous" destination
-  if (location.pathname !== "/login" && location.pathname !== "/signup") {
-     // console.log("Saving full path:", location.pathname);
-    sessionStorage.setItem("prevPath", location.pathname);
-  }
-}, [location]);
+    // Ignore the login and signup paths so they aren't stored as redirect points
+    if (currentPath !== "/login" && currentPath !== "/signup") {
+      sessionStorage.setItem("prevPath", currentPath);
+    }
+  }, [user]); // Fires dynamically whenever the active login state updates
 
+  // 4. USER LOGIN HANDLER
   const loginWithUserIdAndPassword = async (userId, password) => {
     setLoading(true);
     setError(null);
@@ -84,17 +85,18 @@ useEffect(() => {
       setLoading(false);
       const msg = err.response?.data?.message || "Login failed";
       setError(msg);
-      throw err; // Throw so the login page can handle local UI logic
+      throw err; 
     }
   };
 
+  // 5. USER LOGOUT HANDLER
   const logOut = async () => {
     try {
       await axios.post(`${API_BASE_URL}/logout`, {}, { withCredentials: true });
       setUser(null);
-     window.location.href = "/";
+      window.location.href = "/"; // Force window redirect to clear any residual memory states
     } catch (err) {
-      console.error("Logout failed", err);
+      // console.error("Logout failed", err);
     }
   };
 
@@ -106,7 +108,7 @@ useEffect(() => {
     logOut,
     error,
     setError,
-    refreshUser, // Expose the refresh function to components that need it
+    refreshUser,
   };
 
   return (
