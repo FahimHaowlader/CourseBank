@@ -233,7 +233,7 @@ if (!dbUser.access && dbUser.status === 'approved' && dbUser?.approvedAt && new 
   // Set token in secure HTTP-only cookie
   res.cookie("accessToken", accessToken, {
   httpOnly: true,      // Prevents JavaScript access (XSS defense)
-  secure: false, // true in production (requires HTTPS), false on local HTTP
+  secure: true, // true in production (requires HTTPS), false on local HTTP
   sameSite:  "none" , // "none" allows cross-origin cookies in production
   path: "/", 
   maxAge: 1000 * 60 * 60 * 24 * 2, // 2 days
