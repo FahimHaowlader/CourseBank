@@ -1132,8 +1132,7 @@ const approveModeratorAccountSubmission = asyncHandler(async (req, res) => {
 const LogOut = asyncHandler(async (req, res) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production",
-    secure: false,
+    secure: false, // Set to true in production (requires HTTPS)
     sameSite: "none",
     path : "/"
   });
