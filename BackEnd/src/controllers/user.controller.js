@@ -232,13 +232,12 @@ if (!dbUser.access && dbUser.status === 'approved' && dbUser?.approvedAt && new 
 
   // Set token in secure HTTP-only cookie
   res.cookie("accessToken", accessToken, {
-    httpOnly: true,      // Cannot be accessed by JS (prevents XSS)
-    // secure: process.env.NODE_ENV === "production", // Only HTTPS in prod
-    secure: false, // Only HTTPS in prod
-    sameSite: "lax", 
-    path : "/", // CSRF protection
-    maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day in milliseconds
-  });
+  httpOnly: true,      // Prevents JavaScript access (XSS defense)
+  secure: false, // true in production (requires HTTPS), false on local HTTP
+  sameSite:  "none" , // "none" allows cross-origin cookies in production
+  path: "/", 
+  maxAge: 1000 * 60 * 60 * 24 * 2, // 2 days
+});
 
   // Set token in secure HTTP-only cookie for production
   // res.cookie("accessToken", accessToken, {
@@ -1135,7 +1134,7 @@ const LogOut = asyncHandler(async (req, res) => {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
     secure: false,
-    sameSite: "lax",
+    sameSite: "none",
     path : "/"
   });
 
