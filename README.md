@@ -14,7 +14,7 @@ The core platform logic separates users into four distinct functional tiers to p
 ### 1. What a Student / Public User Can Do
 The public facing interface is engineered for fast, frictionless exploration. Public users do not require administrative privileges to browse the curriculum directory. 
 
-![Course Search Dashboard](/FrontEnd/Public/homepage.png)
+![Course Profile Overview](/FrontEnd/public/detailspage.png)
 
 * **Granular Multi-Parameter Searching:** Users can dynamically search for courses using individual or combined parameters, including: 
     * *Text Identification:* Search by specific Course Title or precise Course Code. 
