@@ -14,7 +14,7 @@ The core platform logic separates users into four distinct functional tiers to p
 ### 1. What a Student / Public User Can Do
 The public facing interface is engineered for fast, frictionless exploration. Public users do not require administrative privileges to browse the curriculum directory. 
 
-![Course Search Dashboard](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.50.12%E2%80%AFPM.jpg)
+![Course Search Dashboard](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.50.12%E2%80%AFPM.png)
 
 * **Granular Multi-Parameter Searching:** Users can dynamically search for courses using individual or combined parameters, including: 
     * *Text Identification:* Search by specific Course Title or precise Course Code. 
@@ -32,12 +32,12 @@ The public facing interface is engineered for fast, frictionless exploration. Pu
 ### 2. What a Contributor Can Do
 Contributors are the primary content creators of the ecosystem—typically professors, teaching assistants, or departmental heads. 
 
-![Contributor Workspace](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.55.58%E2%80%AFPM.jpg)
+![Contributor Workspace](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.55.58%E2%80%AFPM.png)
 
 * **Dedicated Contribution Workspace:** Contributors have a private dashboard summarizing their active entries (e.g., "Contributor have 3 courses") without cluttering their view with other users' drafts. 
 * **Structured Proposal Engine:** Through the **"Add New Course"** interface, contributors fill out structured forms enforcing strict data constraints, mapping essential academic variables like HSC Year definitions, explicit starting calendars, credit allocations, and targeted formats. 
 
-![Add New Course Interface](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.55.17%E2%80%AFPM.jpg)
+![Add New Course Interface](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.55.17%E2%80%AFPM.png)
 
 * **Inline Draft Refinement:** Contributors retain full modification and deletion rights over their submitted courses. They can quickly use inline edit pencils to tweak course descriptions or correct instructor bios on the fly. 
 * **Lifecycle Management:** Once a course entry is perfectly formed, contributors utilize the finalization controls to save and push changes to the review queues. 
@@ -47,7 +47,7 @@ Contributors are the primary content creators of the ecosystem—typically profe
 ### 3. What a Moderator Can Do
 Moderators serve as the quality control layer, ensuring that no unverified or non-compliant coursework is permanently published to the public bank. 
 
-![Moderator Dashboard](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.57.38%E2%80%AFPM.jpg)
+![Moderator Dashboard](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.57.38%E2%80%AFPM.png)
 
 * **Command Control Hub:** The specialized **Moderator Dashboard** breaks their operational responsibilities into three logical application blocks: 
     * *Manage Courses Module:* Oversees systemic course lists, reviews curriculum structures, and toggles real-time course availability. 
@@ -69,7 +69,7 @@ Administrators possess global system-wide root access. They oversee the entire p
     * Toggle system privileges on demand using dynamic `ALLOW` state rules. 
     * Revoke access or permanently purge accounts from the infrastructure utilizing active deletion tools. 
 
-![Search and Explore Moderators](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.56.38%E2%80%AFPM.jpg)
+![Search and Explore Moderators](/FrontEnd/Public/Screenshot%202026-05-23%20at%202.56.38%E2%80%AFPM.png)
 
 * **Contributor Account Management:** Admins manage the entire academic contribution team at scale: 
     * Onboard staff members across various academic streams via the "+ New Contributor" trigger. 
@@ -81,7 +81,7 @@ Administrators possess global system-wide root access. They oversee the entire p
 
 * **Global Course Auditing:** Admins can monitor, modify, or inject courses instantly across the ecosystem using the advanced admin-tier exploration panel, featuring global bypass overrides. 
 
-![Global Course Auditing Workspace](/FrontEnd/Public/Screenshot%202026-05-23%20at%203.09.58%E2%80%AFPM.jpg)
+![Global Course Auditing Workspace](/FrontEnd/Public/Screenshot%202026-05-23%20at%203.09.58%E2%80%AFPM.png)
 
 * **System Infrastructure Analytics:** Built-in dashboard modules permit real-time scanning of application usage, resource consumption trends, and overall student platform engagement. 
 
