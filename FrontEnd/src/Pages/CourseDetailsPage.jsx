@@ -108,12 +108,11 @@ const CourseDetailsPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             
            <div className="flex-1 min-w-0"> 
-    <h1 className="text-3xl sm:text-4xl text-transparent mb-2 bg-clip-text bg-primary-dark dark:bg-primary tracking-tight font-extrabold break-words leading-tight">
-      {/* Added break-words to handle long titles */}
-      {course.title
-        ? course?.title?.charAt(0).toUpperCase() + course.title.slice(1)
-        : ""}
-    </h1>
+   <h1 className="text-3xl sm:text-4xl text-primary-dark dark:text-primary mb-2 tracking-tight font-extrabold break-words leading-tight">
+  {course?.title 
+    ? course.title.charAt(0).toUpperCase() + course.title.slice(1) 
+    : ""}
+</h1>
     
     <p className="text-lg text-slate-600 dark:text-slate-400 mb-2 ">
       {/* Added truncate for department names */}
