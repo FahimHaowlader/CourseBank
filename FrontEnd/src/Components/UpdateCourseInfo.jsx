@@ -160,9 +160,9 @@ const UpdateCourseInfo = () => {
                           value={data.type}
                           onChange={handleChange}
                         >
-                          <option value="core">Core</option>
+                          <option value="theory">Theory</option>
                           <option value="lab">Lab</option>
-                          <option value="project">Project</option>
+                          {/* <option value="project">Project</option> */}
                         </select>
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary flex items-center justify-center text-[20px]">
                           <IoIosArrowDown />

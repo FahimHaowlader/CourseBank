@@ -66,7 +66,7 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
       lowercase: true,
-      enum: ["core", "lab", "project"],
+      enum: ["theory", "lab",],
     },
     instructorName: {
       type: String,
