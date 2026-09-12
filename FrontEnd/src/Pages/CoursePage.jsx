@@ -165,7 +165,7 @@ const CoursePage = () => {
         if (response.data && response.data.data && response.data.data.courses) {
           setCourses(response.data.data.courses);
           //  // console.log(response.data.data);
-          setTotalDocs(response.data.data?.totalDocuments || totalDocs);
+          setTotalDocs(response.data.data?.totalDocuments);
         } else {
           setCourses([]); // Fallback to empty array if structure is wrong
         }
@@ -217,7 +217,7 @@ const CoursePage = () => {
     });
   };
 
-  //  // console.log(totalDocs);
+   console.log(totalDocs);
   //  // console.log(page);
   //  // console.log(filters);
   //  // console.log(courses);
