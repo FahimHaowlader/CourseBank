@@ -129,7 +129,14 @@ const CourseDetailsPage = () => {
 
     <div className="flex flex-wrap gap-3">
       {/* Map through items or list them with max-w-full to prevent badge overflow */}
-      {[course.degree, course.type, course.format].map((val, i) => (
+      <div  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize max-w-full">
+            <span className="truncate">{course.degree}</span>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
+        <SemesterDisplay code={course.semester} />
+      </div>
+      {[course.format, course.type].map((val, i) => (
         val && (
           <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm capitalize max-w-full">
             <span className="truncate">{val}</span>
@@ -141,9 +148,7 @@ const CourseDetailsPage = () => {
         {course.credits} Credits
       </div>
 
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">
-        <SemesterDisplay code={course.semester} />
-      </div>
+      
     </div>
   </div>
             

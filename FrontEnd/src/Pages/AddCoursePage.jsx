@@ -722,9 +722,9 @@ const years = (() => {
                     required
                     >
                        <option value="">Select Type</option>
-                    <option value={"core"}>Core</option>
+                    <option value={"theory"}>Theory</option>
                     <option value="lab">Lab</option>
-                    <option value="project">Project</option>  
+                    {/* <option value="project">Project</option>   */}
                     </select>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
                       <IoIosArrowDown />
