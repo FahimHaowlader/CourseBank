@@ -709,6 +709,29 @@ const years = (() => {
               <div className="col-span-1 relative z-20">
                 <CustomDatePicker label="Stating Date" onChange={handleDateChange} />
               </div>
+               <div className="col-span-1">
+                <label className="flex flex-col gap-1.5 w-full">
+                  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
+                    Format
+                  </span>
+                  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
+                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="format"
+                    value={formData.format}
+                    onChange={handleChange}
+                    required
+                    >
+                     <option value="">Select Format</option>
+                     <option value="major">Major</option>
+                    <option value="non-major">Non-Major</option>
+                    <option value="elective">Elective</option>
+                    </select>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
+                      <IoIosArrowDown />
+                    </span>
+                  </div>
+                </label>
+              </div>
               <div className="col-span-1">
                 <label className="flex flex-col gap-1.5 w-full">
                   <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
@@ -758,29 +781,7 @@ const years = (() => {
                   </div>
                 </label>
               </div>
-              <div className="col-span-1">
-                <label className="flex flex-col gap-1.5 w-full">
-                  <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                    Format
-                  </span>
-                  <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                    <select className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
-                    name="format"
-                    value={formData.format}
-                    onChange={handleChange}
-                    required
-                    >
-                     <option value="">Select Format</option>
-                     <option value="major">Major</option>
-                    <option value="non-major">Non-Major</option>
-                    <option value="elective">Elective</option>
-                    </select>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                      <IoIosArrowDown />
-                    </span>
-                  </div>
-                </label>
-              </div>
+             
             </div>
           </div>
 

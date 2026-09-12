@@ -217,7 +217,7 @@ const CoursePage = () => {
     });
   };
 
-   console.log(totalDocs);
+  //  console.log(totalDocs);
   //  // console.log(page);
   //  // console.log(filters);
   //  // console.log(courses);
@@ -367,29 +367,8 @@ const CoursePage = () => {
           </div>
           <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-end">
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 w-full xl:flex-1">
-              <label className="flex flex-col gap-1.5 w-full">
-                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
-                  Degree
-                </span>
-                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
-                  <select
-                    className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
-                    name="degree"
-                    value={filters.degree}
-                    onChange={handleFilterChange}
-                  >
-                    <option value="">All Degrees</option>
-                    <option value="bachelors">Bachelor</option>
-                    <option value="masters">Master</option>
-                    <option value="phd">PhD</option>
-                    
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
-                    <IoIosArrowDown />
-                  </span>
-                </div>
-              </label>
-              <label className="flex flex-col gap-1.5 w-full">
+             
+             <label className="flex flex-col gap-1.5 w-full">
                 <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
                   Year
                 </span>
@@ -412,6 +391,29 @@ const CoursePage = () => {
                   </span>
                 </div>
               </label>
+              <label className="flex flex-col gap-1.5 w-full">
+                <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
+                  Degree
+                </span>
+                <div className="relative w-full border border-border-light dark:border-border-dark rounded-lg focus-within:border-primary transition-colors">
+                  <select
+                    className="w-full h-11 pl-3 pr-10 rounded-lg bg-white dark:bg-background-dark border-0 focus:outline-none focus:ring-0 text-sm appearance-none cursor-pointer"
+                    name="degree"
+                    value={filters.degree}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">All Degrees</option>
+                    <option value="bachelors">Bachelor</option>
+                    <option value="masters">Master</option>
+                    <option value="phd">PhD</option>
+                    
+                  </select>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary material-symbols-outlined text-[20px]">
+                    <IoIosArrowDown />
+                  </span>
+                </div>
+              </label>
+              
               <label className="flex flex-col gap-1.5 w-full">
                 <span className="text-sm font-semibold text-text-secondary dark:text-gray-400">
                   Semester
